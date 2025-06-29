@@ -168,4 +168,4 @@
 [詳細はこちら](https://www.figma.com/design/Qwwzc2zR2v1g4OReCM8769/GinLog%E7%94%BB%E9%9D%A2%E9%81%B7%E7%A7%BB%E5%9B%B3?node-id=74-2068&t=dvXVXbQztUNlcbXg-1)
 
 # ■ ER図
-[![Image from Gyazo](https://i.gyazo.com/c00e4e5a8ce8a85cd9d86ac2939dfc2d.png)](https://gyazo.com/c00e4e5a8ce8a85cd9d86ac2939dfc2d)
+![Ginlog_ERDiagram](https://github.com/user-attachments/assets/50e416e6-dc33-4870-8cfd-5a854b6521bf)
