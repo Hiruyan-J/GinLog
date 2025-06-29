@@ -168,5 +168,5 @@
 [詳細はこちら](https://www.figma.com/design/Qwwzc2zR2v1g4OReCM8769/GinLog%E7%94%BB%E9%9D%A2%E9%81%B7%E7%A7%BB%E5%9B%B3?node-id=74-2068&t=dvXVXbQztUNlcbXg-1)
 
 # ■ ER図
-![Ginlog_ERDiagram](https://github.com/user-attachments/assets/90db65a6-514a-4a92-95bb-589824a42d88)
+![Ginlog_ERDiagram](https://github.com/user-attachments/assets/842efc54-359a-4022-bb3c-164905b37e7b)
 
