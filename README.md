@@ -155,7 +155,7 @@
 | カテゴリ       | 使用技術 |
 |----------------|----------|
 | フロントエンド | TailwindCSS / daisyUI |
-| バックエンド   | Ruby 3.3.6 / Rails 7.2.2 |
+| バックエンド   | Ruby 3.3.6 / Rails 7.2.1 |
 | データベース   | PostgreSQL |
 | 開発環境       | Docker |
 | インフラ       | Render / AWS(S3) |
