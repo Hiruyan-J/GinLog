@@ -1,0 +1,41 @@
+<nav class="navbar bg-base-100 shadow-lg">
+  <div class="flex-1">
+    <%= link_to '/', class: 'btn btn-ghost normal-case text-xl' do %>
+      吟ログ
+    <% end %>
+  </div>
+
+  <div class="flex-none">
+    <ul class="menu menu-horizontal px-1 items-center space-x-4">
+      <!-- 掲示板 ドロップダウン -->
+      <li tabindex="0" class="dropdown dropdown-hover dropdown-end">
+        <a class="btn btn-ghost rounded-btn">
+          掲示板
+          <svg class="ml-1 w-4 h-4 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </a>
+        <ul class="p-2 shadow menu dropdown-content bg-base-100 rounded-box w-52">
+          <li><%= link_to '掲示板一覧', '#', class: 'justify-between' %></li>
+          <li><%= link_to '掲示板作成', '#' %></li>
+        </ul>
+      </li>
+
+      <!-- ブックマーク一覧 -->
+      <li><%= link_to 'ブックマーク一覧', '#', class: 'btn btn-ghost rounded-btn' %></li>
+
+      <!-- プロフィール ドロップダウン -->
+      <li tabindex="0" class="dropdown dropdown-hover dropdown-end">
+        <a class="btn btn-ghost rounded-btn p-0">
+          プロフィール
+        </a>
+        <ul class="p-2 shadow menu dropdown-content bg-base-100 rounded-box w-52">
+          <li class="px-4 py-2 cursor-default">らんてっく たろう</li>
+          <li class="divider"></li>
+          <li><%= link_to 'プロフィール', '#', class: '' %></li>
+          <li><%= link_to 'ログアウト', '#', class: '' %></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</nav>
