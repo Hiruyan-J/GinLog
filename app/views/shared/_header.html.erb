@@ -1,19 +1,18 @@
 <header class="bg-secondary text-secondary-content px-4 py-2 shadow-md sticky top-0 z-50">
   <div class="flex items-center justify-between max-w-screen-xl mx-auto">
     <!-- ハンバーガーメニュー -->
-    <span class="btn btn-ghost flex items-center justify-center p-2">
+    <button type="button" class="btn btn-ghost btn-secondary p-2 flex items-center justify-center" aria-label="Open menu">
       <span class="material-symbols-rounded text-xl">density_medium</span>
-    </span>
+    </button>
 
     <!-- ロゴ -->
-  <%= link_to root_path, class: "btn btn-ghost p-0" do %>
-    <%= inline_svg_tag "ginlog_logo.svg", class: "h-15 w-auto" %>
-  <% end %>
+    <%= link_to root_path, class: "btn btn-ghost btn-secondary p-0" do %>
+      <%= inline_svg_tag "ginlog_logo.svg", class: "h-14 w-auto" %>
+    <% end %>
 
     <!-- アカウント関連 -->
-    <%= link_to "#", class: "btn btn-ghost" do %>
+    <%= link_to "#", class: "btn btn-ghost btn-secondary flex items-center gap-1" do %>
       <span>login</span>
       <span class="material-symbols-rounded">login</span>
     <% end %>
-  </div>
 </header>
