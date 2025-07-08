@@ -69,3 +69,4 @@ end
 
 gem "tailwindcss-rails", "~> 4.0"
 gem "tailwindcss-ruby"
+gem "inline_svg"
