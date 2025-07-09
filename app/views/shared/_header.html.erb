@@ -1,18 +1,29 @@
-<header class="bg-secondary text-secondary-content px-4 py-2 shadow-md sticky top-0 z-50">
-  <div class="flex items-center justify-between max-w-screen-xl mx-auto">
-    <!-- ハンバーガーメニュー -->
-    <button type="button" class="btn btn-ghost btn-secondary p-2 flex items-center justify-center" aria-label="Open menu">
-      <span class="material-symbols-rounded text-xl">density_medium</span>
-    </button>
-
-    <!-- ロゴ -->
-    <%= link_to root_path, class: "btn btn-ghost btn-secondary p-0" do %>
-      <%= inline_svg_tag "ginlog_logo.svg", class: "h-14 w-auto" %>
-    <% end %>
-
-    <!-- アカウント関連 -->
-    <%= link_to "#", class: "btn btn-ghost btn-secondary flex items-center gap-1" do %>
-      <span>login</span>
-      <span class="material-symbols-rounded">login</span>
-    <% end %>
+<header>
+  <div class="navbar bg-secondary text-secondary-content shadow-sm px-4 py-2 sticky top-0 z-50">
+    <div class="navbar-start">
+      <div class="dropdown">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-secondary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /> </svg>
+        </div>
+        <ul
+          tabindex="0"
+          class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+          <li><a>Homepage</a></li>
+          <li><a>Portfolio</a></li>
+          <li><a>About</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="navbar-center">
+      <%= link_to root_path, class: "btn btn-ghost btn-secondary p-0" do %>
+        <%= inline_svg_tag "ginlog_logo.svg", class: "h-14 w-auto" %>
+      <% end %>
+    </div>
+    <div class="navbar-end">
+      <%= link_to "#", class: "btn btn-ghost btn-secondary flex items-center gap-1" do %>
+        <span>login</span>
+        <span class="material-symbols-rounded">login</span>
+      <% end %>
+    </div>
+  </div>
 </header>
