@@ -23,6 +23,8 @@
   <body class="min-h-screen flex flex-col">
     <%= render "shared/header" %>
     <main class="container flex-1 pt-4 pb-24 px-4 mx-auto">
+      <p class="notice"><%= notice %></p>
+      <p class="alert"><%= alert %></p>
       <%= yield %>
     </main>
     <%= render "shared/footer" %>
