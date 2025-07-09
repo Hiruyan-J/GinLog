@@ -6,6 +6,15 @@
   'opsz' 24
 }
 
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}
+
+
 /* 推奨アイコンサイズ */
 span.ms-size-20 {
   font-size: 20px;
@@ -31,7 +40,9 @@ span.ms-size-60 {
 
 /* 塗りつぶし設定 */
 span.ms-fill {
-  font-variation-settings: 'FILL' 1;
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 700;
 }
 
 
