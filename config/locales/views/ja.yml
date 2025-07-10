@@ -1,0 +1,15 @@
+ja:
+  helpers:
+    submit:
+      create: 登録
+      submit: 保存
+      update: 更新
+    label:
+  header:
+    login: ログイン
+    logout: ログアウト
+  footer:
+    home: ホーム
+    search: 検索
+    my_log: マイログ
+    analyze_preferences: 好み分析

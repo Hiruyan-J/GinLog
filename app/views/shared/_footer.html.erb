@@ -2,12 +2,12 @@
   <div class="dock text-footer-color dock-md md:dock-lg">
     <%= link_to "#", class: "flex flex-col items-center justify-center leading-none dock-active" do %>
       <span class="material-symbols-rounded">home</span>
-      <span class="dock-label">home</span>
+      <span class="dock-label"><%= t('footer.home') %></span>
     <% end %>
 
     <%= link_to "#", class: "flex flex-col items-center justify-center leading-none" do %>
       <span class="material-symbols-rounded">search</span>
-      <span class="dock-label">検索</span>
+      <span class="dock-label"><%= t('footer.search') %></span>
     <% end %>
 
     <%= link_to "#", class: "flex flex-col items-center" do %>
@@ -17,12 +17,12 @@
 
     <%= link_to "#", class: "flex flex-col items-center justify-center leading-none" do %>
       <span class="material-symbols-outlined">lists</span>
-      <span class="dock-label">マイログ</span>
+      <span class="dock-label"><%= t('footer.my_log') %></span>
     <% end %>
 
     <%= link_to "#", class: "flex flex-col items-center justify-center leading-none" do %>
       <span class="material-symbols-rounded">star</span>
-      <span class="dock-label">好み分析</span>
+      <span class="dock-label"><%= t('footer.analyze_preferences') %></span>
     <% end %>
   </div>
 </footer>

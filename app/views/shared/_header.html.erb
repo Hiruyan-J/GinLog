@@ -26,13 +26,13 @@
       <% unless user_signed_in? %>
         <!-- ログインボタン表示 -->
         <%= link_to new_user_session_path, class: "btn btn-ghost btn-secondary flex items-center gap-1" do %>
-          <span>login</span>
+          <span><%= t('header.login') %></span>
           <span class="material-symbols-rounded">login</span>
         <% end %>
       <% else %>
         <!-- ログアウトボタン表示 -->
         <%= link_to destroy_user_session_path, data: { turbo_method: :delete }, class: "btn btn-ghost btn-secondary flex items-center gap-1" do %>
-          <span>logout</span>
+          <span><%= t('header.logout') %></span>
           <span class="material-symbols-rounded">logout</span>
         <% end %>
       <% end %>
