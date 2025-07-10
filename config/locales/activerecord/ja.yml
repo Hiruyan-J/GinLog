@@ -1,0 +1,5 @@
+ja:
+  activerecord:
+    models:
+      user: ユーザー
+      sake_log: 日本酒記録
