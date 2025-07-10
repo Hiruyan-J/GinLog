@@ -36,7 +36,7 @@ gem "bootsnap", require: false
 
 
 # フロント
-gem "tailwindcss-rails", "~> 4.0"
+gem "tailwindcss-rails", "~> 4.3"
 gem "tailwindcss-ruby"
 gem "inline_svg"
 gem "rails-i18n", "~> 7.0.0"
