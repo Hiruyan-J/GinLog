@@ -29,5 +29,7 @@ module Myapp
       g.helper false # ヘルパーメソッドの追加無し
       g.test_framework nil # テストフレームワークを使わない
     end
+
+    config.i18n.default_locale = :ja
   end
 end
