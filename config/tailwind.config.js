@@ -22,7 +22,5 @@ module.exports = {
     // require('@tailwindcss/typography'),
     // require('@tailwindcss/container-queries'),
   ],
-  daisyui: {
-    darkTheme: false,
-  },
+  safelist: ['alert-success', 'alert-info','alert-warning', 'alert-error'],
 }
