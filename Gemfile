@@ -66,6 +66,9 @@ group :development, :test do
   # Print debug
   gem "awesome_print"
   gem "tapp"
+
+  # Table/Schema
+  gem "annotate"
 end
 
 group :development do
