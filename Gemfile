@@ -69,7 +69,6 @@ group :development, :test do
 
   # Table/Schema
   gem "annotate"
-
 end
 
 group :development do
