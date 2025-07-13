@@ -1,3 +1,27 @@
+# == Schema Information
+#
+# Table name: sake_logs
+#
+#  id             :bigint           not null, primary key
+#  aroma_strength :float            not null
+#  rating         :integer          not null
+#  review         :text
+#  taste_strength :float            not null
+#  created_at     :datetime         not null
+#  updated_at     :datetime         not null
+#  sake_id        :bigint           not null
+#  user_id        :bigint           not null
+#
+# Indexes
+#
+#  index_sake_logs_on_sake_id  (sake_id)
+#  index_sake_logs_on_user_id  (user_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (sake_id => sakes.id)
+#  fk_rails_...  (user_id => users.id)
+#
 class SakeLog < ApplicationRecord
   validates :rating, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 5 }
   validates :taste_strength, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 10 }
