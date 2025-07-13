@@ -19,6 +19,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_12_055815) do
     t.integer "rating", limit: 2, null: false
     t.float "taste_strength", null: false
     t.float "aroma_strength", null: false
+    t.text "review"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_sake_logs_on_user_id"

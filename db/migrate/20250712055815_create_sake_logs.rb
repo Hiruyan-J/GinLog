@@ -5,6 +5,7 @@ class CreateSakeLogs < ActiveRecord::Migration[7.2]
       t.integer :rating, null: false, limit: 1
       t.float :taste_strength, null: false
       t.float :aroma_strength, null: false
+      t.text :review
       t.timestamps
     end
   end
