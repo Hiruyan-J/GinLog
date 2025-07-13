@@ -1,10 +1,11 @@
 # !/usr/bin/env bash
 set -o errexit
 
+docker compose down
+docker compose run --rm web rails db:drop
+
+docker compose up
 bundle install
 bundle exec rails assets:precompile
 bundle exec rails assets:clean
-# bundle exec rails db:migrate
-RAILS_ENV=production DISABLE_DATABASE_ENVIRONMENT_CHECK=1 bundle exec rails db:drop
-rails db:create RAILS_ENV=production
-rails db:migrate RAILS_ENV=production
+bundle exec rails db:migrate
