@@ -19,6 +19,7 @@ class SakeLogsController < ApplicationController
     rescue ActiveRecord::RecordInvalid => exception
       flash.now[:error] = t('defaults.flash_message.not_created', sake_log: SakeLog.model_name.human)
       render :new, status: :unprocessable_entity
+      return
     end
 
     redirect_to sake_logs_path, success: t('defaults.flash_message.created', item: SakeLog.model_name.human)
