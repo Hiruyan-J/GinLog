@@ -8,7 +8,8 @@ class SakeLogsController < ApplicationController
 
   def new
     @sakes = Sake.all
-    @sake_log = SakeLog.new
+    @sake = Sake.new
+    @sake_log = @sake.sake_logs.new
   end
 
   def create
@@ -20,7 +21,7 @@ class SakeLogsController < ApplicationController
       @sake_log.sake = @sake
       @sake_log.save!
     rescue ActiveRecord::RecordInvalid => exception
-      flash.now[:error] = t('defaults.flash_message.not_created', sake_log: SakeLog.model_name.human)
+      flash.now[:error] = t('defaults.flash_message.not_created', item: SakeLog.model_name.human)
       render :new, status: :unprocessable_entity
       return
     end

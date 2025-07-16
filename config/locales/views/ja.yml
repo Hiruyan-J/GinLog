@@ -17,3 +17,6 @@ ja:
     search: 検索
     my_log: マイログ
     analyze_preferences: 好み分析
+  sake_logs:
+    new:
+      title: 日本酒記録
