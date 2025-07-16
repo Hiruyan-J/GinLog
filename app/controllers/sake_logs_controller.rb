@@ -1,4 +1,7 @@
 class SakeLogsController < ApplicationController
+  skip_before_action :authenticate_user!, only: %i[index]
+
+
   def index
     @sake_logs = SakeLog.includes(:sake)
   end
