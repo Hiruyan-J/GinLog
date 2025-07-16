@@ -1,0 +1,20 @@
+<%= form_with model: sake_log do |f| %>
+  <div class="my-5">
+    <%= f.label :product_name %>
+    <%= text_field_tag 'sake_log[product_name]', params.dig(:sake_log, :product_name) %>
+  </div>
+  <div class="my-5">
+    <%= f.label :aroma_strength %>
+    <%= f.number_field :aroma_strength, step: 0.1 %>
+  </div>
+  <div class="my-5">
+    <%= f.label :taste_strength %>
+    <%= f.number_field :taste_strength, step: 0.1 %>
+  </div>
+  <div class="my-5">
+    <%= f.label :rating %>
+    <%= f.number_field :rating %>
+  </div>
+
+  <%= f.submit nil, class: "btn btn-primary" %>
+<% end %>
