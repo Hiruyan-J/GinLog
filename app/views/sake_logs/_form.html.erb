@@ -1,0 +1,29 @@
+<%= form_with model: sake_log do |f| %>
+  <%= render 'shared/error_messages', object: f.object %>
+  <%= render 'shared/error_messages', object: f.object.sake %>
+  <%= f.fields_for :sake do |sake_fields| %>
+    <div class="my-5">
+      <%= sake_fields.label :product_name %>
+      <%= sake_fields.text_field :product_name %>
+    </div>
+  <% end %>
+  <div class="my-5">
+    <%= f.label :rating %>
+    <%= f.number_field :rating, step: 1  %>
+  </div>
+  <div class="my-5">
+    <%= f.label :aroma_strength %>
+    <%= f.number_field :aroma_strength, step: 0.1 %>
+  </div>
+  <div class="my-5">
+    <%= f.label :taste_strength %>
+    <%= f.number_field :taste_strength, step: 0.1 %>
+  </div>
+
+  <div class="my-5">
+    <%= f.label :review %>
+    <%= f.text_area :review %>
+  </div>
+
+  <%= f.submit nil, class: "btn btn-primary" %>
+<% end %>

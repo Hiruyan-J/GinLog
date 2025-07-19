@@ -1,4 +1,8 @@
 ja:
+  defaults:
+    flash_message:
+      created: "%{item}を作成しました"
+      not_created: "%{item}を作成出来ませんでした"
   helpers:
     submit:
       create: 登録
@@ -13,3 +17,8 @@ ja:
     search: 検索
     my_log: マイログ
     analyze_preferences: 好み分析
+  sake_logs:
+    new:
+      title: 日本酒記録
+    index:
+      title: マイログ

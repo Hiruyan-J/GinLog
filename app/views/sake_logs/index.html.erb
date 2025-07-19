@@ -1,4 +1,7 @@
+<% content_for :title,  t('.title') %>
+
 <div class="w-full">
+  <h1 class="font-bold text-4xl"><%= t('.title') %></h1>
   <div id="posts" class="min-w-full">
     <% if @sake_logs.any? %>
       <% @sake_logs.each do |sake_log| %>

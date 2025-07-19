@@ -30,4 +30,6 @@ class SakeLog < ApplicationRecord
 
   belongs_to :user
   belongs_to :sake
+
+  accepts_nested_attributes_for :sake
 end
