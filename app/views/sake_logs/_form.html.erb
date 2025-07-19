@@ -12,11 +12,11 @@
     <div class="flex justify-between items-center">
       <%# 画面左 好み度入力 %>
       <div class="rating rating-xl flex items-center gap-2">
-        <%# 好み度0(クリア)　%>
-        <%= f.radio_button :rating, 0, class: "rating-hidden", id: "rating-0", aria: { label: "clear" } %>
+        <%# 好み度0　%>
+        <%= f.radio_button :rating, SakeLog::RATING_MIN, class: "rating-hidden", id: "rating-0", aria: { label: "clear" } %>
 
         <%# 好み度1〜5　%>
-        <% rating_range = (1..5) %>
+        <% rating_range = (SakeLog::RATING_MIN + 1)..SakeLog::RATING_MAX %>
         <% rating_range.each do |i| %>
           <%= f.radio_button :rating, i, class: "mask mask-star-2 bg-yellow-300", id: "rating-#{i}", aria: { label: "#{i} star" } %>
         <% end %>
