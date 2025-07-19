@@ -12,10 +12,10 @@ class SakeLogsController < ApplicationController
   end
 
   def create
-    @product_name = params[:sake_log][:sake_attributes][:product_name].strip
+    product_name =sake_log_params[:sake_attributes][:product_name].strip
 
     SakeLog.transaction do
-      @sake = Sake.find_or_create_by!(product_name: @product_name)
+      @sake = Sake.find_or_create_by!(product_name: product_name)
       @sake_log = current_user.sake_logs.build(sake_log_params)
       @sake_log.sake = @sake
       @sake_log.save!
