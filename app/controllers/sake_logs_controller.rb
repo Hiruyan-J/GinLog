@@ -8,7 +8,7 @@ class SakeLogsController < ApplicationController
   def new
     @sake_log = SakeLog.new
     @sake_log.build_sake
-  end%
+  end
 
   def create
     product_name =sake_log_params[:sake_attributes][:product_name].strip
