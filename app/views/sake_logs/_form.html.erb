@@ -9,8 +9,26 @@
   <% end %>
   <div class="my-5">
     <%= f.label :rating %>
-    <%= f.number_field :rating, step: 1  %>
+    <div class="flex justify-between items-center">
+      <%# 画面左 好み度入力 %>
+      <div class="rating rating-xl flex items-center gap-2">
+        <%# 好み度0(クリア)　%>
+        <%= f.radio_button :rating, 0, class: "rating-hidden", id: "rating-0", aria: { label: "clear" } %>
+
+        <%# 好み度1〜5　%>
+        <% (1..5).each do |i| %>
+          <%= f.radio_button :rating, i, class: "mask mask-star", id: "rating-#{i}", aria: { label: "#{i} star" } %>
+        <% end %>
+      </div>
+
+      <%# 画面右 クリアボタン %>
+      <label for="rating-0" class="cursor-pointer tooltip" data-tip="好み度をクリア">
+        <span class="btn btn-xs btn-secondary">クリア</span>
+      </label>
+    </div>
   </div>
+
+
   <div class="my-5">
     <%= f.label :aroma_strength %>
     <%= f.number_field :aroma_strength, step: 0.1 %>
