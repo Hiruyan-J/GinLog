@@ -4,7 +4,7 @@
 #
 #  id             :bigint           not null, primary key
 #  aroma_strength :float            not null
-#  rating         :integer          not null
+#  rating         :integer          default(0), not null
 #  review         :text
 #  taste_strength :float            not null
 #  created_at     :datetime         not null
