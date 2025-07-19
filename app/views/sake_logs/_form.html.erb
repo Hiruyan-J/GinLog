@@ -1,9 +1,11 @@
 <%= form_with model: sake_log do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
-  <div class="my-5">
-    <%= f.label :product_name %>
-    <%= text_field_tag 'sake_log[product_name]', params.dig(:sake_log, :product_name) %>
-  </div>
+  <%= f.fields_for :sake do |sake_fields| %>
+    <div class="my-5">
+      <%= sake_fields.label :product_name %>
+      <%= sake_fields.text_field :product_name %>
+    </div>
+  <% end %>
   <div class="my-5">
     <%= f.label :rating %>
     <%= f.number_field :rating, step: 1  %>
