@@ -1,5 +1,6 @@
 <%= form_with model: sake_log do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
+  <%= render 'shared/error_messages', object: f.object.sake %>
   <%= f.fields_for :sake do |sake_fields| %>
     <div class="my-5">
       <%= sake_fields.label :product_name %>
