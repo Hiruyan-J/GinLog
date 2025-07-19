@@ -10,14 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_07_13_075644) do
+ActiveRecord::Schema[7.2].define(version: 2025_07_19_071724) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "sake_logs", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "sake_id", null: false
-    t.integer "rating", limit: 2, null: false
+    t.integer "rating", limit: 2, default: 0, null: false
     t.float "taste_strength", null: false
     t.float "aroma_strength", null: false
     t.text "review"
