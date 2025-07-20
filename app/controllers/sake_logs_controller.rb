@@ -62,7 +62,7 @@ class SakeLogsController < ApplicationController
 
   def destroy
     if @sake_log.destroy
-      redirect_to sake_logs_path, success: t('defaults.flash_message.deleted', item: SakeLog.model_name.human), status: :see_other
+      redirect_to sake_logs_path, success: t("defaults.flash_message.deleted", item: SakeLog.model_name.human), status: :see_other
     else
       flash[:error] = t("defaults.flash_message.not_deleted", item: SakeLog.model_name.human)
       redirect_back fallback_location: sake_logs_path, status: :see_other
