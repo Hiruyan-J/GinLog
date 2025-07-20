@@ -7,9 +7,14 @@
     <p class="font-medium mb-1"><%= "review:#{sake_log.review}" %></p>
   </div>
   <div>
-    <% if current_user.own?(sake_log) %>
-      <%= link_to edit_sake_log_path(sake_log),  id: "button-edit-#{sake_log.id}" do %>
+    <% if current_user&.own?(sake_log) %>
+      <%# 編集ボタン %>
+      <%= link_to edit_sake_log_path(sake_log), id: "button-edit-#{sake_log.id}" do %>
         <span class="material-symbols-rounded text-primary">edit_square</span>
+      <% end %>
+      <%# 削除ボタン %>
+      <%= link_to sake_log_path(sake_log), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm')} do %>
+        <span class="material-symbols-rounded text-primary">delete</span>
       <% end %>
     <% end %>
   </div>
