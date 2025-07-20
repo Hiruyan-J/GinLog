@@ -3,7 +3,7 @@
   <head>
     <title><%= content_for(:title) || "Myapp" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -22,7 +22,7 @@
 
   <body class="min-h-screen flex flex-col">
     <%= render "shared/header" %>
-    <main class="container flex-1 pt-4 pb-24 px-4 mx-auto">
+    <main class="container flex-1 pt-4 pb-12 md:pb-18 px-4 mx-auto">
       <%= render 'shared/flash_message' %>
       <%= yield %>
     </main>
