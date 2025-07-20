@@ -33,6 +33,34 @@ class SakeLogsController < ApplicationController
     redirect_to sake_logs_path, success: t("defaults.flash_message.created", item: SakeLog.model_name.human)
   end
 
+  def edit
+    @sake_log = current_user.sake_logs.find(params[:id])
+  end
+
+  def update
+    @sake_log = current_user.sake_logs.find(params[:id])
+    product_name =sake_log_params[:sake_attributes][:product_name].strip
+
+    SakeLog.transaction do
+      @sake = Sake.find_or_initialize_by(product_name: product_name)
+      @sake_log.assign_attributes(sake_log_params)
+      @sake_log.sake = @sake
+      @sake.save!
+      @sake_log.save!
+    rescue ActiveRecord::RecordInvalid => exception
+      flash.now[:error] = t("defaults.flash_message.not_updated", item: SakeLog.model_name.human)
+      logger.error("-----ERROR-----#{Time.now}")
+      logger.error(exception)
+      logger.error(@sake)
+      logger.error(@sake_log)
+      logger.error("-----ERROR LOG END-----")
+      render :edit, status: :unprocessable_entity
+      return
+    end
+
+    redirect_to sake_logs_path, success: t("defaults.flash_message.updated", item: SakeLog.model_name.human)
+  end
+
   private
   def sake_log_params
     params.require(:sake_log).permit(:rating, :aroma_strength, :taste_strength, :review,
