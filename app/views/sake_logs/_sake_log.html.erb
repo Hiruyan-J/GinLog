@@ -7,8 +7,10 @@
     <p class="font-medium mb-1"><%= "review:#{sake_log.review}" %></p>
   </div>
   <div>
-    <%= link_to edit_sake_log_path(sake_log),  id: "button-edit-#{sake_log.id}" do %>
-      <span class="material-symbols-rounded text-primary">edit_square</span>
+    <% if current_user.own?(sake_log) %>
+      <%= link_to edit_sake_log_path(sake_log),  id: "button-edit-#{sake_log.id}" do %>
+        <span class="material-symbols-rounded text-primary">edit_square</span>
+      <% end %>
     <% end %>
   </div>
   <hr>
