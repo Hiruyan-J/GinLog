@@ -1,5 +1,5 @@
 <footer class="fixed bottom-0 w-full bg-base-200 px-4 py-4">
-  <div class="dock text-footer-color dock-md md:dock-lg">
+  <div class="dock text-footer-color dock-xs md:dock-lg">
     <%= link_to "#", class: "flex flex-col items-center justify-center leading-none dock-active" do %>
       <span class="material-symbols-rounded">home</span>
       <span class="dock-label"><%= t('footer.home') %></span>
@@ -11,7 +11,7 @@
     <% end %>
 
     <%= link_to new_sake_log_path, class: "flex flex-col items-center" do %>
-      <span class="material-symbols-outlined ms-fill ms-size-60 text-primary drop-shadow-sm">add_circle</span>
+      <span class="material-symbols-outlined ms-fill ms-size-48 md:ms-size-60 text-primary drop-shadow-sm">add_circle</span>
     <% end %>
 
 
