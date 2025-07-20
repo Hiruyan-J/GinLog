@@ -3,6 +3,8 @@ ja:
     flash_message:
       created: "%{item}を作成しました"
       not_created: "%{item}を作成出来ませんでした"
+      updated: "%{item}を更新しました"
+      not_updated: "%{item}を更新出来ませんでした"
   helpers:
     submit:
       create: 登録
@@ -20,5 +22,7 @@ ja:
   sake_logs:
     new:
       title: 日本酒記録
+    edit:
+      title: 日本酒記録編集
     index:
       title: マイログ
