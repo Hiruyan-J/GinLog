@@ -1,5 +1,6 @@
 class SakeLogsController < ApplicationController
   skip_before_action :authenticate_user!, only: %i[index]
+  before_action :set_sake_log, only: %i[edit update destroy]
 
   def index
     @sake_logs = SakeLog.includes([ :user, :sake ]).order(created_at: :desc)
@@ -33,12 +34,9 @@ class SakeLogsController < ApplicationController
     redirect_to sake_logs_path, success: t("defaults.flash_message.created", item: SakeLog.model_name.human)
   end
 
-  def edit
-    @sake_log = current_user.sake_logs.find(params[:id])
-  end
+  def edit; end
 
   def update
-    @sake_log = current_user.sake_logs.find(params[:id])
     product_name =sake_log_params[:sake_attributes][:product_name].strip
 
     SakeLog.transaction do
@@ -61,7 +59,22 @@ class SakeLogsController < ApplicationController
     redirect_to sake_logs_path, success: t("defaults.flash_message.updated", item: SakeLog.model_name.human)
   end
 
+
+  def destroy
+    if @sake_log.destroy
+      redirect_to sake_logs_path, success: t("defaults.flash_message.deleted", item: SakeLog.model_name.human), status: :see_other
+    else
+      flash[:error] = t("defaults.flash_message.not_deleted", item: SakeLog.model_name.human)
+      redirect_back fallback_location: sake_logs_path, status: :see_other
+    end
+  end
+
   private
+
+  def set_sake_log
+    @sake_log = current_user.sake_logs.find(params[:id])
+  end
+
   def sake_log_params
     params.require(:sake_log).permit(:rating, :aroma_strength, :taste_strength, :review,
                                       sake_attributes: [ :product_name ])
