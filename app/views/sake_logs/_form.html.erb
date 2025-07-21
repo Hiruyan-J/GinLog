@@ -6,14 +6,20 @@
   <%# 日本酒名 %>
     <%= f.fields_for :sake do |sake_fields| %>
       <div class="flex flex-col">
-        <%= sake_fields.label :product_name, class: "font-semibold" %>
+        <%= sake_fields.label :product_name, class: "font-semibold" do %>
+          <%= sake_fields.object.class.human_attribute_name(:product_name) %>
+          <span class="text-red-500">*</span>
+        <% end %>
         <%= sake_fields.text_field :product_name, class: "input md:w-11/12" %>
       </div>
     <% end %>
 
     <%# 好み度 %>
     <div>
-      <%= f.label :rating, class: "font-semibold" %>
+      <%= f.label :rating, class: "font-semibold" do %>
+        <%= f.object.class.human_attribute_name(:rating) %>
+        <span class="text-red-500">*</span>
+      <% end %>
       <div class="w-full flex justify-between items-center">
         <%# 画面左 好み度入力 %>
         <div class="rating rating-xl flex items-center gap-2">
@@ -36,7 +42,10 @@
 
     <%# 香りの濃淡 %>
     <div>
-      <%= f.label :aroma_strength, class: "font-semibold" %>
+      <%= f.label :aroma_strength, class: "font-semibold" do %>
+        <%= f.object.class.human_attribute_name(:aroma_strength) %>
+        <span class="text-red-500">*</span>
+      <% end %>
       <div class="w-full ">
         <div class="px-5">
           <%= f.range_field :aroma_strength, min: 0, max: 10, step: 0.1, class: "range range-primary w-full" %>
@@ -56,7 +65,10 @@
 
     <%# 味の濃淡 %>
     <div>
-      <%= f.label :taste_strength, class: "font-semibold" %>
+      <%= f.label :taste_strength, class: "font-semibold" do %>
+        <%= f.object.class.human_attribute_name(:taste_strength) %>
+        <span class="text-red-500">*</span>
+      <% end %>
       <div class="w-full ">
         <div class="px-5">
           <%= f.range_field :taste_strength, min: 0, max: 10, step: 0.1, class: "range range-primary w-full" %>
