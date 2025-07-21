@@ -24,8 +24,8 @@
 #
 class SakeLog < ApplicationRecord
   validates :rating, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: RATING_MIN = 0, less_than_or_equal_to: RATING_MAX = 5 }
-  validates :taste_strength, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 10 }
-  validates :aroma_strength, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 10 }
+  validates :taste_strength, presence: true, numericality: { greater_than_or_equal_to: TASTE_STRENGTH_MIN = 0, less_than_or_equal_to: TASTE_STRENGTH_MAX = 10 }
+  validates :aroma_strength, presence: true, numericality: { greater_than_or_equal_to: AROMA_STRENGTH_MIN = 0, less_than_or_equal_to: AROMA_STRENGTH_MAX = 10 }
   validates :review, length: { maximum: 65_535 }
 
   belongs_to :user
