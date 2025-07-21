@@ -1,5 +1,5 @@
 <article id="<%= dom_id sake_log %>">
-  <section class="body py-2">
+  <section class="body p-2">
 
     <%# タイトル %>
     <section class="flex justify-between">
@@ -29,7 +29,7 @@
       </div>
       <p><%= "#{SakeLog.human_attribute_name(:aroma_strength)}：#{sake_log.aroma_strength}" %></p>
       <p><%= "#{SakeLog.human_attribute_name(:taste_strength)}：#{sake_log.taste_strength}" %></p>
-      <%= simple_format(h(sake_log.review)) %>
+      <%= simple_format(h(sake_log.review), class: "py-2") %>
     </section>
 
     <%# 記録時刻 %>
@@ -37,5 +37,4 @@
       <p class="text-xs text-neutral-500"><%= l sake_log.created_at, format: :long %></p>
     </section>
   </section>
-  <hr>
 </article>
