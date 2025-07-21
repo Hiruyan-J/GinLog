@@ -1,22 +1,41 @@
-<div id="<%= dom_id sake_log %>">
-  <div class="my-5">
-    <p class="font-medium mb-1"><%= "product_name:#{sake_log.sake.product_name}" %></p>
-    <p class="font-medium mb-1"><%= "Rating:#{sake_log.rating}" %></p>
-    <p class="font-medium mb-1"><%= "aroma_strength:#{sake_log.aroma_strength}" %></p>
-    <p class="font-medium mb-1"><%= "taste_strength:#{sake_log.taste_strength}" %></p>
-    <p class="font-medium mb-1"><%= "review:#{sake_log.review}" %></p>
-  </div>
-  <div>
-    <% if current_user&.own?(sake_log) %>
-      <%# 編集ボタン %>
-      <%= link_to edit_sake_log_path(sake_log), id: "button-edit-#{sake_log.id}" do %>
-        <span class="material-symbols-rounded text-primary">edit_square</span>
-      <% end %>
-      <%# 削除ボタン %>
-      <%= link_to sake_log_path(sake_log), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm')} do %>
-        <span class="material-symbols-rounded text-primary">delete</span>
-      <% end %>
-    <% end %>
-  </div>
+<article id="<%= dom_id sake_log %>">
+  <section class="body py-2">
+
+    <%# タイトル %>
+    <section class="flex justify-between">
+      <h2 class="title font-bold text-xl"><%= sake_log.sake.product_name %></h2>
+      <%# 各種ボタン %>
+      <div class="buttons">
+        <% if current_user&.own?(sake_log) %>
+          <%# 編集ボタン %>
+          <%= link_to edit_sake_log_path(sake_log), id: "button-edit-#{sake_log.id}" do %>
+            <span class="material-symbols-rounded text-primary ms-size-16 md:ms-size-20">edit_square</span>
+          <% end %>
+          <%# 削除ボタン %>
+          <%= link_to sake_log_path(sake_log), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm')} do %>
+            <span class="material-symbols-rounded text-primary ms-size-16 md:ms-size-20">delete</span>
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+
+    <%# 各指標 %>
+    <section>
+      <%# 好み度 %>
+      <div class="flex gap-0 items-center">
+        <% SakeLog::RATING_MAX.times do |rate| %>
+          <span class="inline-block w-3 h-3 md:w-5 md:h-5 mask mask-star-2 <%= rate < sake_log.rating ? "bg-yellow-300" : "bg-stone-400" %> " aria-hidden="true"></span>
+        <% end %>
+      </div>
+      <p><%= "#{SakeLog.human_attribute_name(:aroma_strength)}：#{sake_log.aroma_strength}" %></p>
+      <p><%= "#{SakeLog.human_attribute_name(:taste_strength)}：#{sake_log.taste_strength}" %></p>
+      <%= simple_format(h(sake_log.review)) %>
+    </section>
+
+    <%# 記録時刻 %>
+    <section>
+      <p class="text-xs text-neutral-500"><%= l sake_log.created_at, format: :long %></p>
+    </section>
+  </section>
   <hr>
-</div>
+</article>
