@@ -1,9 +1,8 @@
 class SakeLogsController < ApplicationController
-  skip_before_action :authenticate_user!, only: %i[index]
   before_action :set_sake_log, only: %i[edit update destroy]
 
   def index
-    @sake_logs = SakeLog.includes([ :user, :sake ]).order(created_at: :desc)
+    @sake_logs = current_user.sake_logs.includes([ :sake ]).order(created_at: :desc)
   end
 
   def new
