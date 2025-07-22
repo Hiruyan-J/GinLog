@@ -14,7 +14,8 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
   resources :sake_logs, only: %i[index new create edit update destroy]
+  get "timeline", to: "timeline#index", as: :timeline
 
   # Defines the root path route ("/")
-  root "sake_logs#index"
+  root "timeline#index"
 end

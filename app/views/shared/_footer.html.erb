@@ -1,6 +1,6 @@
-<footer class="fixed bottom-0 w-full bg-base-200 px-4 py-4">
-  <div class="dock text-footer-color dock-xs md:dock-lg">
-    <%= link_to "#", class: "flex flex-col items-center justify-center leading-none dock-active" do %>
+<footer class="fixed bottom-0 w-full px-4 py-4">
+  <div class="dock bg-base-100 text-footer-color dock-xs md:dock-lg">
+    <%= link_to timeline_path, class: class_names("flex flex-col items-center justify-center leading-none", ("dock-active" if current_page?(timeline_path))) do %>
       <span class="material-symbols-rounded">home</span>
       <span class="dock-label"><%= t('footer.home') %></span>
     <% end %>
@@ -8,6 +8,7 @@
     <%= link_to "#", class: "flex flex-col items-center justify-center leading-none" do %>
       <span class="material-symbols-rounded">search</span>
       <span class="dock-label"><%= t('footer.search') %></span>
+      <span class="dock-label">(実装中)</span>
     <% end %>
 
     <%= link_to new_sake_log_path, class: "flex flex-col items-center" do %>
@@ -15,7 +16,7 @@
     <% end %>
 
 
-    <%= link_to "#", class: "flex flex-col items-center justify-center leading-none" do %>
+    <%= link_to sake_logs_path, class: class_names("flex flex-col items-center justify-center leading-none", ("dock-active" if current_page?(sake_logs_path))) do %>
       <span class="material-symbols-outlined">lists</span>
       <span class="dock-label"><%= t('footer.my_log') %></span>
     <% end %>
@@ -23,6 +24,7 @@
     <%= link_to "#", class: "flex flex-col items-center justify-center leading-none" do %>
       <span class="material-symbols-rounded">star</span>
       <span class="dock-label"><%= t('footer.analyze_preferences') %></span>
+      <span class="dock-label">(実装中)</span>
     <% end %>
   </div>
 </footer>

@@ -1,12 +1,10 @@
 <% content_for :title,  t('.title') %>
 
 <div class="w-full">
-  <h1 class="font-bold text-4xl"><%= t('.title') %></h1>
-  <div id="posts" class="min-w-full">
+  <%= page_title %>
+  <div id="sake_logs" class="flex flex-col gap-0 divide-y">
     <% if @sake_logs.any? %>
-      <% @sake_logs.each do |sake_log| %>
-        <%= render sake_log %>
-      <% end %>
+      <%= render @sake_logs %>
     <% else %>
       <p class="text-center my-10">まだ記録がありません</p>
     <% end %>

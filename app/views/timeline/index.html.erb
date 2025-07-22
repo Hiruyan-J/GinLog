@@ -1,0 +1,12 @@
+<% content_for :title,  t('.title') %>
+
+<div class="w-full">
+  <%= page_title %>
+  <div id="timeline" class="flex flex-col gap-0 divide-y">
+    <% if @sake_logs.any? %>
+      <%= render partial: 'timeline/sake_log', collection: @sake_logs %>
+    <% else %>
+      <p class="text-center my-10">まだ投稿がありません</p>
+    <% end %>
+  </div>
+</div>
