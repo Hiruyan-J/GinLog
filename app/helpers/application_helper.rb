@@ -12,6 +12,6 @@ module ApplicationHelper
   end
 
   def page_title(title = nil)
-    render 'shared/page_title', title: title
+    render "shared/page_title", title: title
   end
 end
