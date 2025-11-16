@@ -47,6 +47,7 @@ gem "devise-i18n"
 
 # SEO
 gem "meta-tags"
+gem "sitemap_generator"
 
 
 
