@@ -5,7 +5,7 @@ gem "rails", "~> 7.2.3"
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem "sprockets-rails"
 # Use postgresql as the database for Active Record
-gem "pg", "~> 1.1"
+gem "pg", "~> 1.6"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Bundle and transpile JavaScript [https://github.com/rails/jsbundling-rails]
@@ -36,7 +36,7 @@ gem "bootsnap", require: false
 
 
 # フロント
-gem "tailwindcss-rails", "~> 4.0"
+gem "tailwindcss-rails", "~> 4.4"
 gem "tailwindcss-ruby"
 gem "inline_svg"
 gem "rails-i18n", "~> 7.0.0"
