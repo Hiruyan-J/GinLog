@@ -18,7 +18,7 @@ module ApplicationHelper
   def default_meta_tags
     {
       site: "吟ログ",
-      title: "日本酒の簡単メモアプリ",
+      title: content_for?(:title) ? content_for(:title) : "",
       reverse: false,
       charset: "utf-8",
       separator: "|",   # Webサイト名とページタイトルを区切るために使用されるテキスト
