@@ -1,7 +1,7 @@
 <% content_for :title,  t('.title') %>
 
 <div class="w-full">
-  <%= page_title %>
+  <%= page_heading %>
   <div id="sake_logs" class="flex flex-col gap-0 divide-y">
     <% if @sake_logs.any? %>
       <%= render @sake_logs %>
