@@ -1,5 +1,5 @@
 <% content_for :title,  t('.sign_in') %>
-<%= page_title %>
+<%= page_heading %>
 
 <section class="flex flex-col gap-4 p-2">
   <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>

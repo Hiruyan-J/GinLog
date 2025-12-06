@@ -1,5 +1,5 @@
 <% content_for :title,  t('.resend_confirmation_instructions') %>
-<%= page_title %>
+<%= page_heading %>
 
 <section class="flex flex-col gap-4 p-2">
   <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f| %>
