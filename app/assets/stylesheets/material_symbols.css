@@ -18,7 +18,7 @@
 /* アイコンサイズ */
 span.ms-size-16 {
   font-size: 16px;
-  font-variation-settings: 'OPSZ' 16;
+  font-variation-settings: 'OPSZ' 20;
 }
 
 span.ms-size-20 {
@@ -38,9 +38,14 @@ span.ms-size-48 {
   font-variation-settings: 'OPSZ' 48;
 }
 
-span.ms-size-60 {
-  font-size: 60px;
-  font-variation-settings: 'OPSZ' 60;
+span.ms-size-64 {
+  font-size: 64px;
+  font-variation-settings: 'OPSZ' 48;
+}
+
+span.ms-size-80 {
+  font-size: 80px;
+  font-variation-settings: 'OPSZ' 48;
 }
 
 /* 塗りつぶし設定 */
