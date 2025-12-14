@@ -44,44 +44,34 @@
   name: "dark-ginlog";
   default: false;
   prefersdark: false;
-
   --color-base-100: oklch(18% 0.01 160);
   --color-base-200: oklch(22% 0.01 160);
   --color-base-300: oklch(26% 0.01 160);
   --color-base-content: oklch(92% 0 0);
-
   /* Primary（グリーン） */
   --color-primary: oklch(62% 0.16 162.480);
   --color-primary-content: oklch(15% 0.02 162.480);
-
   /* Secondary（青） */
   --color-secondary: oklch(60% 0.12 220);
   --color-secondary-content: oklch(14% 0.03 220);
-
   /* Accent（青緑） */
   --color-accent: oklch(65% 0.11 190);
   --color-accent-content: oklch(15% 0.03 190);
-
   /* Neutral */
   --color-neutral: oklch(30% 0.02 160);
   --color-neutral-content: oklch(92% 0 0);
-
   /* Info */
   --color-info: oklch(65% 0.11 220);
   --color-info-content: oklch(15% 0.03 220);
-
   /* Success */
   --color-success: oklch(58% 0.14 162);
   --color-success-content: oklch(14% 0.03 162);
-
   /* Warning */
   --color-warning: oklch(70% 0.16 90);
   --color-warning-content: oklch(18% 0.04 90);
-
   /* Error */
   --color-error: oklch(60% 0.18 20);
   --color-error-content: oklch(14% 0.04 20);
-
   /* Shape / UI */
   --radius-selector: 0.5rem;
   --radius-field: 0.25rem;
