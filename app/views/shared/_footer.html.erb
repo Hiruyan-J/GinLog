@@ -1,26 +1,30 @@
 <footer class="fixed bottom-0 w-full px-4 py-4">
-  <div class="dock bg-base-100 text-neutral dock-xs md:dock-lg">
+  <div class="dock bg-base-100 text-neutral dock-xs md:dock-xl">
+    <%# ホームボタン %>
     <%= link_to timeline_path, class: class_names("flex flex-col items-center justify-center leading-none", ("dock-active" if current_page?(timeline_path))) do %>
       <span class="material-symbols-rounded">home</span>
       <span class="dock-label"><%= t('footer.home') %></span>
     <% end %>
 
+    <%# 検索ボタン %>
     <%= link_to "#", class: "flex flex-col items-center justify-center leading-none" do %>
       <span class="material-symbols-rounded">search</span>
       <span class="dock-label"><%= t('footer.search') %></span>
       <span class="dock-label">(実装中)</span>
     <% end %>
 
+    <%# 投稿ボタン %>
     <%= link_to new_sake_log_path, class: "flex flex-col items-center" do %>
-      <span class="material-symbols-outlined ms-fill ms-size-48 md:ms-size-60 text-primary drop-shadow-sm">add_circle</span>
+      <span class="material-symbols-outlined ms-fill ms-size-48 md:ms-size-80 text-primary drop-shadow-sm">add_circle</span>
     <% end %>
 
-
+    <%# マイログボタン %>
     <%= link_to sake_logs_path, class: class_names("flex flex-col items-center justify-center leading-none", ("dock-active" if current_page?(sake_logs_path))) do %>
       <span class="material-symbols-outlined">lists</span>
       <span class="dock-label"><%= t('footer.my_log') %></span>
     <% end %>
 
+    <%# 好み度解析ボタン %>
     <%= link_to "#", class: "flex flex-col items-center justify-center leading-none" do %>
       <span class="material-symbols-rounded">star</span>
       <span class="dock-label"><%= t('footer.analyze_preferences') %></span>
