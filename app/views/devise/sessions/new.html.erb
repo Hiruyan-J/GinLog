@@ -1,31 +1,29 @@
 <% content_for :title,  t('.sign_in') %>
 <%= page_heading %>
 
-<section class="flex flex-col gap-4 p-2">
-  <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-    <div class="field">
-      <%= f.label :email %><br />
-      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input" %>
-    </div>
+<%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "flex flex-col items-center gap-4 py-2" }) do |f| %>
+  <div class="field w-full md:w-8/12">
+    <%= f.label :email %><br />
+    <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input input-primary w-full" %>
+  </div>
 
-    <div class="field">
-      <%= f.label :password %><br />
-      <%= f.password_field :password, autocomplete: "current-password", class: "input" %>
-    </div>
+  <div class="field w-full md:w-8/12">
+    <%= f.label :password %><br />
+    <%= f.password_field :password, autocomplete: "current-password", class: "input input-primary w-full" %>
+  </div>
 
-    <% if devise_mapping.rememberable? %>
-      <div class="field">
-        <%= f.check_box :remember_me, class: "checkbox checkbox-primary" %>
-        <%= f.label :remember_me %>
-      </div>
-    <% end %>
-
-    <div class="actions flex justify-center">
-      <%= f.submit t('.sign_in'), class: "btn btn-primary" %>
+  <% if devise_mapping.rememberable? %>
+    <div class="field w-full md:w-8/12">
+      <%= f.check_box :remember_me, class: "checkbox checkbox-primary" %>
+      <%= f.label :remember_me %>
     </div>
   <% end %>
-</section>
 
-<section class="flex flex-col items-center gap-2">
+  <div class="actions flex justify-center">
+    <%= f.submit t('.sign_in'), class: "btn btn-primary" %>
+  </div>
+<% end %>
+
+<section class="flex flex-col items-center gap-2 py-2">
   <%= render "devise/shared/links" %>
 </section>
