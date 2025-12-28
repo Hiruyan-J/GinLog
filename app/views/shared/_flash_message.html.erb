@@ -1,7 +1,11 @@
-<div id="flash_messages" class="px-4 mt-4 space-y-2">
-  <% flash.each do |message_type, message| %>
-    <div class="alert alert-<%= flash_class_for(message_type) %>">
-      <%= message %>
+<div id="flash_messages">
+  <% if !flash.empty? %>
+    <div class="px-4 my-2 space-y-2">
+      <% flash.each do |message_type, message| %>
+        <div class="alert alert-<%= flash_class_for(message_type) %>">
+          <%= message %>
+        </div>
+      <% end %>
     </div>
   <% end %>
 </div>
