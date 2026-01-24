@@ -2,68 +2,118 @@ class SakeLogForm
   include ActiveModel::Model
   include ActiveModel::Attributes
 
-  # Sake attributes  # TODO: sake_idも必要?
+  # フォームの属性
+  # Sake attributes
   attribute :product_name, :string
-
   # SakeLog attributes
   attribute :rating, :integer, default: SakeLog::RATING_MIN  # TODO: デフォルト値は不要?
   attribute :aroma_strength, :float
   attribute :taste_strength, :float
-  attribute :review, :text
+  attribute :review, :string
+
+  # 関連オブジェクト (ゲッターのみ)
+  attr_reader :sake_log, :user
 
 
+  # バリデーション
+  # Sake attributesバリデーション
   validates :product_name, presence: true # TODO: length制限も必要?
-
   # SakeLog attributesバリデーション
   # TODO: SakeLogモデルの記述を削除?その場合、定数の宣言場所も再考
-  validates :rating, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: SakeLog::RATING_MIN, less_than_or_equal_to: SakeLog::RATING_MAX }
-  validates :taste_strength, presence: true, numericality: { greater_than_or_equal_to: SakeLog::TASTE_STRENGTH_MIN, less_than_or_equal_to: SakeLog::TASTE_STRENGTH_MAX }
-  validates :aroma_strength, presence: true, numericality: { greater_than_or_equal_to: SakeLog::AROMA_STRENGTH_MIN, less_than_or_equal_to: SakeLog::AROMA_STRENGTH_MAX }
-  validates :review, length: { maximum: 65_535 }  # TODO: 文字数制限を定数化?
+  validates :rating, presence: true,
+                      numericality: { only_integer: true,
+                                      greater_than_or_equal_to: SakeLog::RATING_MIN,
+                                      less_than_or_equal_to: SakeLog::RATING_MAX }
+  validates :taste_strength, presence: true,
+                      numericality: { greater_than_or_equal_to: SakeLog::TASTE_STRENGTH_MIN,
+                                      less_than_or_equal_to: SakeLog::TASTE_STRENGTH_MAX }
+  validates :aroma_strength, presence: true,
+                              numericality: { greater_than_or_equal_to: SakeLog::AROMA_STRENGTH_MIN,
+                                              less_than_or_equal_to: SakeLog::AROMA_STRENGTH_MAX }
+  validates :review, length: { maximum: 65_535 }, allow_blank: true  # TODO: 文字数制限を定数化?
 
-  attr_accessor :user, :sake_log, :sake
+  # コンストラクタ
+  def initialize(attributes = {}, user:, sake_log: nil)
+      @user = user
+      @sake_log = sake_log
 
-  def initialize(attributes = {}, user: , sake_log: nil)
-    @user = user
-    @sake_log = sake_log || user.sake_logs.build
-    @sake = @sake_log.sake || Sake.new
-    super(attributes) # TODO: attributesの中身を確認
-
-    # 編集時はモデルの値をフォームの属性にセット
-    self.product_name ||= @sake.product_name # TODO: selfの内容を確認
-    self.rating ||= @sake_log.rating
-    self.aroma_strength ||= @sake_log.aroma_strength
-    self.taste_strength ||= @sake_log.taste_strength
-    self.review ||= @sake_log.review
+      if @sake_log
+        # 編集時: 既存データから属性をセット
+        attributes = {
+          rating: @sake_log.rating,
+          aroma_strength: @sake_log.aroma_strength,
+          taste_strength: @sake_log.taste_strength,
+          review: @sake_log.review,
+          product_name: @sake_log.sake.product_name
+        }.merge(attributes)
+      end
+      super(attributes)
   end
 
+  # 保存処理
   def save
     return false if invalid?
 
-    ActiveRecord::Base.transaction do
-      # 銘柄を特定/作成
-      self.sake = Sake.find_or_initialize_by(product_name: product_name.strip)
+    SakeLog.transaction do
+      # Sakeの検索または作成
+      sake = Sake.find_or_initialize_by(product_name: product_name.strip)
       sake.save!
 
-      # 記録を保存
-      sake_log.assign_attributes(
-        user: user,
-        sake: sake,
-        rating: rating,
-        aroma_strength: aroma_strength,
-        taste_strength: taste_strength,
-        review: review
-      )
-      sake_log.save!
+      # SakeLogの作成または更新
+      if @sake_log
+        # 更新
+        @sake_log.assign_attributes(sake_log_attributes)
+        @sake_log.sake = sake
+        @sake_log.save!
+      else
+        # 新規作成
+        @sake_log = @user.sake_logs.build(sake_log_attributes)
+        @sake_log.sake = sake
+        @sake_log.save!
+      end
+
       true
+    rescue ActiveRecord::RecordInvalid => e
+      # モデルのエラーをFormObjectに転記
+      copy_errors_from_record(e.record)
+      false
     end
-  rescue ActiveRecord::RecordInvalid => exception
-    false
   end
 
+  # from_withとの連携用メソッド
   # form_withが PATCH か POST かを判別
   def persisted?
-    sake_log.persisted?  # sake_logがDBに存在するかどうか
+    @sake_log&.persisted? # sake_logがDBに存在するかどうか
+  end
+
+  def to_model
+    self
+  end
+
+  def model_name
+    ActiveModel::Name.new(self, nil, "SakeLog")
+  end
+
+  private
+
+  def sake_log_attributes
+    {
+      rating: rating,
+      aroma_strength: aroma_strength,
+      taste_strength: taste_strength,
+      review: review
+    }
+  end
+
+  def copy_errors_from_record(record)
+    record.errors.each do |error|
+      # Sakeのエラーの場合、product_nameに割り当て
+      if record.is_a?(Sake) && error.attribute == :product_name
+        self.errors.add(:product_name, error.message)
+      elsif record.is_a?(SakeLog)
+        self.errors.add(error.attribute, error.message)
+      end
+    end
   end
 
 end

@@ -1,18 +1,16 @@
-<%= form_with model: sake_log do |f| %>
+<%= form_with model: sake_log, url: sake_log.persisted? ? sake_log_path(sake_log.sake_log) : sake_logs_path do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
-  <%= render 'shared/error_messages', object: f.object.sake %>
 
   <section class="flex flex-col gap-4 px-2">
-  <%# 日本酒名 %>
-    <%= f.fields_for :sake do |sake_fields| %>
-      <div class="flex flex-col">
-        <%= sake_fields.label :product_name, class: "font-semibold" do %>
-          <%= sake_fields.object.class.human_attribute_name(:product_name) %>
+    <%# 日本酒名 %>
+    <div class="w-full flex flex-col md:flex-row items-baseline md:items-center gap-1 md:gap-2">
+        <%= f.label :product_name, class: "font-semibold" do %>
+          <%= f.object.class.human_attribute_name(:product_name) %>
           <span class="text-red-500">*</span>
         <% end %>
-        <%= sake_fields.text_field :product_name, class: "input md:w-11/12" %>
+        <%= f.text_field :product_name, class: "input md:w-11/12" %>
       </div>
-    <% end %>
+    </div>
 
     <%# 好み度 %>
     <div>
