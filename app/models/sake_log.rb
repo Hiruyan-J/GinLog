@@ -23,13 +23,20 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class SakeLog < ApplicationRecord
-  validates :rating, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: RATING_MIN = 0, less_than_or_equal_to: RATING_MAX = 5 }
-  validates :taste_strength, presence: true, numericality: { greater_than_or_equal_to: TASTE_STRENGTH_MIN = 0, less_than_or_equal_to: TASTE_STRENGTH_MAX = 10 }
-  validates :aroma_strength, presence: true, numericality: { greater_than_or_equal_to: AROMA_STRENGTH_MIN = 0, less_than_or_equal_to: AROMA_STRENGTH_MAX = 10 }
-  validates :review, length: { maximum: 65_535 }
+  RATING_MIN = 0
+  RATING_MAX = 5
+  TASTE_STRENGTH_MIN = 0
+  TASTE_STRENGTH_MAX = 10
+  TASTE_STRENGTH_DEFAULT = 5.0
+  AROMA_STRENGTH_MIN = 0
+  AROMA_STRENGTH_MAX = 10
+  AROMA_STRENGTH_DEFAULT = 5.0
 
   belongs_to :user
   belongs_to :sake
 
-  accepts_nested_attributes_for :sake
+  validates :rating, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: RATING_MIN, less_than_or_equal_to: RATING_MAX }
+  validates :taste_strength, presence: true, numericality: { greater_than_or_equal_to: TASTE_STRENGTH_MIN, less_than_or_equal_to: TASTE_STRENGTH_MAX }
+  validates :aroma_strength, presence: true, numericality: { greater_than_or_equal_to: AROMA_STRENGTH_MIN, less_than_or_equal_to: AROMA_STRENGTH_MAX }
+  validates :review, length: { maximum: 65535 }
 end
