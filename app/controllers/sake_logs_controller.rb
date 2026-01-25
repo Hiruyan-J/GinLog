@@ -51,7 +51,7 @@ end
     @sake_log = current_user.sake_logs.find(params[:id])
   end
 
-  def sake_log_params
+  def sake_log_form_params
     params.require(:sake_log).permit(:rating, :aroma_strength, :taste_strength, :review, :product_name)
   end
 end
