@@ -13,3 +13,9 @@
  *= require_tree .
  *= require_self
  */
+
+ .required::after {
+  content: "*";
+  color: #ef4444;
+  margin-left: 0.125rem;
+ }

@@ -91,7 +91,7 @@ class SakeLogForm
   end
 
   def model_name
-    ActiveModel::Name.new(self, nil, "SakeLog")
+    SakeLog.model_name
   end
 
   private
