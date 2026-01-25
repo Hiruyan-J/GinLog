@@ -19,12 +19,6 @@ ja:
       submit: 保存
       update: 更新
     label:
-      sake_log:
-        product_name: 日本酒名
-        rating: 好み度
-        aroma_strength: 香りの濃淡
-        taste_strength: 味の濃淡
-        review: 感想
   header:
     login: ログイン
     logout: ログアウト
