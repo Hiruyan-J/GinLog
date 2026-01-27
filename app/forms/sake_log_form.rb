@@ -86,10 +86,6 @@ class SakeLogForm
     @sake_log&.persisted? # sake_logがDBに存在するかどうか
   end
 
-  def to_model
-    self
-  end
-
   def model_name
     SakeLog.model_name
   end
