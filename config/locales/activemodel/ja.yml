@@ -1,15 +1,14 @@
 ja:
-  activerecord:
+  activemodel:
     models:
       user: ユーザー
       sake_log: 日本酒記録
       sake: 日本酒
     attributes:
-      sake_log:
+      sake_log_form:
         rating: 好み度
         aroma_strength: 香りの濃淡
         taste_strength: 味の濃淡
         review: 感想
         product_name: 日本酒名
-      sake:
-        product_name: 日本酒名
+

@@ -12,6 +12,7 @@ ja:
       updated: "%{item}を更新しました"
       not_updated: "%{item}を更新出来ませんでした"
       deleted: "%{item}を削除しました"
+      not_deleted: "%{item}を削除出来ませんでした"
   helpers:
     submit:
       create: 登録
