@@ -6,7 +6,7 @@ class SakeLogForm
   # Sake attributes
   attribute :product_name, :string
   # SakeLog attributes
-  attribute :rating, :integer, default: SakeLog::RATING_MIN  # TODO: デフォルト値は不要?
+  attribute :rating, :integer, default: SakeLog::RATING_MIN
   attribute :aroma_strength, :float
   attribute :taste_strength, :float
   attribute :review, :string
@@ -17,9 +17,8 @@ class SakeLogForm
 
   # バリデーション
   # Sake attributesバリデーション
-  validates :product_name, presence: true # TODO: length制限も必要?
+  validates :product_name, presence: true, length: { maximum: Sake::PRODUCT_NAME_MAX_LENGTH }
   # SakeLog attributesバリデーション
-  # TODO: SakeLogモデルの記述を削除?その場合、定数の宣言場所も再考
   validates :rating, presence: true,
                       numericality: { only_integer: true,
                                       greater_than_or_equal_to: SakeLog::RATING_MIN,
@@ -30,7 +29,7 @@ class SakeLogForm
   validates :aroma_strength, presence: true,
                               numericality: { greater_than_or_equal_to: SakeLog::AROMA_STRENGTH_MIN,
                                               less_than_or_equal_to: SakeLog::AROMA_STRENGTH_MAX }
-  validates :review, length: { maximum: 65_535 }, allow_blank: true  # TODO: 文字数制限を定数化?
+  validates :review, length: { maximum: SakeLog::REVIEW_MAX_LENGTH }, allow_blank: true
 
   # コンストラクタ
   def initialize(attributes = {}, user:, sake_log: nil)
@@ -111,5 +110,4 @@ class SakeLogForm
       end
     end
   end
-
 end

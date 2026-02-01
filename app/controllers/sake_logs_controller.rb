@@ -1,5 +1,4 @@
 class SakeLogsController < ApplicationController
-
   def index
     @sake_logs = current_user.sake_logs.includes(:sake).order(created_at: :desc)
   end

@@ -8,7 +8,9 @@
 #  updated_at   :datetime         not null
 #
 class Sake < ApplicationRecord
-  validates :product_name, presence: true, length: { maximum: 255 }
+  PRODUCT_NAME_MAX_LENGTH = 255
+
+  validates :product_name, presence: true, length: { maximum: PRODUCT_NAME_MAX_LENGTH }
 
   has_many :sake_logs
 end
