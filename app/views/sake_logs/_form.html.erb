@@ -1,16 +1,15 @@
 <%= form_with model: sake_log, url: sake_log.persisted? ? sake_log_path(sake_log.sake_log) : sake_logs_path do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
 
-  <section class="flex flex-col gap-4 px-2">
+  <section class="flex flex-col items-center gap-6 px-2">
     <%# 日本酒名 %>
-    <div class="w-full flex flex-col md:flex-row items-baseline md:items-center gap-1 md:gap-2">
+    <div class="w-full md:w-8/12 flex flex-col">
       <%= f.label :product_name, class: "font-semibold required" %>
-      <%= f.text_field :product_name, class: "input md:w-10/12" %>
+      <%= f.text_field :product_name, class: "input input-primary w-full" %>
     </div>
 
-    <%# TODO:表示の変更 #>
     <%# 好み度 %>
-    <div>
+    <div class="w-full md:w-8/12">
       <%= f.label :rating, class: "font-semibold required" %>
       <div class="w-full flex justify-between items-center">
         <%# 画面左 好み度入力 %>
@@ -26,14 +25,14 @@
         </div>
 
         <%# 画面右 クリアボタン %>
-        <label for="rating-0" class= "cursor-pointer" >
+        <label for="rating-0" class= "cursor-pointer">
           <span class="btn btn-outline btn-xs btn-primary">クリア</span>
         </label>
       </div>
     </div>
 
     <%# 香りの濃淡 %>
-    <div>
+    <div class="w-full md:w-8/12">
       <%= f.label :aroma_strength, class: "font-semibold required" %>
       <div class="w-full ">
         <div class="px-5">
@@ -53,7 +52,7 @@
     </div>
 
     <%# 味の濃淡 %>
-    <div>
+    <div class="w-full md:w-8/12">
       <%= f.label :taste_strength, class: "font-semibold required" %>
       <div class="w-full ">
         <div class="px-5">
@@ -73,9 +72,9 @@
     </div>
 
     <%# 感想 %>
-    <div class="flex flex-col">
+    <div class="w-full md:w-8/12 flex flex-col">
       <%= f.label :review, class: "font-semibold" %>
-      <%= f.text_area :review, class: "textarea md:w-11/12" %>
+      <%= f.text_area :review, class: "textarea textarea-primary w-full" %>
     </div>
 
     <div class="flex justify-center gap-2">
