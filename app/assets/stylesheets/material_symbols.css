@@ -29,6 +29,12 @@ span.ms-size-24 {
   font-size: 24px;
   font-variation-settings: 'OPSZ' 24;
 }
+
+span.ms-size-32 {
+  font-size: 32px;
+  font-variation-settings: 'OPSZ' 32;
+}
+
 span.ms-size-40 {
   font-size: 40px;
   font-variation-settings: 'OPSZ' 40;

@@ -5,15 +5,15 @@
     <section class="flex justify-between">
       <h2 class="title font-bold text-xl"><%= sake_log.sake.product_name %></h2>
       <%# 各種ボタン %>
-      <div class="buttons">
+      <div class="buttons flex gap-2">
         <% if current_user&.own?(sake_log) %>
           <%# 編集ボタン %>
           <%= link_to edit_sake_log_path(sake_log), id: "button-edit-#{sake_log.id}" do %>
-            <span class="material-symbols-rounded text-primary ms-size-16 md:ms-size-20">edit_square</span>
+            <span class="material-symbols-rounded text-primary ms-size-24">edit_square</span>
           <% end %>
           <%# 削除ボタン %>
           <%= link_to sake_log_path(sake_log), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm')} do %>
-            <span class="material-symbols-rounded text-primary ms-size-16 md:ms-size-20">delete</span>
+            <span class="material-symbols-rounded text-primary ms-size-24">delete</span>
           <% end %>
         <% end %>
       </div>
