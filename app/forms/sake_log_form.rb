@@ -6,7 +6,7 @@ class SakeLogForm
   # Sake attributes
   attribute :product_name, :string
   # SakeLog attributes
-  attribute :rating, :integer, default: SakeLog::RATING_MIN
+  attribute :rating, :integer
   attribute :aroma_strength, :float
   attribute :taste_strength, :float
   attribute :review, :string
