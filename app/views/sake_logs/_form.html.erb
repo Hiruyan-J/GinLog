@@ -13,22 +13,27 @@
       <%= f.label :rating, class: "font-semibold required" %>
       <div class="w-full flex justify-between items-center">
         <%# 画面左 好み度入力 %>
-        <div class="rating rating-xl flex items-center gap-2">
+        <div class="rating rating-xl flex items-center gap-2"
+              data-controller="rating">
           <%# 好み度0 %>
           <%= f.radio_button :rating, SakeLog::RATING_MIN, class: "rating-hidden",
-              id: "rating-0", aria: { label: "clear" } %>
+              id: "rating-0", aria: { label: "clear" },
+               data: { action: "change->rating#select" } %>
 
           <%# 好み度1〜5　%>
           <% rating_range = (SakeLog::RATING_MIN + 1)..SakeLog::RATING_MAX %>
+          <%# 初期表示の星色をrating値に応じて切り替え(nil→灰色、値あり→黄色) %>
+          <% star_color = sake_log.rating.nil? ? "bg-stone-400" : "bg-yellow-300" %>
           <% rating_range.each do |i| %>
-            <%= f.radio_button :rating, i, class: "mask mask-star-2 bg-yellow-300",
-                id: "rating-#{i}", aria: { label: "#{i} star" } %>
+            <%= f.radio_button :rating, i, class: "mask mask-star-2 #{star_color}",
+                id: "rating-#{i}", aria: { label: "#{i} star" },
+                data: { rating_target: "star", action: "change->rating#select" } %>
           <% end %>
         </div>
 
         <%# 画面右 クリアボタン %>
         <label for="rating-0" class= "cursor-pointer">
-          <span class="btn btn-outline btn-xs btn-primary">クリア</span>
+          <span class="btn btn-outline btn-xs btn-primary">好み度 0</span>
         </label>
       </div>
     </div>
