@@ -13,7 +13,7 @@
       <%= f.label :rating, class: "font-semibold required" %>
       <div class="w-full flex justify-between items-center">
         <%# 画面左 好み度入力 %>
-        <div class="rating rating-xl flex items-center gap-2"
+        <div class="rating rating-xl flex items-center gap-2",
               data-controller="rating">
           <%# 好み度0 %>
           <%= f.radio_button :rating, SakeLog::RATING_MIN, class: "rating-hidden",
