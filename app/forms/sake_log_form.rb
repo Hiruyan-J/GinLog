@@ -22,7 +22,8 @@ class SakeLogForm
   validates :rating, presence: true,
                       numericality: { only_integer: true,
                                       greater_than_or_equal_to: SakeLog::RATING_MIN,
-                                      less_than_or_equal_to: SakeLog::RATING_MAX }
+                                      less_than_or_equal_to: SakeLog::RATING_MAX,
+                                      allow_nil: true } # nilはpresenceで弾き、numericalityはnil以外のときのみチェック
   validates :taste_strength, presence: true,
                       numericality: { greater_than_or_equal_to: SakeLog::TASTE_STRENGTH_MIN,
                                       less_than_or_equal_to: SakeLog::TASTE_STRENGTH_MAX }
