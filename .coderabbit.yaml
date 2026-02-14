@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+language: "ja"
+
+tone_instructions: >
+  日本語でレビューしてください。
+  Railsのベストプラクティスに沿って、
+  セキュリティ・パフォーマンス（N+1など）・可読性を重点的に確認してください。
+  指摘は具体的かつ簡潔にお願いします。
+
+reviews:
+  profile: "chill"
+  high_level_summary: true
+
+  path_filters:
+    - "!vendor/**"
+    - "!node_modules/**"
+    - "!*.lock"
+    - "!**/yarn.lock"
+    - "!**/package-lock.json"
+    - "!db/schema.rb"
+    - "!coverage/**"
+    - "!log/**"
+    - "!tmp/**"
+    - "!app/assets/builds/**"
+
+  tools:
+    rubocop:
+      enabled: true
+
+chat:
+  auto_reply: true

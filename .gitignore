@@ -42,4 +42,7 @@
 .DS_Store
 /vendor/bundle
 
+# Claude Code 関連
 /claude_code
+CLAUDE.md
+.claude
