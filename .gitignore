@@ -42,6 +42,9 @@
 .DS_Store
 /vendor/bundle
 
+# エディタ設定（個人環境依存）
+/.vscode
+
 # Claude Code 関連
 /claude_code
 CLAUDE.md
