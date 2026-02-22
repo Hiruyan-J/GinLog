@@ -58,8 +58,8 @@ class SakenowaApiClient
     response = fetch_data(:areas)
     areas_data = response["areas"]
 
-    # 空データは異常とみなしてインポートを中止
-    if areas_data.empty?
+    # 空データは異常とみなしてインポートを中止(nil + 空配列チェック)
+    if areas_data.blank?
       raise "さけのわAPI エラー: areas のデータが空です。インポートを中止します"
     end
 
@@ -81,10 +81,10 @@ class SakenowaApiClient
     response = fetch_data(:breweries)
     breweries_data = response["breweries"]
 
-    # 空データは異常とみなしてインポートを中止
+    # 空データは異常とみなしてインポートを中止(nil + 空配列チェック)
     # 空配列のまま進むと where.not(sakenowa_id: []) が全件にマッチし、
     # 全銘柄が論理削除されてしまうため必須のガード
-    if breweries_data.empty?
+    if breweries_data.blank?
       raise "さけのわAPI エラー: breweries のデータが空です。インポートを中止します"
     end
 
@@ -119,10 +119,10 @@ class SakenowaApiClient
     response = fetch_data(:brands)
     brands_data = response["brands"]
 
-    # 空データは異常とみなしてインポートを中止
+    # 空データは異常とみなしてインポートを中止(nil + 空配列チェック)
     # 空配列のまま進むと where.not(sakenowa_id: []) が全件にマッチし、
     # 全銘柄が論理削除されてしまうため必須のガード
-    if brands_data.empty?
+    if brands_data.blank?
       raise "さけのわAPI エラー: brands のデータが空です。インポートを中止します"
     end
 
@@ -140,7 +140,7 @@ class SakenowaApiClient
       end
 
       Brand.active
-        .where.not(brewery_id: api_brand_sakenowa_ids)
+        .where.not(sakenowa_id: api_brand_sakenowa_ids)
         .update_all(is_deleted: true)
     end
 
