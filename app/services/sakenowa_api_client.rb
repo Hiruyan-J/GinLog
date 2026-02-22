@@ -49,7 +49,9 @@ class SakenowaApiClient
     end
 
     begin
-      JSON.parse(response.body)
+      api_data = JSON.parse(response.body)
+      Rails.logger.info("さけのわAPI: #{endpoint_key} の取得件数: #{api_data[endpoint_key.to_s]&.size} 件")
+      api_data
     rescue JSON::ParserError => e
       raise "さけのわAPI エラー: #{endpoint_key} のJSONパースに失敗しました（#{e.message}）"
     end
