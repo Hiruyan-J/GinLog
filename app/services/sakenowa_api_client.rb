@@ -32,7 +32,7 @@ class SakenowaApiClient
   # APIからJSONデータを取得する共通メソッド
   # @param endpoint_key [Symbol] エンドポイントのキー（:areas, :breweries, :brands）
   # @return [Hash] パース済みのJSONレスポンス
-  # @raise [RuntimeError] HTTPリクエストが失敗した場合
+  # @raise [RuntimeError] HTTPリクエストが失敗した場合、またはJSONパースに失敗した場合
   def fetch_data(endpoint_key)
     url = URI.parse("#{BASE_URL}#{ENDPOINTS[endpoint_key]}")
 
@@ -48,7 +48,11 @@ class SakenowaApiClient
       raise "さけのわAPI エラー: #{endpoint_key} の取得に失敗しました（ステータス: #{response.code}）"
     end
 
-    JSON.parse(response.body)
+    begin
+      JSON.parse(response.body)
+    rescue JSON::ParserError => e
+      raise "さけのわAPI エラー: #{endpoint_key} のJSONパースに失敗しました（#{e.message}）"
+    end
   end
 
   # エリア（都道府県）データをAPIから取得しareasテーブルへインポートする
@@ -94,7 +98,7 @@ class SakenowaApiClient
     area_id_map = Area.pluck(:sakenowa_id, :id).to_h
 
     Brewery.transaction do
-      breweries_data.each do | brewery_data |
+      breweries_data.each do |brewery_data|
         brewery = Brewery.find_or_initialize_by(sakenowa_id: brewery_data["id"])
         brewery.name = brewery_data["name"]
         # APIのareaIdを変換マップでRailsのarea_idに変換
