@@ -4,5 +4,7 @@ class Brand < ApplicationRecord
 
   validates :name, presence: true, length: { maximum: NAME_MAX_LENGTH }
 
+  scope :active, -> { where(is_deleted: false) }
+
   belongs_to :brewery
 end
