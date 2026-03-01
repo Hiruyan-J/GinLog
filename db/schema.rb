@@ -10,9 +10,39 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_09_220221) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_20_092455) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "areas", force: :cascade do |t|
+    t.integer "sakenowa_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sakenowa_id"], name: "index_areas_on_sakenowa_id", unique: true
+  end
+
+  create_table "brands", force: :cascade do |t|
+    t.integer "sakenowa_id", null: false
+    t.string "name", null: false
+    t.bigint "brewery_id", null: false
+    t.boolean "is_deleted", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["brewery_id"], name: "index_brands_on_brewery_id"
+    t.index ["sakenowa_id"], name: "index_brands_on_sakenowa_id", unique: true
+  end
+
+  create_table "breweries", force: :cascade do |t|
+    t.integer "sakenowa_id", null: false
+    t.string "name", null: false
+    t.bigint "area_id", null: false
+    t.boolean "is_deleted", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["area_id"], name: "index_breweries_on_area_id"
+    t.index ["sakenowa_id"], name: "index_breweries_on_sakenowa_id", unique: true
+  end
 
   create_table "sake_logs", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -46,6 +76,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_09_220221) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "brands", "breweries"
+  add_foreign_key "breweries", "areas"
   add_foreign_key "sake_logs", "sakes"
   add_foreign_key "sake_logs", "users"
 end
