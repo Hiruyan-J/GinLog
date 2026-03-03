@@ -7,8 +7,8 @@
   },
   "scripts": {
     "build": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets",
-    "tailwind:sort": "rustywind --write --custom-regex 'class\\s*(?:=\\s*|:\\s*)\"(?![^\"]*(?:<%|#\\{))([^\"]+)\"' app/views/",
-    "tailwind:check": "rustywind --check-formatted --custom-regex 'class\\s*(?:=\\s*|:\\s*)\"(?![^\"]*(?:<%|#\\{))([^\"]+)\"' app/views/"
+    "tailwind:sort": "rustywind --write --custom-regex 'class\\s*(?:=\\s*|:\\s*)\"([^\"<{]+)\"' app/views/",
+    "tailwind:check": "rustywind --check-formatted --custom-regex 'class\\s*(?:=\\s*|:\\s*)\"([^\"<{]+)\"' app/views/"
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
