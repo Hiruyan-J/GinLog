@@ -1,19 +1,19 @@
 <%= form_with model: sake_log, url: sake_log.persisted? ? sake_log_path(sake_log.sake_log) : sake_logs_path do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
 
-  <section class="flex flex-col items-center gap-6 px-2">
+  <section class="flex flex-col gap-6 items-center px-2">
     <%# 日本酒名 %>
-    <div class="w-full md:w-8/12 flex flex-col">
+    <div class="flex flex-col w-full md:w-8/12">
       <%= f.label :product_name, class: "font-semibold required" %>
-      <%= f.text_field :product_name, class: "input input-primary w-full" %>
+      <%= f.text_field :product_name, class: "w-full input input-primary" %>
     </div>
 
     <%# 好み度 %>
     <div class="w-full md:w-8/12">
       <%= f.label :rating, class: "font-semibold required" %>
-      <div class="w-full flex justify-between items-center">
+      <div class="flex justify-between items-center w-full">
         <%# 画面左 好み度入力 %>
-        <div class="rating rating-xl flex items-center gap-2"
+        <div class="flex gap-2 items-center rating rating-xl"
               data-controller="rating">
           <%# 好み度0 %>
           <%= f.radio_button :rating, SakeLog::RATING_MIN, class: "rating-hidden",
@@ -41,13 +41,13 @@
     <%# 香りの濃淡 %>
     <div class="w-full md:w-8/12">
       <%= f.label :aroma_strength, class: "font-semibold required" %>
-      <div class="w-full ">
+      <div class="w-full">
         <div class="px-5">
           <%= f.range_field :aroma_strength,
               min: SakeLog::AROMA_STRENGTH_MIN, max: SakeLog::AROMA_STRENGTH_MAX,
-              step: 0.1, class: "range range-primary w-full" %>
+              step: 0.1, class: "w-full range range-primary" %>
         </div>
-        <div class="flex justify-between px-7.5 mt-2 text-xs">
+        <div class="flex justify-between mt-2 text-xs px-7.5">
           <span>|</span>
           <span>|</span>
           <span>|</span>
@@ -63,13 +63,13 @@
     <%# 味の濃淡 %>
     <div class="w-full md:w-8/12">
       <%= f.label :taste_strength, class: "font-semibold required" %>
-      <div class="w-full ">
+      <div class="w-full">
         <div class="px-5">
           <%= f.range_field :taste_strength,
               min: SakeLog::TASTE_STRENGTH_MIN, max: SakeLog::TASTE_STRENGTH_MAX,
-              step: 0.1, class: "range range-primary w-full" %>
+              step: 0.1, class: "w-full range range-primary" %>
         </div>
-        <div class="flex justify-between px-7.5 mt-2 text-xs">
+        <div class="flex justify-between mt-2 text-xs px-7.5">
           <span>|</span>
           <span>|</span>
           <span>|</span>
@@ -83,12 +83,12 @@
     </div>
 
     <%# 感想 %>
-    <div class="w-full md:w-8/12 flex flex-col">
+    <div class="flex flex-col w-full md:w-8/12">
       <%= f.label :review, class: "font-semibold" %>
-      <%= f.text_area :review, class: "textarea textarea-primary w-full" %>
+      <%= f.text_area :review, class: "w-full textarea textarea-primary" %>
     </div>
 
-    <div class="flex justify-center gap-2">
+    <div class="flex gap-2 justify-center">
       <%= link_to "一覧に戻る", sake_logs_path, class: "btn btn-outline btn-primary md:btn-wide" %>
       <%= f.submit nil, class: "btn btn-primary md:btn-wide" %>
     </div>

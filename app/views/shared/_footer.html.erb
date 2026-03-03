@@ -1,4 +1,4 @@
-<footer class="fixed bottom-0 w-full px-4 py-4">
+<footer class="fixed bottom-0 py-4 px-4 w-full">
   <div class="dock bg-base-100 text-neutral dock-xs md:dock-xl">
     <%# ホームボタン %>
     <%= link_to timeline_path, class: class_names("flex flex-col items-center justify-center leading-none", ("dock-active" if current_page?(timeline_path))) do %>
@@ -7,15 +7,15 @@
     <% end %>
 
     <%# 検索ボタン %>
-    <%= link_to "#", class: "flex flex-col items-center justify-center leading-none" do %>
+    <%= link_to "#", class: "flex flex-col justify-center items-center leading-none" do %>
       <span class="material-symbols-rounded">search</span>
       <span class="dock-label"><%= t('footer.search') %></span>
       <span class="dock-label">(実装中)</span>
     <% end %>
 
     <%# 投稿ボタン %>
-    <%= link_to new_sake_log_path, class: "flex items-center justify-center" do %>
-      <span class="material-symbols-outlined ms-fill ms-size-48 md:ms-size-80 text-primary drop-shadow-sm">add_circle</span>
+    <%= link_to new_sake_log_path, class: "flex justify-center items-center" do %>
+      <span class="material-symbols-outlined ms-fill ms-size-48 text-primary drop-shadow-sm md:ms-size-80">add_circle</span>
     <% end %>
 
     <%# マイログボタン %>
@@ -25,7 +25,7 @@
     <% end %>
 
     <%# 好み度解析ボタン %>
-    <%= link_to "#", class: "flex flex-col items-center justify-center leading-none" do %>
+    <%= link_to "#", class: "flex flex-col justify-center items-center leading-none" do %>
       <span class="material-symbols-rounded">star</span>
       <span class="dock-label"><%= t('footer.analyze_preferences') %></span>
       <span class="dock-label">(実装中)</span>
