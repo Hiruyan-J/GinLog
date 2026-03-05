@@ -11,7 +11,7 @@ class SakeLogsController < ApplicationController
     @form = SakeLogForm.new(sake_log_form_params, user: current_user)
 
     if @form.save
-      redirect_to sake_logs_path, success: t("defaults.flash_message.created", items: SakeLog.model_name.human)
+      redirect_to sake_logs_path, success: t("defaults.flash_message.created", item: SakeLog.model_name.human)
     else
       flash.now[:error] = t("defaults.flash_message.not_created", item: SakeLog.model_name.human) # TODO: ログ出力
       render :new, status: :unprocessable_entity
@@ -35,14 +35,14 @@ class SakeLogsController < ApplicationController
     end
   end
 
-def destroy
-  set_sake_log
-  if @sake_log.destroy
-    redirect_to sake_logs_path, success: t("defaults.flash_message.deleted", item: SakeLog.model_name.human), status: :see_other
-  else
-    redirect_back fallback_location: sake_logs_path, error: t("defaults.flash_message.not_deleted", item: SakeLog.model_name.human), status: :see_other
+  def destroy
+    set_sake_log
+    if @sake_log.destroy
+      redirect_to sake_logs_path, success: t("defaults.flash_message.deleted", item: SakeLog.model_name.human), status: :see_other
+    else
+      redirect_back fallback_location: sake_logs_path, error: t("defaults.flash_message.not_deleted", item: SakeLog.model_name.human), status: :see_other
+    end
   end
-end
 
   private
 
