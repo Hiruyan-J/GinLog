@@ -1,29 +1,29 @@
 <% content_for :title,  t('.sign_in') %>
 <%= page_heading %>
 
-<%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "flex flex-col items-center gap-4 py-2" }) do |f| %>
-  <div class="field w-full md:w-8/12">
+<%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "flex flex-col gap-4 items-center py-2" }) do |f| %>
+  <div class="w-full md:w-8/12 field">
     <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input input-primary w-full" %>
+    <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "w-full input input-primary" %>
   </div>
 
-  <div class="field w-full md:w-8/12">
+  <div class="w-full md:w-8/12 field">
     <%= f.label :password %><br />
-    <%= f.password_field :password, autocomplete: "current-password", class: "input input-primary w-full" %>
+    <%= f.password_field :password, autocomplete: "current-password", class: "w-full input input-primary" %>
   </div>
 
   <% if devise_mapping.rememberable? %>
-    <div class="field w-full md:w-8/12">
+    <div class="w-full md:w-8/12 field">
       <%= f.check_box :remember_me, class: "checkbox checkbox-primary" %>
       <%= f.label :remember_me %>
     </div>
   <% end %>
 
-  <div class="actions flex justify-center">
+  <div class="flex justify-center actions">
     <%= f.submit t('.sign_in'), class: "btn btn-primary" %>
   </div>
 <% end %>
 
-<section class="flex flex-col items-center gap-2 py-2">
+<section class="flex flex-col gap-2 items-center py-2">
   <%= render "devise/shared/links" %>
 </section>

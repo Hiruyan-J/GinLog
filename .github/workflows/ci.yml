@@ -37,6 +37,24 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+  tailwind_sort_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Check Tailwind CSS class order
+        run: yarn tailwind:check
+
   test:
     runs-on: ubuntu-latest
 
