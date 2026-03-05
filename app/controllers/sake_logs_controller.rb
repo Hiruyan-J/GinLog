@@ -11,7 +11,7 @@ class SakeLogsController < ApplicationController
     @form = SakeLogForm.new(sake_log_form_params, user: current_user)
 
     if @form.save
-      redirect_to sake_logs_path, success: t("defaults.flash_message.created", items: SakeLog.model_name.human)
+      redirect_to sake_logs_path, success: t("defaults.flash_message.created", item: SakeLog.model_name.human)
     else
       flash.now[:error] = t("defaults.flash_message.not_created", item: SakeLog.model_name.human) # TODO: ログ出力
       render :new, status: :unprocessable_entity
