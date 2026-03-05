@@ -7,6 +7,7 @@ tone_instructions: >
   Railsのベストプラクティスに沿って、
   セキュリティ・パフォーマンス（N+1など）・可読性を重点的に確認してください。
   指摘は具体的かつ簡潔にお願いします。
+  `aria-label` や `sr-only` 等のアクセシビリティ対応はスコープ外とします。
 
 reviews:
   profile: "chill"
