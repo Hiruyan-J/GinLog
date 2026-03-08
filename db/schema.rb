@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_20_092455) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_08_051337) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -61,6 +61,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_20_092455) do
     t.string "product_name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "brand_id"
+    t.string "brand_name"
+    t.index ["brand_id"], name: "index_sakes_on_brand_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -80,4 +83,5 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_20_092455) do
   add_foreign_key "breweries", "areas"
   add_foreign_key "sake_logs", "sakes"
   add_foreign_key "sake_logs", "users"
+  add_foreign_key "sakes", "brands"
 end
