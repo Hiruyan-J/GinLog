@@ -27,5 +27,17 @@ class Brand < ApplicationRecord
 
   scope :active, -> { where(is_deleted: false) }
 
+  # オートコンプリート用の銘柄検索スコープ
+  # 蔵元・都道府県を eager load し、銘柄名で部分一致検索(上位10件)
+  # @param query [String] 検索文字列
+  # @return [ActiveRecord::Relation<Brand>]
+  scope :search_by_name, ->(query) {
+    active
+      .includes(brewery: :area)
+      .where("brands.name LIKE ?", "%#{sanitize_sql_like(query)}%")
+      .limit(10)
+  }
+
   belongs_to :brewery
+  has_many :sakes
 end
