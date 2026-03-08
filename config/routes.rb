@@ -13,6 +13,19 @@ Rails.application.routes.draw do
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
+  namespace :api do
+    resources :brands, only: [] do
+      collection do
+        get :search # GET /api/brands/search?q=xxx
+      end
+    end
+    resources :sakes, only: [] do
+      collection do
+        get :search # GET /api/sakes/search?brand_id=xxx&q=yyy
+      end
+    end
+  end
+
   resources :sake_logs, only: %i[index new create edit update destroy]
   get "timeline", to: "timeline#index", as: :timeline
 
