@@ -9,7 +9,7 @@ class Api::SakesController < ApplicationController
 
     # brand_idが未指定の場合は空配列を返す
     if brand_id.blank?
-      render json: { sake: [] }
+      render json: { sakes: [] }
       return
     end
 
