@@ -33,6 +33,5 @@ class Sake < ApplicationRecord
   scope :search_by_product_name, ->(brand_id, query){
     where(brand_id: brand_id)
       .where("product_name LIKE ?", "%#{sanitize_sql_like(query)}%")
-      .limit(10)
   }
 end
