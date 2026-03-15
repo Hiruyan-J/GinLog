@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="brand-autocomplete"
+// 銘柄オートコンプリートコントローラ
 // 銘柄名を入力すると、さけのわAPIマスタから候補を表示する
 // 候補選択時に蔵元を自動表示し、商品名フィールドにbrand_idを伝える
 export default class extends Controller {
@@ -81,24 +82,28 @@ export default class extends Controller {
     }
   }
 
-  // 候補リストの描画
+  // 候補リストの描画（XSS対策: DOM APIで要素を構築）
   renderDropdown(brands) {
-    const items = brands.map(brand => `
-      <li>
-        <button type="button"
-          class="w-full text-left px-4 py-2 hover:bg-base-200 cursor-pointer"
-          data-action="click->brand-autocomplete#selectBrand"
-          data-brand-id="${brand.id}"
-          data-brand-name="${brand.name}"
-          data-brand-label="${brand.label}"
-          data-brewery-name="${brand.brewery_name}（${brand.area_name}）">
-          ${brand.label}
-          </button>
-      </li>
-    `).join("")
+    const ul = document.createElement("ul")
+    ul.className = "menu bg-base-100 border border-base-300 rounded-box shadow-lg w-full max-h-60 overflow-y-auto"
 
-    this.dropdownTarget.innerHTML =
-      `<ul class="menu bg-base-100 border border-base-300 rounded-box shadow-lg w-full max-h-60 overflow-y-auto">${items}</ul>`
+    brands.forEach(brand => {
+      const li = document.createElement("li")
+      const button = document.createElement("button")
+      button.type = "button"
+      button.className = "w-full text-left px-4 py-2 hover:bg-base-200 cursor-pointer"
+      button.dataset.action = "click->brand-autocomplete#selectBrand"
+      button.dataset.brandId = brand.id
+      button.dataset.brandName = brand.name
+      button.dataset.brandLabel = brand.label
+      button.dataset.breweryName = `${brand.brewery_name}（${brand.area_name}）`
+      button.textContent = brand.label
+      li.appendChild(button)
+      ul.appendChild(li)
+    })
+
+    this.dropdownTarget.innerHTML = ""
+    this.dropdownTarget.appendChild(ul)
     this.dropdownTarget.classList.remove("hidden")
   }
 
