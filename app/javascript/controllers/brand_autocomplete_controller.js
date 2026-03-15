@@ -1,0 +1,156 @@
+import { Controller } from "@hotwired/stimulus"
+
+// Connects to data-controller="brand-autocomplete"
+// 銘柄名を入力すると、さけのわAPIマスタから候補を表示する
+// 候補選択時に蔵元を自動表示し、商品名フィールドにbrand_idを伝える
+export default class extends Controller {
+  static targets = [
+    "input",          // 銘柄名テキスト入力(オートコンプリート対象)
+    "hiddenBrandId",  // brand_id の hidden フィールド
+    "dropdown",       // 候補リストのドロップダウン
+    "breweryDisplay"  // 蔵元の自動表示エリア (readonly)
+  ]
+
+  static values = {
+    searchUrl: String,          // /api/brands/search
+    initialBrandId: Number,     // 編集時の初期brand_id
+    initialBrandLabel: String,  // 編集時の初期表示ラベル
+    initialBreweryName: String  // 編集時の初期蔵元名
+  }
+
+  connect() {
+    this.debounceTimer = null
+    // プルダウン外をクリックするとドロップダウンを閉じるためのリスナー
+    this.boundHandleOutsideClick = this.handleOutsideClick.bind(this)
+    document.addEventListener("click", this.boundHandleOutsideClick)
+
+    // 編集時: 初期値を復元
+    this.restoreInitialValues()
+  }
+
+  disconnect() {
+    document.removeEventListener("click", this.boundHandleOutsideClick)
+    clearTimeout(this.debounceTimer)
+  }
+
+  // 編集時に初期値を復元
+  restoreInitialValues() {
+    if (this.initialBrandIdValue && this.initialBrandIdValue > 0) {
+      this.inputTarget.value = this.initialBrandLabelValue
+      this.showBreweryDisplay(this.initialBreweryNameValue)
+    }
+  }
+
+  // 入力欄のキー入力ハンドラ (300msのdebounce(チャタリング防止))
+  onInput() {
+    clearTimeout(this.debounceTimer)
+    const query = this.inputTarget.value.trim()
+
+    // 入力が変わったらbrand_idをクリア(再選択を促す)
+    this.hiddenBrandIdTarget.value = ""
+    this.hideBreweryDisplay()
+
+    if (query.length < 1) {
+      this.closeDropdown()
+      return
+    }
+
+    // 300ms入力が止まったら検索
+    this.debounceTimer = setTimeout(() => {
+      this.searchBrands(query)
+    }, 300)
+  }
+
+  // APIへの検索リクエスト
+  async searchBrands(query) {
+    try {
+      const url = new URL(this.searchUrlValue, window.location.origin)
+      url.searchParams.set("q", query)
+
+      const response = await fetch(url, {
+        headers: { "Accept": "application/json" },
+        credentials: "same-origin"
+      })
+
+      if (!response.ok) return
+
+      const data = await response.json()
+      this.renderDropdown(data.brands)
+    } catch (error) {
+      console.error("銘柄検索エラー:", error)
+    }
+  }
+
+  // 候補リストの描画
+  renderDropdown(brands) {
+    const items = brands.map(brand => `
+      <li>
+        <button type="button"
+          class="w-full text-left px-4 py-2 hover:bg-base-200 cursor-pointer"
+          data-action="click->brand-autocomplete#selectBrand"
+          data-brand-id="${brand.id}"
+          data-brand-name="${brand.name}"
+          data-brand-label="${brand.label}"
+          data-brewery-name="${brand.brewery_name}（${brand.area_name}）">
+          ${brand.label}
+          </button>
+      </li>
+    `).join("")
+
+    this.dropdownTarget.innerHTML =
+      `<ul class="menu bg-base-100 border border-base-300 rounded-box shadow-lg w-full max-h-60 overflow-y-auto">${items}</ul>`
+    this.dropdownTarget.classList.remove("hidden")
+  }
+
+  // 銘柄候補を選択したとき
+  selectBrand(event) {
+    const button = event.currentTarget
+    const brandId = button.dataset.brandId
+    const brandLabel = button.dataset.brandLabel
+    const breweryName = button.dataset.breweryName
+
+    // hidden フィールドにbrand_idをセット
+    this.hiddenBrandIdTarget.value = brandId
+
+    // 入力欄にラベルを表示
+    this.inputTarget.value = brandLabel
+
+    // 蔵元を自動表示
+    this.showBreweryDisplay(breweryName)
+
+    this.closeDropdown()
+
+    // 商品名コントローラにbrand_idの変更を通知(CustomEvent)
+    this.element.dispatchEvent(new CustomEvent("brand-selected", {
+      bubbles: true,
+      detail: { brandId: parseInt(brandId) }
+    })) // TODO:product_name_autocomplete_controllerに伝搬できる?
+  }
+
+  // --- 蔵元表示の切り替え ---
+
+  // 蔵元の自動表示エリアを表示
+  showBreweryDisplay(text) {
+    this.breweryDisplayTarget.textContent = text
+    this.breweryDisplayTarget.classList.remove("hidden")
+  }
+
+  // 蔵元の自動表示エリアを非表示
+  hideBreweryDisplay() {
+    this.breweryDisplayTarget.textContent = ""
+    this.breweryDisplayTarget.classList.add("hidden")
+  }
+
+  // ---　ドロップダウン制御 ---
+  closeDropdown() {
+    this.dropdownTarget.classList.add("hidden")
+    this.dropdownTarget.innerHTML = ""
+  }
+
+  // コントローラ外クリックでドロップダウンを閉じる
+  handleOutsideClick(event) {
+    if (!this.element.contains(event.target)) {
+      this.closeDropdown()
+    }
+  }
+}
