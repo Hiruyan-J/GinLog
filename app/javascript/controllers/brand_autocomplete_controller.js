@@ -129,7 +129,7 @@ export default class extends Controller {
     this.element.dispatchEvent(new CustomEvent("brand-selected", {
       bubbles: true,
       detail: { brandId: parseInt(brandId) }
-    })) // TODO:product_name_autocomplete_controllerに伝搬できる?
+    }))
   }
 
   // --- 蔵元表示の切り替え ---

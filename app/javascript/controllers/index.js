@@ -10,5 +10,8 @@ application.register("brand-autocomplete", BrandAutocompleteController)
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
 
+import ProductNameAutocompleteController from "./product_name_autocomplete_controller"
+application.register("product-name-autocomplete", ProductNameAutocompleteController)
+
 import RatingController from "./rating_controller"
 application.register("rating", RatingController)
