@@ -30,7 +30,7 @@ class Sake < ApplicationRecord
   # @param brand_id [Integer] 銘柄ID
   # @param query [String] 検索文字列
   # @return [ActiveRecord::Relation<Sake>]
-  scope :search_by_product_name, ->(brand_id, query){
+  scope :search_by_product_name, ->(brand_id, query) {
     where(brand_id: brand_id)
       .where("product_name LIKE ?", "%#{sanitize_sql_like(query)}%")
   }
