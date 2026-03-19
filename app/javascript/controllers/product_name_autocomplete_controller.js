@@ -96,7 +96,7 @@ export default class extends Controller {
   // APIへの検索リクエスト
   async searchSakes(query) {
     try {
-      const url = new URL(this.searchUrlValue, windows.location.origin)
+      const url = new URL(this.searchUrlValue, window.location.origin)
       url.searchParams.set("brand_id", this.brandIdValue)
       if (query) {
         url.searchParams.set("q", query)
@@ -169,7 +169,7 @@ export default class extends Controller {
     this.hiddenSakeIdTarget.value = ""
     // 入力欄のテキストはそのまま保持(ユーザーが入力した商品名を利用)
 
-    this.closeDropdown
+    this.closeDropdown()
   }
 
   // --- ドロップダウン制御 ---
