@@ -10,5 +10,7 @@ ja:
         aroma_strength: 香りの濃淡
         taste_strength: 味の濃淡
         review: 感想
-        product_name: 日本酒名
+        product_name: 商品名
+        brand_id: 銘柄
+        sake_id: 商品
 
