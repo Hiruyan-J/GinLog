@@ -5,6 +5,8 @@ class SakeLogForm
   # フォームの属性
   # Sake attributes
   attribute :product_name, :string
+  attribute :brand_id, :integer
+  attribute :sake_id, :integer
   # SakeLog attributes
   attribute :rating, :integer
   attribute :aroma_strength, :float
@@ -18,6 +20,8 @@ class SakeLogForm
   # バリデーション
   # Sake attributesバリデーション
   validates :product_name, presence: true, length: { maximum: Sake::PRODUCT_NAME_MAX_LENGTH }
+  validates :brand_id, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
+  validates :sake_id, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   # SakeLog attributesバリデーション
   validates :rating, presence: true,
                       numericality: { only_integer: true,
@@ -44,7 +48,9 @@ class SakeLogForm
           aroma_strength: @sake_log.aroma_strength,
           taste_strength: @sake_log.taste_strength,
           review: @sake_log.review,
-          product_name: @sake_log.sake.product_name
+          product_name: @sake_log.sake.product_name,
+          brand_id: @sake_log.sake.brand_id,
+          sake_id: @sake_log.sake.id
         }.merge(attributes)
       end
       super(attributes)
@@ -55,8 +61,8 @@ class SakeLogForm
     return false if invalid?
 
     SakeLog.transaction do
-      # Sakeの検索または作成
-      sake = Sake.find_or_initialize_by(product_name: product_name.strip)
+      # sake_idがある場合は既存レコードを使用、なければ検索・作成
+      sake = find_or_initialize_sake
       sake.save!
 
       # SakeLogの作成または更新
@@ -90,7 +96,44 @@ class SakeLogForm
     SakeLog.model_name
   end
 
+  # 銘柄のラベル文字列(オートコンプリート入力欄の初期表示用)
+  # @return [string, nil] 「赤武 - 赤武酒造（岩手県）」形式のラベル
+  def brand_label
+    return nil if brand_id.blank?
+
+    brand = Brand.includes(brewery: :area).find_by(id: brand_id)
+    return nil unless brand
+
+    "#{brand.name} - #{brand.brewery.name}（#{brand.brewery.area.name}）"
+  end
+
+  # 蔵元名(蔵元表示エリアの初期表示用)
+  # @return [String, nil] 「赤武酒造（岩手県）」形式の蔵元名
+  def brewery_display_name
+    return nil if brand_id.blank?
+
+    brand = Brand.includes(brewery: :area).find_by(id: brand_id)
+    return nil unless brand
+
+    "#{brand.brewery.name}（#{brand.brewery.area.name}）"
+  end
+
   private
+
+  # Sakeの検索または初期化(brand_id, sake_idを考慮)
+  # @return [Sake] 既存または、新規のSakeオブジェクト
+  def find_or_initialize_sake
+    if sake_id.present?
+      # 既存のSakeレコードを使用(オートコンプリートで選択した場合)
+      Sake.find(sake_id)
+    else
+      # 新規のSakeレコードを検索または作成
+      Sake.find_or_initialize_by(
+        product_name: product_name.strip,
+        brand_id: brand_id.presence
+      )
+    end
+  end
 
   def sake_log_attributes
     {
