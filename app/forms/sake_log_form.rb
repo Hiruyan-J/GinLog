@@ -37,6 +37,9 @@ class SakeLogForm
   validates :review, length: { maximum: SakeLog::REVIEW_MAX_LENGTH }, allow_blank: true
 
   # コンストラクタ
+  # @param attributes [Hash] フォームの属性
+  # @param user [User] ログイン中のユーザー
+  # @param sake_log [SakeLog, nil] 編集時の既存SakeLog（新規作成時はnil）
   def initialize(attributes = {}, user:, sake_log: nil)
       @user = user
       @sake_log = sake_log
@@ -57,6 +60,7 @@ class SakeLogForm
   end
 
   # 保存処理
+  # @return [Boolean] 保存成功なら true
   def save
     return false if invalid?
 
@@ -144,6 +148,9 @@ class SakeLogForm
     }
   end
 
+  # モデルのバリデーションエラーをFormObjectに転記する
+  # @param record [ActiveRecord::Base] エラーが発生したレコード（SakeまたはSakeLog）
+  # @return [void]
   def copy_errors_from_record(record)
     record.errors.each do |error|
       # Sakeのエラーの場合、product_nameに割り当て
