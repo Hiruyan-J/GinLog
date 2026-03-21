@@ -72,6 +72,20 @@ export default class extends Controller {
     }
   }
 
+  // 入力欄クリック時に銘柄に紐づく全商品を表示
+  onClick() {
+    // brand_idが無い場合は何もしない
+    if (!this.brandIdValue || this.brandIdValue === 0) return
+
+    // ドロップダウンが既に表示中の場合は何もしない
+    if (!this.dropdownTarget.classList.contains("hidden")) return
+
+    const query = this.inputTarget.value.trim()
+    this.searchSakes(query)
+  }
+
+
+
   // 入力欄のキー入力ハンドラ（300msのdebounce）
   onInput() {
     clearTimeout(this.debounceTimer)
@@ -110,14 +124,16 @@ export default class extends Controller {
       if (!response.ok) return
 
       const data = await response.json()
-      this.renderDropdown(data.sakes)
+      this.renderDropdown(data.sakes, query)
     } catch (error) {
       console.error("商品名検索エラー:", error)
     }
   }
 
-  // 候補リストの描画（XSS対策: DOM APIで要素を構築）
-  renderDropdown(sakes) {
+  // 候補リストの描画
+  // @param sakes [Array] 商品名候補の配列
+  // @param query [String] 検索文字列（入力テキストがある場合のみ「新しい商品名として登録」を表示）
+  renderDropdown(sakes, query) {
     const ul = document.createElement("ul")
     ul.className = "menu bg-base-100 border border-base-300 rounded-box shadow-lg w-full max-h-60 overflow-y-auto"
 
@@ -135,14 +151,16 @@ export default class extends Controller {
     })
 
     // 「新しい商品名として登録」オプションを末尾に追加
-    const newLi = document.createElement("li")
-    const newButton = document.createElement("button")
-    newButton.type = "button"
-    newButton.className = "w-full text-left px-4 py-2 hover:bg-base-200 text-base-content/60 cursor-pointer"
-    newButton.dataset.action = "click->product-name-autocomplete#selectNewProduct"
-    newButton.textContent = "新しい商品名として登録"
-    newLi.appendChild(newButton)
-    ul.appendChild(newLi)
+    if (query) {
+      const newLi = document.createElement("li")
+      const newButton = document.createElement("button")
+      newButton.type = "button"
+      newButton.className = "w-full text-left px-4 py-2 hover:bg-base-200 text-base-content/60 cursor-pointer"
+      newButton.dataset.action = "click->product-name-autocomplete#selectNewProduct"
+      newButton.textContent = "新しい商品名として登録"
+      newLi.appendChild(newButton)
+      ul.appendChild(newLi)
+    }
 
     this.dropdownTarget.innerHTML = ""
     this.dropdownTarget.appendChild(ul)

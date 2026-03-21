@@ -69,7 +69,7 @@
             disabled: sake_log.brand_id.blank? && !sake_log.persisted?,
             data: {
               product_name_autocomplete_target: "input",
-              action: "input->product-name-autocomplete#onInput"
+              action: "input->product-name-autocomplete#onInput click->product-name-autocomplete#onClick"
             } %>
 
       <%# 候補リストのドロップダウン %>
