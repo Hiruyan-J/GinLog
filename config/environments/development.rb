@@ -81,4 +81,7 @@ Rails.application.configure do
 
   # better_errorsの設定
   BetterErrors::Middleware.allow_ip! "0.0.0.0/0"
+
+  # ngrok経由のアクセスを許可（スマホ実機確認用）
+  config.hosts << /.*\.ngrok-free\.(app|dev)/
 end
