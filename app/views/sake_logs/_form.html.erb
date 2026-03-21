@@ -38,10 +38,10 @@
       <%# 蔵元の自動表示エリア（銘柄選択時に表示） %>
       <div class="mt-4">
         <label class="font-semibold required whitespace-nowrap">蔵元</label>
-        <%# TODO:初期に表示されない %>
-        <p class="flex hidden w-full items-center input input-bordered bg-base-200 text-base-content/70"
-           data-brand-autocomplete-target="breweryDisplay">
-        </p>
+        <input type="text"
+               class="w-full input input-bordered bg-base-200 text-base-content/70"
+               disabled
+               data-brand-autocomplete-target="breweryDisplay">
       </div>
     </div>
 

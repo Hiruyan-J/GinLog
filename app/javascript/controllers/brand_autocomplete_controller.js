@@ -134,16 +134,14 @@ export default class extends Controller {
 
   // --- 蔵元表示の切り替え ---
 
-  // 蔵元の自動表示エリアを表示
+  // 蔵元の読み取り専用フィールドに値をセットする
   showBreweryDisplay(text) {
-    this.breweryDisplayTarget.textContent = text
-    this.breweryDisplayTarget.classList.remove("hidden")
+    this.breweryDisplayTarget.value = text
   }
 
-  // 蔵元の自動表示エリアを非表示
+  // 蔵元の読み取り専用フィールドをクリアする
   hideBreweryDisplay() {
-    this.breweryDisplayTarget.textContent = ""
-    this.breweryDisplayTarget.classList.add("hidden")
+    this.breweryDisplayTarget.value = ""
   }
 
   // ---　ドロップダウン制御 ---
