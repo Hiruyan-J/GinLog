@@ -11,8 +11,8 @@
          data-brand-autocomplete-initial-brand-name-value="<%= sake_log.brand_display_name %>"
          data-brand-autocomplete-initial-brewery-name-value="<%= sake_log.brewery_display_name %>">
     
-      <div class="flex items-baseline gap-2">
-        <%= f.label :brand_id, class: "font-semibold required whitespace-nowrap" %>
+      <div class="flex gap-2 items-baseline">
+        <%= f.label :brand_id, class: "font-semibold whitespace-nowrap required" %>
         <span class="text-xs text-base-content/50">（蔵元のブランド名。例：獺祭、久保田、新政）</span>
       </div>
 
@@ -37,7 +37,7 @@
 
       <%# 蔵元の自動表示エリア（銘柄選択時に表示） %>
       <div class="mt-4">
-        <label class="font-semibold required whitespace-nowrap">蔵元</label>
+        <label class="font-semibold whitespace-nowrap required">蔵元</label>
         <input type="text"
                class="w-full input input-bordered bg-base-200 text-base-content/70"
                disabled
@@ -53,8 +53,8 @@
          data-product-name-autocomplete-initial-sake-id-value="<%= sake_log.sake_id %>"
          data-product-name-autocomplete-initial-product-name-value="<%= sake_log.product_name %>">
 
-      <div class="flex items-baseline gap-2">
-        <%= f.label :product_name, class: "font-semibold required whitespace-nowrap" %>
+      <div class="flex gap-2 items-baseline">
+        <%= f.label :product_name, class: "font-semibold whitespace-nowrap required" %>
         <span class="text-xs text-base-content/50">（銘柄内の個別の名前。例：磨き二割三分、千寿、No.6 R-type）</span>
       </div>
 
@@ -82,7 +82,7 @@
 
     <%# 好み度 %>
     <div class="w-full md:w-8/12">
-      <%= f.label :rating, class: "font-semibold required whitespace-nowrap" %>
+      <%= f.label :rating, class: "font-semibold whitespace-nowrap required" %>
       <div class="flex justify-between items-center w-full">
         <%# 画面左 好み度入力 %>
         <div class="flex gap-2 items-center rating rating-xl"
@@ -112,7 +112,7 @@
 
     <%# 香りの濃淡 %>
     <div class="w-full md:w-8/12">
-      <%= f.label :aroma_strength, class: "font-semibold required whitespace-nowrap" %>
+      <%= f.label :aroma_strength, class: "font-semibold whitespace-nowrap required" %>
       <div class="w-full">
         <div class="px-5">
           <%= f.range_field :aroma_strength,
@@ -134,7 +134,7 @@
 
     <%# 味の濃淡 %>
     <div class="w-full md:w-8/12">
-      <%= f.label :taste_strength, class: "font-semibold required whitespace-nowrap" %>
+      <%= f.label :taste_strength, class: "font-semibold whitespace-nowrap required" %>
       <div class="w-full">
         <div class="px-5">
           <%= f.range_field :taste_strength,
