@@ -135,7 +135,7 @@ export default class extends Controller {
   // @param query [String] 検索文字列（入力テキストがある場合のみ「新しい商品名として登録」を表示）
   renderDropdown(sakes, query) {
     const ul = document.createElement("ul")
-    ul.className = "menu bg-base-100 border border-base-300 rounded-box shadow-lg w-full max-h-60 overflow-y-auto"
+    ul.className = "flex flex-col bg-base-100 border border-base-300 rounded-box shadow-lg w-full max-h-60 overflow-y-auto list-none p-2"
 
     sakes.forEach(sake => {
       const li = document.createElement("li")

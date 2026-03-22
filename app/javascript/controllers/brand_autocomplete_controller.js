@@ -85,7 +85,7 @@ export default class extends Controller {
   // 候補リストの描画（XSS対策: DOM APIで要素を構築）
   renderDropdown(brands) {
     const ul = document.createElement("ul")
-    ul.className = "menu bg-base-100 border border-base-300 rounded-box shadow-lg w-full max-h-60 overflow-y-auto"
+    ul.className = "flex flex-col bg-base-100 border border-base-300 rounded-box shadow-lg w-full max-h-60 overflow-y-auto list-none p-2"
 
     brands.forEach(brand => {
       const li = document.createElement("li")
