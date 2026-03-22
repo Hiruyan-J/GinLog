@@ -62,6 +62,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_08_051337) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "brand_id"
+    t.index ["brand_id", "product_name"], name: "index_sakes_on_brand_id_and_product_name", unique: true
     t.index ["brand_id"], name: "index_sakes_on_brand_id"
   end
 
