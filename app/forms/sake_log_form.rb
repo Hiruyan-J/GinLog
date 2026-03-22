@@ -96,6 +96,9 @@ class SakeLogForm
       # モデルのエラーをFormObjectに転記
       copy_errors_from_record(e.record)
       false
+    rescue ActiveRecord::RecordNotFound
+      errors.add(:base, "指定された日本酒が見つかりませんでした")
+      false
     end
   end
 
