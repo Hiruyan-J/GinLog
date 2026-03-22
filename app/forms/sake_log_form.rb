@@ -138,7 +138,7 @@ class SakeLogForm
   def find_or_initialize_sake
     if sake_id.present?
       # 既存のSakeレコードを使用(オートコンプリートで選択した場合)
-      Sake.find_by!(id: sake_id, brand_id: brand_id)
+      Sake.find_by!(id: sake_id, brand_id: brand_id.presence)
     else
       # 新規のSakeレコードを検索または作成
       Sake.find_or_initialize_by(
