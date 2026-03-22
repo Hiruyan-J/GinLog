@@ -149,7 +149,7 @@ export default class extends Controller {
     // 商品名コントローラにbrand_idの変更を通知(CustomEvent)
     this.element.dispatchEvent(new CustomEvent("brand-selected", {
       bubbles: true,
-      detail: { brandId: parseInt(brandId) }
+      detail: { brandId: parseInt(brandId, 10) }
     }))
   }
 
