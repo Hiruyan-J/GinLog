@@ -199,7 +199,7 @@ export default class extends Controller {
 
   // コントローラ外クリックでドロップダウンを閉じる
   handleOutsideClick(event) {
-    if (!this.element.contains(event.target)) {
+    if (!this.dropdownTarget.contains(event.target) && !this.inputTarget.contains(event.target)) {
       this.closeDropdown()
     }
   }
