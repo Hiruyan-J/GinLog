@@ -51,6 +51,6 @@ class SakeLogsController < ApplicationController
   end
 
   def sake_log_form_params
-    params.require(:sake_log).permit(:rating, :aroma_strength, :taste_strength, :review, :product_name)
+    params.require(:sake_log).permit(:rating, :aroma_strength, :taste_strength, :review, :product_name, :brand_id, :sake_id)
   end
 end
