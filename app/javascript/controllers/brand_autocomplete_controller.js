@@ -58,9 +58,20 @@ export default class extends Controller {
     clearTimeout(this.debounceTimer)
     const query = this.inputTarget.value.trim()
 
+    // 銘柄が選択済みだった場合、商品名側もリセットする
+    const hadSelectedBrand = this.hiddenBrandIdTarget.value !== ""
+
     // 入力が変わったらbrand_idをクリア(再選択を促す)
     this.hiddenBrandIdTarget.value = ""
     this.hideBreweryDisplay()
+
+    // 商品名コントローラに銘柄リセットを通知
+    if (hadSelectedBrand) {
+      this.element.dispatchEvent(new CustomEvent("brand-selected", {
+        bubbles: true,
+        detail: { brandId: null }
+      }))
+    }
 
     if (query.length < 1) {
       this.closeDropdown()
