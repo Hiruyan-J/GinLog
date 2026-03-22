@@ -21,6 +21,7 @@ class Sake < ApplicationRecord
   PRODUCT_NAME_MAX_LENGTH = 255
 
   validates :product_name, presence: true, length: { maximum: PRODUCT_NAME_MAX_LENGTH }
+  validates :product_name, uniqueness: { scope: :brand_id }
 
   belongs_to :brand, optional: true
 

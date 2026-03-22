@@ -67,7 +67,16 @@ class SakeLogForm
     SakeLog.transaction do
       # sake_idがある場合は既存レコードを使用、なければ検索・作成
       sake = find_or_initialize_sake
-      sake.save!
+
+      # 複合ユニークインデックス違反時は既存レコードを再検索
+      begin
+        sake.save!
+      rescue ActiveRecord::RecordNotUnique
+        sake = Sake.find_by!(
+          product_name: product_name.strip,
+          brand_id: brand_id.presence
+        )
+      end
 
       # SakeLogの作成または更新
       if @sake_log
