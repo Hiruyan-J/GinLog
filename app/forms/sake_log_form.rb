@@ -100,15 +100,12 @@ class SakeLogForm
     SakeLog.model_name
   end
 
-  # 銘柄のラベル文字列(オートコンプリート入力欄の初期表示用)
-  # @return [string, nil] 「赤武 - 赤武酒造（岩手県）」形式のラベル
-  def brand_label
+  # 銘柄名(オートコンプリート入力欄の初期表示用)
+  # @return [string, nil] 銘柄名（例: 「赤武」）
+  def brand_display_name
     return nil if brand_id.blank?
 
-    brand = Brand.includes(brewery: :area).find_by(id: brand_id)
-    return nil unless brand
-
-    "#{brand.name} - #{brand.brewery.name}（#{brand.brewery.area.name}）"
+    Brand.find_by(id: brand_id)&.name
   end
 
   # 蔵元名(蔵元表示エリアの初期表示用)

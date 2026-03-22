@@ -15,7 +15,7 @@ export default class extends Controller {
   static values = {
     searchUrl: String,          // /api/brands/search
     initialBrandId: Number,     // 編集時の初期brand_id
-    initialBrandLabel: String,  // 編集時の初期表示ラベル
+    initialBrandName: String,  // 編集時の初期表示銘柄
     initialBreweryName: String  // 編集時の初期蔵元名
   }
 
@@ -37,12 +37,12 @@ export default class extends Controller {
   // 編集時に初期値を復元
   restoreInitialValues() {
     if (this.initialBrandIdValue && this.initialBrandIdValue > 0) {
-      this.inputTarget.value = this.initialBrandLabelValue
+      this.inputTarget.value = this.initialBrandNameValue
       this.showBreweryDisplay(this.initialBreweryNameValue)
     }
   }
 
-  // 入力欄うkリック時に入力済みテキストで検索
+  // 入力欄クリック時に入力済みテキストで検索
   onClick() {
     // ドロップダウンが既に表示中なら何もしない
     if (!this.dropdownTarget.classList.contains("hidden")) return
@@ -122,14 +122,13 @@ export default class extends Controller {
   selectBrand(event) {
     const button = event.currentTarget
     const brandId = button.dataset.brandId
-    const brandLabel = button.dataset.brandLabel
     const breweryName = button.dataset.breweryName
 
     // hidden フィールドにbrand_idをセット
     this.hiddenBrandIdTarget.value = brandId
 
-    // 入力欄にラベルを表示
-    this.inputTarget.value = brandLabel
+    // 入力欄に銘柄を表示
+    this.inputTarget.value = button.dataset.brandName
 
     // 蔵元を自動表示
     this.showBreweryDisplay(breweryName)
