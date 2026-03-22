@@ -42,6 +42,17 @@ export default class extends Controller {
     }
   }
 
+  // 入力欄うkリック時に入力済みテキストで検索
+  onClick() {
+    // ドロップダウンが既に表示中なら何もしない
+    if (!this.dropdownTarget.classList.contains("hidden")) return
+
+    const query = this.inputTarget.value.trim()
+    if (query.length < 1) return
+
+    this.searchBrands(query)
+  }
+
   // 入力欄のキー入力ハンドラ (300msのdebounce(チャタリング防止))
   onInput() {
     clearTimeout(this.debounceTimer)
