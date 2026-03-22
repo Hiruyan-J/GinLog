@@ -32,6 +32,8 @@ class Sake < ApplicationRecord
   # @param query [String] 検索文字列
   # @return [ActiveRecord::Relation<Sake>]
   scope :search_by_product_name, ->(brand_id, query) {
+    next none if query.blank?
+
     where(brand_id: brand_id)
       .where("product_name LIKE ?", "%#{sanitize_sql_like(query)}%")
   }

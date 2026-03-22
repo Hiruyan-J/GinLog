@@ -32,6 +32,8 @@ class Brand < ApplicationRecord
   # @param query [String] 検索文字列
   # @return [ActiveRecord::Relation<Brand>]
   scope :search_by_name, ->(query) {
+    next none if query.blank?
+
     active
       .includes(brewery: :area)
       .where("brands.name LIKE ?", "%#{sanitize_sql_like(query)}%")
