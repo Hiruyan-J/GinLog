@@ -37,6 +37,7 @@ export default class extends Controller {
   // 編集時に初期値を復元
   restoreInitialValues() {
     if (this.initialBrandIdValue && this.initialBrandIdValue > 0) {
+      this.hiddenBrandIdTarget.value = this.initialBrandIdValue
       this.inputTarget.value = this.initialBrandNameValue
       this.showBreweryDisplay(this.initialBreweryNameValue)
     }
