@@ -167,8 +167,9 @@
 
     <%# さけのわデータ帰属表示 %>
     <p class="text-xs text-base-content/50">
-      <%= link_to "さけのわデータ", "https://sakenowa.com",
-          target: "_blank", rel: "noopener noreferrer", class: "link" %>を利用しています
+      <%= t('sake_logs.sakenowa_attribution_html',
+            link: link_to("さけのわデータ", "https://sakenowa.com",
+                  target: "_blank", rel: "noopener noreferrer", class: "link")) %>
     </p>
   </section>
 <% end %>

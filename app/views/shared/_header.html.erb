@@ -31,9 +31,9 @@
       </button>
       <ul tabindex="-1" class="z-10 p-2 mt-3 w-52 shadow menu menu-md dropdown-content bg-base-300 text-base-content rounded-box md:menu-lg">
         <li><%= link_to "home", root_path %></li>
-        <li class="mt-2 menu-title">データについて</li>
+        <li class="mt-2 menu-title"><%= t('header.data_menu_title') %></li>
         <li>
-          <%= link_to "さけのわデータを利用しています", "https://sakenowa.com",
+          <%= link_to t('header.sakenowa_attribution'), "https://sakenowa.com",
               target: "_blank", rel: "noopener noreferrer", class: "text-xs" %>
         </li>
       </ul>
