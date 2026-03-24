@@ -22,6 +22,8 @@ ja:
   header:
     login: ログイン
     logout: ログアウト
+    data_menu_title: データについて
+    sakenowa_attribution: さけのわデータを利用しています
   footer:
     home: ホーム
     search: 検索
@@ -34,6 +36,7 @@ ja:
       title: 日本酒記録編集
     index:
       title: マイログ
+    sakenowa_attribution_html: "%{link}を利用しています"
   timeline:
     index:
       title: タイムライン

@@ -164,5 +164,12 @@
       <%= link_to "一覧に戻る", sake_logs_path, class: "btn btn-outline btn-primary md:btn-wide" %>
       <%= f.submit nil, class: "btn btn-primary md:btn-wide" %>
     </div>
+
+    <%# さけのわデータ帰属表示 %>
+    <p class="text-xs text-base-content/50">
+      <%= t('sake_logs.sakenowa_attribution_html',
+            link: link_to("さけのわデータ", "https://sakenowa.com",
+                  target: "_blank", rel: "noopener noreferrer", class: "link")) %>
+    </p>
   </section>
 <% end %>
