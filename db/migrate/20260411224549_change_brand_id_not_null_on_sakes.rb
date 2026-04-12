@@ -1,7 +1,11 @@
 class ChangeBrandIdNotNullOnSakes < ActiveRecord::Migration[7.2]
   def up
     # 既存データの確認: brand_id が NULL の Sake レコードがあればエラーを発生
-    null_count = Sake.where(brand_id: nil).count
+    # ActiveRecordモデルへの依存を避けるため、生SQLで直接sakesテーブルを参照する
+    # (将来 Sakeモデルに default_scope等が追加されてもマイグレーションが影響を受けないようにするため)
+    null_count = connection.select_value(
+      "SELECT COUNT(*) FROM sakes WHERE brand_id IS NULL"
+    ).to_i
     if null_count > 0
       raise "brand_id が NULL の Sake レコードが #{null_count} 件あります。先にデータ移行をしてください。"
     end
