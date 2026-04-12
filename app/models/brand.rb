@@ -23,6 +23,7 @@ class Brand < ApplicationRecord
   NAME_MAX_LENGTH = 255
 
   validates :name, presence: true, length: { maximum: NAME_MAX_LENGTH }
+  validates :sakenowa_id, uniqueness: true, allow_nil: true
 
   scope :active, -> { where(is_deleted: false) }
 
