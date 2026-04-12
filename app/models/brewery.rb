@@ -8,18 +8,17 @@
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  area_id     :bigint           not null
-#  sakenowa_id :integer          not null
+#  sakenowa_id :integer
 #
 # Indexes
 #
 #  index_breweries_on_area_id      (area_id)
-#  index_breweries_on_sakenowa_id  (sakenowa_id) UNIQUE
+#  index_breweries_on_sakenowa_id  (sakenowa_id) UNIQUE WHERE (sakenowa_id IS NOT NULL)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (area_id => areas.id)
 #
-# さけのわAPIから取得する蔵元マスターデータ
 class Brewery < ApplicationRecord
   NAME_MAX_LENGTH = 255
 

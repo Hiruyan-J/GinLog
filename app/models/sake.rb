@@ -6,7 +6,7 @@
 #  product_name :string           not null
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
-#  brand_id     :bigint
+#  brand_id     :bigint           not null
 #
 # Indexes
 #
