@@ -164,8 +164,10 @@ class SakeLogForm
     manual_brand_mode? && brewery_id.blank?
   end
 
+  # 都道府県の選択肢
+  # @return [Array<Array<String, Integer>>] [["北海道", 1], ["青森県", 2], ...]
   def area_options
-    # TODO:実装
+    Area.order(:id).pluck(:name, :id)
   end
 
   private
