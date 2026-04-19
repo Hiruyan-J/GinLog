@@ -12,6 +12,12 @@ class SakeLogForm
   attribute :aroma_strength, :float
   attribute :taste_strength, :float
   attribute :review, :string
+  # 銘柄手入力モード用の属性
+  attribute :manual_brand_name, :string
+  attribute :manual_brewery_name, :string
+  attribute :brewery_id, :integer           # オートコンプリートで選択した蔵元ID
+  attribute :area_id, :integer              # 都道府県ID (蔵元手入力時)
+  attribute :manual_brand_mode, :boolean
 
   # 関連オブジェクト (ゲッターのみ)
   attr_reader :sake_log, :user
@@ -35,6 +41,11 @@ class SakeLogForm
                               numericality: { greater_than_or_equal_to: SakeLog::AROMA_STRENGTH_MIN,
                                               less_than_or_equal_to: SakeLog::AROMA_STRENGTH_MAX }
   validates :review, length: { maximum: SakeLog::REVIEW_MAX_LENGTH }, allow_blank: true
+  # 銘柄手入力モード時のバリデーション
+  validates :manual_brand_name, presence: true, length: { maximum: Brand::NAME_MAX_LENGTH }, if: :manual_brand_mode?
+  validates :brewery_id, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
+  validates :area_id, numericality: { only_integer: true, greater_than: 0 }, if: :manual_brewery_mode?
+  validates :manual_brewery_name, presence: true, length: { maximum: Brewery::NAME_MAX_LENGTH }, if: :manual_brewery_mode?
 
   # コンストラクタ
   # @param attributes [Hash] フォームの属性
@@ -65,6 +76,9 @@ class SakeLogForm
     return false if invalid?
 
     SakeLog.transaction do
+      # 銘柄手入力モード時は Brand/Brewery を先に作成
+      resolve_brand_id! if manual_brand_mode?
+
       # sake_idがある場合は既存レコードを使用、なければ検索・作成
       sake = find_or_initialize_sake
 
@@ -113,25 +127,82 @@ class SakeLogForm
   end
 
   # 銘柄名(オートコンプリート入力欄の初期表示用)
-  # @return [string, nil] 銘柄名（例: 「赤武」）
+  # @return [String, nil] 銘柄名（例: 「赤武」）
   def brand_display_name
     return nil if brand_id.blank?
 
     Brand.find_by(id: brand_id)&.name
   end
 
-  # 蔵元名(蔵元表示エリアの初期表示用)
-  # @return [String, nil] 「赤武酒造（岩手県）」形式の蔵元名
+  # 蔵元名
+  # @return [String, nil] 蔵元名（例: 「赤武酒造」）
   def brewery_display_name
     return nil if brand_id.blank?
 
     brand = Brand.includes(brewery: :area).find_by(id: brand_id)
     return nil unless brand
 
-    "#{brand.brewery.name}（#{brand.brewery.area.name}）"
+    brand.brewery.name
+  end
+
+  # 都道府県名
+  # @return [String, nil] 都道府県名（例: 「岩手県」）
+  def area_display_name
+    return nil if brand_id.blank?
+
+    brand = Brand.includes(brewery: :area).find_by(id: brand_id)
+    return nil unless brand
+
+    brand.brewery.area.name
+  end
+
+  def manual_brand_mode?
+    manual_brand_mode == true
+  end
+
+  def manual_brewery_mode?
+    manual_brand_mode? && brewery_id.blank?
+  end
+
+  def area_options
+    # TODO:実装
   end
 
   private
+
+  # 銘柄手入力モード時に Brand(と必要なら Brewery)を作成し、brand_id をセットする
+  # @return [void]
+  def resolve_brand_id!
+    brewery = find_or_create_brewery!
+    brand = find_or_create_brand!(brewery)
+    self.brand_id = brand.id
+  end
+
+  # 蔵元の検索または作成
+  # brewery_id があれば既存 Brewery を使用
+  # なければ名前+エリアで検索、なければ新規作成。
+  # @return [Brewery] 既存または新規の Brewery レコード
+  def find_or_create_brewery!
+    if brewery_id.present?
+      Brewery.find(brewery_id)
+    else
+      Brewery.find_or_create_by!(
+        name: manual_brewery_name.strip,
+        area_id: area_id
+      )
+    end
+  end
+
+  # 銘柄の検索または作成
+  # 同名+同蔵元の Brand が既にあれば再利用、なければ新規作成
+  # @param brewery [Brewery] 紐づける蔵元
+  # @return [Brand] 既存または新規の Brand レコード
+  def find_or_create_brand!(brewery)
+    Brand.find_or_create_by!(
+      name: manual_brand_name.strip,
+      brewery_id: brewery.id
+    )
+  end
 
   # Sakeの検索または初期化(brand_id, sake_idを考慮)
   # @return [Sake] 既存または、新規のSakeオブジェクト
