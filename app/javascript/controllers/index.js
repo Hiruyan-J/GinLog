@@ -7,6 +7,9 @@ import { application } from "./application"
 import BrandAutocompleteController from "./brand_autocomplete_controller"
 application.register("brand-autocomplete", BrandAutocompleteController)
 
+import BreweryAutocompleteController from "./brewery_autocomplete_controller"
+application.register("brewery-autocomplete", BreweryAutocompleteController)
+
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
 
