@@ -17,7 +17,6 @@ class SakeLogForm
   attribute :manual_brewery_name, :string
   attribute :brewery_id, :integer           # オートコンプリートで選択した蔵元ID
   attribute :area_id, :integer              # 都道府県ID (蔵元手入力時)
-  attribute :manual_brand_mode, :boolean
 
   # 関連オブジェクト (ゲッターのみ)
   attr_reader :sake_log, :user
@@ -126,42 +125,61 @@ class SakeLogForm
     SakeLog.model_name
   end
 
-  # 銘柄名(オートコンプリート入力欄の初期表示用)
+  # 銘柄名（通常モード: Brand.name、手入力モード: manual_brand_name）
   # @return [String, nil] 銘柄名（例: 「赤武」）
   def brand_display_name
-    return nil if brand_id.blank?
+    return Brand.find_by(id: brand_id)&.name if brand_id.present?
 
-    Brand.find_by(id: brand_id)&.name
+    manual_brand_name
   end
 
-  # 蔵元名
+  # 蔵元名（通常モード: Brewery.name、蔵元選択時: Brewery.name、蔵元手入力時: manual_brewery_name）
   # @return [String, nil] 蔵元名（例: 「赤武酒造」）
   def brewery_display_name
-    return nil if brand_id.blank?
+    if brand_id.present?
+      brand = Brand.includes(:brewery).find_by(id: brand_id)
+      return brand&.brewery&.name
+    end
 
-    brand = Brand.includes(brewery: :area).find_by(id: brand_id)
-    return nil unless brand
+    if brewery_id.present?
+      return Brewery.find_by(id: brewery_id)&.name
+    end
 
-    brand.brewery.name
+    manual_brewery_name
   end
 
   # 都道府県名
+  #（通常モード: Area.name、手入力モード: 選択した Area.name）
   # @return [String, nil] 都道府県名（例: 「岩手県」）
   def area_display_name
-    return nil if brand_id.blank?
+    if brand_id.present?
+      brand = Brand.includes(brewery: :area).find_by(id: brand_id)
+      return brand&.brewery&.area&.name
+    end
 
-    brand = Brand.includes(brewery: :area).find_by(id: brand_id)
-    return nil unless brand
+    if brewery_id.present?
+      brewery = Brewery.includes(:area).find_by(id: brewery_id)
+      return brewery&.area&.name
+    end
 
-    brand.brewery.area.name
+    return Area.find_by(id: area_id)&.name if area_id.present?
+
+    nil
   end
 
   def manual_brand_mode?
-    manual_brand_mode == true
+    brand_id.blank?
   end
 
   def manual_brewery_mode?
     manual_brand_mode? && brewery_id.blank?
+  end
+
+  # 銘柄が確定済みか(商品名入力欄の活性判定に使用)
+  # 通常モードでbrand_id が present、または手入力モードで manual_brand_name が入力済み⇒true
+  # @return [Boolean]
+  def brand_committed?
+    brand_id.present? || manual_brand_name.present?
   end
 
   # 都道府県の選択肢

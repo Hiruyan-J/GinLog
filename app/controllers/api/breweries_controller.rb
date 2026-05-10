@@ -19,6 +19,7 @@ class Api::BreweriesController < ApplicationController
         {
           id: brewery.id,
           name: brewery.name,
+          area_id: brewery.area.id,
           area_name: brewery.area.name,
           # 重複蔵元を区別するためのラベル（例: 「朝日酒造（新潟県）」）
           label: "#{brewery.name}（#{brewery.area.name}）"

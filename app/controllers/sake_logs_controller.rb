@@ -54,7 +54,7 @@ class SakeLogsController < ApplicationController
     params.require(:sake_log).permit(
       :rating, :aroma_strength, :taste_strength, :review,
       :product_name, :brand_id, :sake_id,
-      :manual_brand_name, :manual_brewery_name, :brewery_id, :area_id, :manual_brand_mode
+      :manual_brand_name, :manual_brewery_name, :brewery_id, :area_id
     )
   end
 end

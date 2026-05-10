@@ -4,6 +4,9 @@
 
 import { application } from "./application"
 
+import AreaDisplayController from "./area_display_controller"
+application.register("area-display", AreaDisplayController)
+
 import BrandAutocompleteController from "./brand_autocomplete_controller"
 application.register("brand-autocomplete", BrandAutocompleteController)
 
