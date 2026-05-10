@@ -1,6 +1,5 @@
 # 蔵元オートコンプリート検索用APIコントローラ
 class Api::BreweriesController < ApplicationController
-
   # GET /api/breweries/search?q=朝日
   # 蔵元名で部分一致検索し、都道府県情報を含むJSONを返す
   # @return [void] JSON形式で蔵元候補を返す

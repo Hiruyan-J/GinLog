@@ -149,7 +149,7 @@ class SakeLogForm
   end
 
   # 都道府県名
-  #（通常モード: Area.name、手入力モード: 選択した Area.name）
+  # （通常モード: Area.name、手入力モード: 選択した Area.name）
   # @return [String, nil] 都道府県名（例: 「岩手県」）
   def area_display_name
     if brand_id.present?

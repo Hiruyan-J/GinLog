@@ -54,7 +54,7 @@ export default class extends Controller {
     if (this.initialBrandIdValue && this.initialBrandIdValue > 0) {
       // 銘柄選択済み
       this.inputTarget.value = this.initialBreweryNameValue
-      this.hiddenBreweryIdTarget.value = this.initialBreweryIdValue || "" // id=0(無効な値)なら""を設定
+      this.hiddenBreweryIdTarget.value = this.initialBreweryIdValue || "" // brewery_id=0(無効な値)なら""を設定
       this.disableInput()
     } else if (this.initialBreweryIdValue && this.initialBreweryIdValue > 0) {
       // 銘柄手入力中 + 蔵元選択済み
