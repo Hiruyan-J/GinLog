@@ -182,6 +182,14 @@ class SakeLogForm
     brand_id.present? || manual_brand_name.present?
   end
 
+  # 蔵元手入力モードかつユーザーが既に入力を開始しているか
+  # 都道府県selectの初期表示判定に使用
+  # 新規フォーム(全て空)ではfalseを返し、selectが表示されないようにする
+  # @return [Boolean]
+  def manual_brewery_input_started?
+    manual_brewery_mode? && manual_brand_name.present?
+  end
+
   # 都道府県の選択肢
   # @return [Array<Array<String, Integer>>] [["北海道", 1], ["青森県", 2], ...]
   def area_options

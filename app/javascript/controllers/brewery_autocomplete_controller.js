@@ -81,10 +81,8 @@ export default class extends Controller {
     this.closeDropdown()
   }
 
-  // 銘柄手入力時：蔵元をクリアして編集可能に
+  // 銘柄手入力時：蔵元を編集可能にする
   onBrandNew() {
-    this.inputTarget.value = ""
-    this.hiddenBreweryIdTarget.value = ""
     this.enableInput()
     this.closeDropdown()
   }

@@ -63,8 +63,7 @@ export default class extends Controller {
     const { brandId } = event.detail
     this.brandIdValue = brandId || 0
 
-    // 銘柄が変わったら商品名リセット
-    this.inputTarget.value = ""
+    // 銘柄が変わったら商品IDリセット
     this.hiddenSakeIdTarget.value = ""
     this.closeDropdown()
 
@@ -76,21 +75,18 @@ export default class extends Controller {
   onBrandNew() {
     this.brandIdValue = 0
 
-    // 商品名リセット
-    this.inputTarget.value = ""
+    // 商品名IDリセット
     this.hiddenSakeIdTarget.value = ""
     this.closeDropdown()
 
     // 商品名入力活性化
     this.inputTarget.disabled = false
-    this.inputTarget.focus()
   }
 
   // 銘柄クリア → 商品名入力欄を非活性化
   onBrandCleared() {
     this.brandIdValue = 0
 
-    this.inputTarget.value = ""
     this.hiddenSakeIdTarget.value = ""
     this.closeDropdown()
 

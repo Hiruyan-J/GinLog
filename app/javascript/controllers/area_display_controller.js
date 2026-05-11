@@ -72,8 +72,8 @@ export default class extends Controller {
   }
 
   onBrandNew() {
-    // 銘柄手入力モードに入った直後。蔵元はまだ未確定なので、都道府県も input を空で保持
-    this.showInput("")
+    // 銘柄を選択済みから切り替わる場合は brand:cleared が先に発火してリセット済み
+    // 手入力モードで銘柄名を修正した場合は都道府県の表示状態を保持する
   }
 
   onBrandCleared() {
