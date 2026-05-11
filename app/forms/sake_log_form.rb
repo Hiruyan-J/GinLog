@@ -34,8 +34,8 @@ class SakeLogForm
                                       less_than_or_equal_to: SakeLog::RATING_MAX,
                                       allow_nil: true } # nilはpresenceで弾き、numericalityはnil以外のときのみチェック
   validates :taste_strength, presence: true,
-                      numericality: { greater_than_or_equal_to: SakeLog::TASTE_STRENGTH_MIN,
-                                      less_than_or_equal_to: SakeLog::TASTE_STRENGTH_MAX }
+                              numericality: { greater_than_or_equal_to: SakeLog::TASTE_STRENGTH_MIN,
+                                              less_than_or_equal_to: SakeLog::TASTE_STRENGTH_MAX }
   validates :aroma_strength, presence: true,
                               numericality: { greater_than_or_equal_to: SakeLog::AROMA_STRENGTH_MIN,
                                               less_than_or_equal_to: SakeLog::AROMA_STRENGTH_MAX }
@@ -43,7 +43,9 @@ class SakeLogForm
   # 銘柄手入力モード時のバリデーション
   validates :manual_brand_name, presence: true, length: { maximum: Brand::NAME_MAX_LENGTH }, if: :manual_brand_mode?
   validates :brewery_id, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
-  validates :area_id, numericality: { only_integer: true, greater_than: 0 }, if: :manual_brewery_mode?
+  validates :area_id, presence: { message: "を選択してください" },
+                      numericality: { only_integer: true, greater_than: 0, allow_nil: true },
+                      if: :manual_brewery_mode?
   validates :manual_brewery_name, presence: true, length: { maximum: Brewery::NAME_MAX_LENGTH }, if: :manual_brewery_mode?
 
   # コンストラクタ
