@@ -19,7 +19,8 @@ export default class extends Controller {
     initialBrandId: Number,       // 編集時の初期 brand_id
     initialBreweryId: Number,     // 編集時の初期 brewery_id
     initialAreaId: Number,        // 編集時の初期 area_id（蔵元手入力時）
-    initialAreaName: String       // 編集時の初期都道府県名
+    initialAreaName: String,      // 編集時の初期都道府県名
+    manualBreweryMode: Boolean    // 蔵元手入力モードかどうか（バリデーションエラー時の select 復元に使用）
   }
 
   connect() {
@@ -55,7 +56,7 @@ export default class extends Controller {
     if (this.initialBrandIdValue > 0 || this.initialBreweryIdValue > 0) {
       // 銘柄選択済み or 蔵元選択済み → input(readonly) に都道府県名を表示
       this.showInput(this.initialAreaNameValue || "")
-    } else if (this.initialAreaIdValue > 0) {
+    } else if (this.initialAreaIdValue > 0 || this.manualBreweryModeValue) {
       // 蔵元手入力モード（バリデーションエラー再表示時など）→ select を活性化
       this.showSelect()
     } else {
