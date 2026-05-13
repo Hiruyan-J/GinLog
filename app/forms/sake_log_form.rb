@@ -259,15 +259,34 @@ class SakeLogForm
   end
 
   # モデルのバリデーションエラーをFormObjectに転記する
-  # @param record [ActiveRecord::Base] エラーが発生したレコード（SakeまたはSakeLog）
+  # @param record [ActiveRecord::Base] エラーが発生したレコード（Sake/SakeLog/Brand/Brewery）
   # @return [void]
   def copy_errors_from_record(record)
     record.errors.each do |error|
-      # Sakeのエラーの場合、product_nameに割り当て
-      if record.is_a?(Sake) && error.attribute == :product_name
-        self.errors.add(:product_name, error.message)
-      elsif record.is_a?(SakeLog)
+      case record
+      when Sake
+        # Sakeのエラー: product_name に紐づくものだけFormObjectに転記
+        if error.attribute == :product_name
+          self.errors.add(error.attribute, error.message)
+        end
+      when SakeLog
         self.errors.add(error.attribute, error.message)
+      when Brand
+        if error.attribute == :name
+          self.errors.add(:manual_brand_name, error.message)
+        else
+          # 表示先がない場合は :base に full_message で転記
+          self.errors.add(:base, error.full_message)
+        end
+      when Brewery
+        case error.attribute
+        when :name
+          self.errors.add(:manual_brewery_name, error.message)
+        when :area
+          self.errors.add(:area_id, error.message)
+        else
+          self.errors.add(:base, error.full_message)
+        end
       end
     end
   end
