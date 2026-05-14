@@ -18,7 +18,9 @@ class Api::BrandsController < ApplicationController
         {
           id: brand.id,
           name: brand.name,
+          brewery_id: brand.brewery.id,
           brewery_name: brand.brewery.name,
+          area_id: brand.brewery.area.id,
           area_name: brand.brewery.area.name,
           # 重複銘柄を区別するためのラベル（例: 「赤武 - 赤武酒造（岩手県）」）
           label: "#{brand.name} - #{brand.brewery.name} (#{brand.brewery.area.name})"

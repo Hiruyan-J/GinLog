@@ -24,6 +24,11 @@ Rails.application.routes.draw do
         get :search # GET /api/sakes/search?brand_id=xxx&q=yyy
       end
     end
+    resources :breweries, only: [] do
+      collection do
+        get :search # GET /api/breweries/search?q=xxx
+      end
+    end
   end
 
   resources :sake_logs, only: %i[index new create edit update destroy]

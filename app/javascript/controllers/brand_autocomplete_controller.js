@@ -7,16 +7,14 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "input",          // 銘柄名テキスト入力(オートコンプリート対象)
-    "hiddenBrandId",  // brand_id の hidden フィールド
-    "dropdown",       // 候補リストのドロップダウン
-    "breweryDisplay"  // 蔵元の自動表示エリア (readonly)
+    "hiddenBrandId",
+    "dropdown"
   ]
 
   static values = {
     searchUrl: String,          // /api/brands/search
     initialBrandId: Number,     // 編集時の初期brand_id
-    initialBrandName: String,  // 編集時の初期表示銘柄
-    initialBreweryName: String  // 編集時の初期蔵元名
+    initialBrandName: String    // 編集時の初期表示銘柄
   }
 
   connect() {
@@ -39,7 +37,6 @@ export default class extends Controller {
     if (this.initialBrandIdValue && this.initialBrandIdValue > 0) {
       this.hiddenBrandIdTarget.value = this.initialBrandIdValue
       this.inputTarget.value = this.initialBrandNameValue
-      this.showBreweryDisplay(this.initialBreweryNameValue)
     }
   }
 
@@ -59,19 +56,14 @@ export default class extends Controller {
     clearTimeout(this.debounceTimer)
     const query = this.inputTarget.value.trim()
 
-    // 銘柄が選択済みだった場合、商品名側もリセットする
+    // 銘柄が選択済みだった場合、brand:cleared を発火して下流にリセットを通知
     const hadSelectedBrand = this.hiddenBrandIdTarget.value !== ""
-
     // 入力が変わったらbrand_idをクリア(再選択を促す)
     this.hiddenBrandIdTarget.value = ""
-    this.hideBreweryDisplay()
 
     // 商品名コントローラに銘柄リセットを通知
     if (hadSelectedBrand) {
-      this.element.dispatchEvent(new CustomEvent("brand-selected", {
-        bubbles: true,
-        detail: { brandId: null }
-      }))
+      this.dispatchBrandCleared()
     }
 
     if (query.length < 1) {
@@ -99,14 +91,14 @@ export default class extends Controller {
       if (!response.ok) return
 
       const data = await response.json()
-      this.renderDropdown(data.brands)
+      this.renderDropdown(data.brands, query)
     } catch (error) {
       console.error("銘柄検索エラー:", error)
     }
   }
 
-  // 候補リストの描画（XSS対策: DOM APIで要素を構築）
-  renderDropdown(brands) {
+  // 候補リストの描画 + 「新しい銘柄として登録」ボタン
+  renderDropdown(brands, query) {
     const ul = document.createElement("ul")
     ul.className = "flex flex-col bg-base-100 border border-base-300 rounded-box shadow-lg w-full max-h-60 overflow-y-auto list-none p-2"
 
@@ -118,12 +110,26 @@ export default class extends Controller {
       button.dataset.action = "click->brand-autocomplete#selectBrand"
       button.dataset.brandId = brand.id
       button.dataset.brandName = brand.name
-      button.dataset.brandLabel = brand.label
-      button.dataset.breweryName = `${brand.brewery_name}（${brand.area_name}）`
+      button.dataset.breweryId = brand.brewery_id
+      button.dataset.breweryName = brand.brewery_name
+      button.dataset.areaId = brand.area_id
+      button.dataset.areaName = brand.area_name
       button.textContent = brand.label
       li.appendChild(button)
       ul.appendChild(li)
     })
+
+    // 「該当する銘柄がない」オプションを末尾に追加
+    if (query) {
+      const newLi = document.createElement("li")
+      const newButton = document.createElement("button")
+      newButton.type = "button"
+      newButton.className = "w-full text-left px-4 py-2 hover:bg-base-200 text-base-content/60 cursor-pointer"
+      newButton.dataset.action = "click->brand-autocomplete#selectNewBrand"
+      newButton.textContent = "新しい銘柄として登録"
+      newLi.appendChild(newButton)
+      ul.appendChild(newLi)
+    }
 
     this.dropdownTarget.innerHTML = ""
     this.dropdownTarget.appendChild(ul)
@@ -133,37 +139,45 @@ export default class extends Controller {
   // 銘柄候補を選択したとき
   selectBrand(event) {
     const button = event.currentTarget
-    const brandId = button.dataset.brandId
-    const breweryName = button.dataset.breweryName
+    const brandId = parseInt(button.dataset.brandId, 10)
+    const breweryId = parseInt(button.dataset.breweryId, 10)
+    const areaId = parseInt(button.dataset.areaId, 10)
 
     // hidden フィールドにbrand_idをセット
     this.hiddenBrandIdTarget.value = brandId
-
     // 入力欄に銘柄を表示
     this.inputTarget.value = button.dataset.brandName
 
-    // 蔵元を自動表示
-    this.showBreweryDisplay(breweryName)
-
     this.closeDropdown()
 
-    // 商品名コントローラにbrand_idの変更を通知(CustomEvent)
-    this.element.dispatchEvent(new CustomEvent("brand-selected", {
-      bubbles: true,
-      detail: { brandId: parseInt(brandId, 10) }
+    // 下流コントローラに銘柄選択を通知
+    document.dispatchEvent(new CustomEvent("brand:selected", {
+      detail: {
+        brandId,
+        brandName: button.dataset.brandName,
+        breweryId,
+        breweryName: button.dataset.breweryName,
+        areaId,
+        areaName: button.dataset.areaName
+      }
     }))
   }
 
-  // --- 蔵元表示の切り替え ---
+  selectNewBrand() {
+    // brand_id をクリア（保存時に manual_brand_name から Brand を作成する）
+    this.hiddenBrandIdTarget.value = ""
 
-  // 蔵元の読み取り専用フィールドに値をセットする
-  showBreweryDisplay(text) {
-    this.breweryDisplayTarget.value = text
+    this.closeDropdown()
+
+    // 下流コントローラに「新規登録モード」を通知
+    document.dispatchEvent(new CustomEvent("brand:new", {
+      detail: { brandName: this.inputTarget.value.trim() }
+    }))
   }
 
-  // 蔵元の読み取り専用フィールドをクリアする
-  hideBreweryDisplay() {
-    this.breweryDisplayTarget.value = ""
+  // 銘柄がクリアされたことを通知（下流コントローラ向け）
+  dispatchBrandCleared() {
+    document.dispatchEvent(new CustomEvent("brand:cleared", { detail: {} }))
   }
 
   // ---　ドロップダウン制御 ---

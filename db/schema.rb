@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_08_051337) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_11_224549) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -23,25 +23,25 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_08_051337) do
   end
 
   create_table "brands", force: :cascade do |t|
-    t.integer "sakenowa_id", null: false
+    t.integer "sakenowa_id"
     t.string "name", null: false
     t.bigint "brewery_id", null: false
     t.boolean "is_deleted", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["brewery_id"], name: "index_brands_on_brewery_id"
-    t.index ["sakenowa_id"], name: "index_brands_on_sakenowa_id", unique: true
+    t.index ["sakenowa_id"], name: "index_brands_on_sakenowa_id", unique: true, where: "(sakenowa_id IS NOT NULL)"
   end
 
   create_table "breweries", force: :cascade do |t|
-    t.integer "sakenowa_id", null: false
+    t.integer "sakenowa_id"
     t.string "name", null: false
     t.bigint "area_id", null: false
     t.boolean "is_deleted", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["area_id"], name: "index_breweries_on_area_id"
-    t.index ["sakenowa_id"], name: "index_breweries_on_sakenowa_id", unique: true
+    t.index ["sakenowa_id"], name: "index_breweries_on_sakenowa_id", unique: true, where: "(sakenowa_id IS NOT NULL)"
   end
 
   create_table "sake_logs", force: :cascade do |t|
@@ -61,7 +61,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_08_051337) do
     t.string "product_name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "brand_id"
+    t.bigint "brand_id", null: false
     t.index ["brand_id", "product_name"], name: "index_sakes_on_brand_id_and_product_name", unique: true
     t.index ["brand_id"], name: "index_sakes_on_brand_id"
   end

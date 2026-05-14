@@ -8,25 +8,26 @@
          data-controller="brand-autocomplete"
          data-brand-autocomplete-search-url-value="<%= search_api_brands_path %>"
          data-brand-autocomplete-initial-brand-id-value="<%= sake_log.brand_id %>"
-         data-brand-autocomplete-initial-brand-name-value="<%= sake_log.brand_display_name %>"
-         data-brand-autocomplete-initial-brewery-name-value="<%= sake_log.brewery_display_name %>">
-    
+         data-brand-autocomplete-initial-brand-name-value="<%= sake_log.brand_display_name %>">
+
       <div class="flex gap-2 items-baseline">
-        <%= f.label :brand_id, class: "font-semibold whitespace-nowrap required" %>
+        <%= f.label :manual_brand_name, class: "font-semibold whitespace-nowrap required" %>
         <span class="text-xs text-base-content/50">（蔵元のブランド名。例：獺祭、久保田、新政）</span>
       </div>
 
-      <%# hidden フィールド(実際にサブミットされる値) %>
+      <%# hidden フィールド(実際にサブミットされる brand_id) %>
       <%= f.hidden_field :brand_id,
             data: { brand_autocomplete_target: "hiddenBrandId" } %>
-
-      <%# オートコンプリートのテキスト入力欄（name属性なし、サブミット対象外） %>
-      <input type="text"
-            class="w-full input input-primary"
-            placeholder="銘柄名を入力してください"
-            autocomplete="off"
-            data-brand-autocomplete-target="input"
-            data-action="input->brand-autocomplete#onInput click->brand-autocomplete#onClick">
+      <%# 銘柄名テキスト入力 %>
+      <%= f.text_field :manual_brand_name,
+            class: "w-full input input-primary",
+            value: sake_log.brand_display_name,
+            placeholder: "銘柄名を入力してください",
+            autocomplete: "off",
+            data: {
+              brand_autocomplete_target: "input",
+              action: "input->brand-autocomplete#onInput click->brand-autocomplete#onClick"
+            } %>
 
       <%# 候補リストのドロップダウン %>
       <div class="relative">
@@ -34,15 +35,70 @@
              data-brand-autocomplete-target="dropdown">
         </div>
       </div>
+    </div>
 
-      <%# 蔵元の自動表示エリア（銘柄選択時に表示） %>
-      <div class="mt-4">
-        <label class="font-semibold whitespace-nowrap required">蔵元</label>
-        <input type="text"
-               class="w-full input input-bordered bg-base-200 text-base-content/70"
-               disabled
-               data-brand-autocomplete-target="breweryDisplay">
+    <%# 蔵元(オートコンプリート) %>
+    <%# 銘柄選択時は readonly で自動表示、銘柄手入力モード時は検索/手入力可能になる %>
+    <div class="flex flex-col w-full md:w-8/12"
+         data-controller="brewery-autocomplete"
+         data-brewery-autocomplete-search-url-value="<%= search_api_breweries_path %>"
+         data-brewery-autocomplete-initial-brand-id-value="<%= sake_log.brand_id %>"
+         data-brewery-autocomplete-initial-brewery-id-value="<%= sake_log.brewery_id %>"
+         data-brewery-autocomplete-initial-brewery-name-value="<%= sake_log.brewery_display_name %>">
+
+      <div class="flex gap-2 items-baseline">
+        <%= f.label :manual_brewery_name, class: "font-semibold whitespace-nowrap required" %>
+        <span class="text-xs text-base-content/50">（銘柄選択時は自動入力、手入力時は検索または新規登録）</span>
       </div>
+
+      <%# hidden フィールド(brewery_id) %>
+      <%= f.hidden_field :brewery_id,
+            data: { brewery_autocomplete_target: "hiddenBreweryId" } %>
+      <%# 蔵元名テキスト入力 %>
+      <%= f.text_field :manual_brewery_name,
+            class: "w-full input input-primary",
+            value: sake_log.brewery_display_name,
+            placeholder: "蔵元名を入力してください",
+            autocomplete: "off",
+            data: {
+              brewery_autocomplete_target: "input",
+              action: "input->brewery-autocomplete#onInput click->brewery-autocomplete#onClick"
+            } %>
+
+      <%# 候補リストのドロップダウン %>
+      <div class="relative">
+        <div class="hidden absolute top-0 right-0 left-0 z-10"
+             data-brewery-autocomplete-target="dropdown">
+        </div>
+      </div>
+    </div>
+
+    <%# 都道府県 %>
+    <%# 通常モードは input(readonly) に都道府県名表示、蔵元手入力時は select に切替 %>
+    <div class="flex flex-col w-full md:w-8/12"
+         data-controller="area-display"
+         data-area-display-initial-brand-id-value="<%= sake_log.brand_id %>"
+         data-area-display-initial-brewery-id-value="<%= sake_log.brewery_id %>"
+         data-area-display-initial-area-id-value="<%= sake_log.area_id %>"
+         data-area-display-initial-area-name-value="<%= sake_log.area_display_name %>"
+         data-area-display-manual-brewery-mode-value="<%= sake_log.manual_brewery_input_started? %>">
+
+      <%= f.label :area_id, class: "font-semibold whitespace-nowrap required" %>
+
+      <%# 都道府県 input (readonly 表示用) %>
+      <input type="text"
+             class="w-full input input-bordered bg-base-200 text-base-content/70"
+             value="<%= sake_log.area_display_name %>"
+             disabled
+             data-area-display-target="input">
+
+      <%# 都道府県 select (蔵元手入力モード時のみ活性化) %>
+      <%= f.select :area_id,
+            sake_log.area_options,
+            { include_blank: "都道府県を選択してください", prompt: nil },
+            { class: "hidden w-full select select-primary",
+              disabled: true,
+              data: { area_display_target: "select" } } %>
     </div>
 
     <%# 商品名(オートコンプリート) %>
@@ -61,12 +117,12 @@
       <%# sake_id hidden フィールド(既存Sake選択時にセット) %>
       <%= f.hidden_field :sake_id,
             data: { product_name_autocomplete_target: "hiddenSakeId" } %>
-      
+
       <%# 商品名入力欄(オートコンプリート + フリー入力兼用) %>
       <%= f.text_field :product_name, class: "w-full input input-primary",
             placeholder: "商品名を入力してください",
             autocomplete: "off",
-            disabled: sake_log.brand_id.blank? && !sake_log.persisted?,
+            disabled: !sake_log.brand_committed?,
             data: {
               product_name_autocomplete_target: "input",
               action: "input->product-name-autocomplete#onInput click->product-name-autocomplete#onClick"

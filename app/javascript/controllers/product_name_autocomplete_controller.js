@@ -26,7 +26,11 @@ export default class extends Controller {
 
     // 銘柄選択イベントをリスナー登録
     this.boundOnBrandSelected = this.onBrandSelected.bind(this)
-    document.addEventListener("brand-selected", this.boundOnBrandSelected)
+    this.boundOnBrandNew = this.onBrandNew.bind(this)
+    this.boundOnBrandCleared = this.onBrandCleared.bind(this)
+    document.addEventListener("brand:selected", this.boundOnBrandSelected)
+    document.addEventListener("brand:new", this.boundOnBrandNew)
+    document.addEventListener("brand:cleared", this.boundOnBrandCleared)
 
     // 編集時: 初期値を復元
     this.restoreInitialValues()
@@ -34,7 +38,9 @@ export default class extends Controller {
 
   disconnect() {
     document.removeEventListener("click", this.boundHandleOutsideClick)
-    document.removeEventListener("brand-selected", this.boundOnBrandSelected)
+    document.removeEventListener("brand:selected", this.boundOnBrandSelected)
+    document.removeEventListener("brand:new", this.boundOnBrandNew)
+    document.removeEventListener("brand:cleared", this.boundOnBrandCleared)
     clearTimeout(this.debounceTimer)
   }
 
@@ -52,24 +58,39 @@ export default class extends Controller {
     }
   }
 
-  // 銘柄選択イベントのハンドラ(brand-autocompleteコントローラから受け取る)
+  // 銘柄選択 → brand_id をセットし入力欄を有効化
   onBrandSelected(event) {
     const { brandId } = event.detail
     this.brandIdValue = brandId || 0
 
-    // 銘柄が変わったら商品名リセット
-    this.inputTarget.value = ""
+    // 銘柄が変わったら商品IDリセット
     this.hiddenSakeIdTarget.value = ""
     this.closeDropdown()
 
-    if (brandId) {
-      // 銘柄が選択された場合: 商品名入力を有効にする
-      this.inputTarget.disabled = false
-      this.inputTarget.focus()
-    } else {
-      // 銘柄が未選択の場合: 商品名入力を無効にする
-      this.inputTarget.disabled = true
-    }
+    this.inputTarget.disabled = false
+    this.inputTarget.focus()
+  }
+
+  // 銘柄手入力モード → brand_id は 0 のままでも入力欄を有効化
+  onBrandNew() {
+    this.brandIdValue = 0
+
+    // 商品名IDリセット
+    this.hiddenSakeIdTarget.value = ""
+    this.closeDropdown()
+
+    // 商品名入力活性化
+    this.inputTarget.disabled = false
+  }
+
+  // 銘柄クリア → 商品名入力欄を非活性化
+  onBrandCleared() {
+    this.brandIdValue = 0
+
+    this.hiddenSakeIdTarget.value = ""
+    this.closeDropdown()
+
+    this.inputTarget.disabled = true
   }
 
   // 入力欄クリック時に銘柄に紐づく全商品を表示
