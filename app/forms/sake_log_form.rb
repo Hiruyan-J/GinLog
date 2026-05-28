@@ -88,7 +88,7 @@ class SakeLogForm
         sake.save!
       rescue ActiveRecord::RecordNotUnique
         sake = Sake.find_by!(
-          product_name: product_name.strip,
+          product_name: product_name,
           brand_id: brand_id
         )
       end
@@ -217,7 +217,7 @@ class SakeLogForm
       Brewery.find(brewery_id)
     else
       Brewery.find_or_create_by!(
-        name: manual_brewery_name.strip,
+        name: manual_brewery_name,
         area_id: area_id
       )
     end
@@ -229,7 +229,7 @@ class SakeLogForm
   # @return [Brand] 既存または新規の Brand レコード
   def find_or_create_brand!(brewery)
     Brand.find_or_create_by!(
-      name: manual_brand_name.strip,
+      name: manual_brand_name,
       brewery_id: brewery.id
     )
   end
@@ -243,7 +243,7 @@ class SakeLogForm
     else
       # 新規のSakeレコードを検索または作成
       Sake.find_or_initialize_by(
-        product_name: product_name.strip,
+        product_name: product_name,
         brand_id: brand_id
       )
     end
