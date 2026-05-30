@@ -18,7 +18,11 @@
 #  fk_rails_...  (brand_id => brands.id)
 #
 class Sake < ApplicationRecord
+  include Normalizable
+
   PRODUCT_NAME_MAX_LENGTH = 255
+
+  normalizes_text :product_name
 
   validates :product_name, presence: true, length: { maximum: PRODUCT_NAME_MAX_LENGTH }
   validates :product_name, uniqueness: { scope: :brand_id }

@@ -20,7 +20,11 @@
 #  fk_rails_...  (brewery_id => breweries.id)
 #
 class Brand < ApplicationRecord
+  include Normalizable
+
   NAME_MAX_LENGTH = 255
+
+  normalizes_text :name
 
   validates :name, presence: true, length: { maximum: NAME_MAX_LENGTH }
   validates :sakenowa_id, uniqueness: true, allow_nil: true

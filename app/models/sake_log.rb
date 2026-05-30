@@ -33,6 +33,8 @@ class SakeLog < ApplicationRecord
   AROMA_STRENGTH_DEFAULT = 5.0
   REVIEW_MAX_LENGTH = 65_535
 
+  normalizes :review, with: ->(value) { value.strip }
+
   belongs_to :user
   belongs_to :sake
 
