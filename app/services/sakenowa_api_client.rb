@@ -99,7 +99,7 @@ class SakenowaApiClient
     # さけのわAPIのエリアID → RailsのエリアIDの変換マップの事前作成(N+1対策)
     area_id_map = Area.pluck(:sakenowa_id, :id).to_h
 
-    # nameからの酒蔵の sakenowa_id を収集(銘柄の論理削除判定用)
+    # nameが空の酒蔵の sakenowa_id を収集(銘柄の論理削除判定用)
     deleted_brewery_sakenowa_ids = []
 
     Brewery.transaction do
