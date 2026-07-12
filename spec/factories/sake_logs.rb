@@ -1,9 +1,9 @@
 FactoryBot.define do
   factory :sake_log do
-    rating { 4 }
-    taste_strength { 4.0 }
-    aroma_strength { 2.0 }
-    review { "甘く肉料理にも負けない味" }
+    rating { 3 }
+    taste_strength { 5.0 }
+    aroma_strength { 5.0 }
+    review { "華やかな香りで美味しい" }
     association :user
     association :sake
   end
