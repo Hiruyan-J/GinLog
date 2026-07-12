@@ -1,6 +1,16 @@
 # Omakase Ruby styling for Rails
 inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
+# 継承元の Exclude を保持しつつ、自前の Exclude をマージする
+inherit_mode:
+  merge:
+    - Exclude
+
+# 検査対象外
+AllCops:
+  Exclude:
+    - "claude_code/**/*"
+
 # Overwrite or add rules to create your own house style
 #
 # # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`

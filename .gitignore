@@ -45,6 +45,9 @@
 # エディタ設定（個人環境依存）
 /.vscode
 
+# テストカバレッジレポート(SimpleCov)
+/coverage
+
 # Claude Code 関連
 /claude_code
 CLAUDE.md
