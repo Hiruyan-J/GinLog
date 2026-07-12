@@ -270,11 +270,19 @@ RSpec.describe SakeLogForm, type: :model do
     # sake.save! が RecordNotUnique を出し、rescue 内で既存レコードを再取得する。
     context "別リクエストが先に同一 Sake を作成済み（複合ユニーク制約違反）" do
       it "RecordNotUnique を捕捉し、既存 Sake に紐づけて保存できる" do
+        # 先行リクエスト(A)が作成済みの Sake。rescue 内の Sake.find_by! で再取得される想定。
         existing = create(:sake, brand: brand, product_name: "制約テスト酒")
-        form = build_form(product_name: "制約テスト酒", brand_id: brand.id)
 
-        # find_or_initialize_sake が返す新規 Sake の save! を失敗させ、制約違反パスを再現
-        allow_any_instance_of(Sake).to receive(:save!).and_raise(ActiveRecord::RecordNotUnique)
+        # find_or_initialize_sake が未保存の新規 Sake を返す状況を作り(=リクエストBの視点)、
+        # その new_sake の save! だけを失敗させる(existing.save! には一切触れない)。
+        # rescue 内の Sake.find_by! はスタブしないので、本物の DB から existing を引く。
+        new_sake = Sake.new(product_name: "制約テスト酒", brand_id: brand.id)
+        expect(Sake).to receive(:find_or_initialize_by)
+          .with(product_name: "制約テスト酒", brand_id: brand.id)
+          .and_return(new_sake)
+        allow(new_sake).to receive(:save!).and_raise(ActiveRecord::RecordNotUnique)
+
+        form = build_form(product_name: "制約テスト酒", brand_id: brand.id)
 
         expect { form.save }.to change(SakeLog, :count).by(1)
         expect(form.sake_log.sake).to eq existing
