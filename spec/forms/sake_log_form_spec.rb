@@ -206,6 +206,49 @@ RSpec.describe SakeLogForm, type: :model do
       end
     end
 
+    # find_or_create_brewery! / find_or_create_brand! が
+    # 「既存レコードがあれば再利用し、二重登録しない」ことを独立して検証する。
+    context "重複レコードの再利用（既存があれば新規作成しない）" do
+      let(:area) { create(:area) }
+
+      it "蔵元手入力: 同名・同都道府県の Brewery が既存なら再利用する" do
+        existing_brewery = create(:brewery, name: "赤武酒造", area: area)
+
+        form = SakeLogForm.new(
+          {
+            product_name: "純米酒",
+            manual_brand_name: "新規銘柄",  # 銘柄は新規（Brand は増える）
+            manual_brewery_name: "赤武酒造",
+            area_id: area.id,
+            rating: 3, aroma_strength: 5.0, taste_strength: 5.0
+          },
+          user: user
+        )
+
+        expect { form.save }.to change(Brewery, :count).by(0)
+        expect(form.sake_log.sake.brand.brewery).to eq existing_brewery
+      end
+
+      it "銘柄手入力: 同名・同蔵元の Brand が既存なら再利用する" do
+        existing_brewery = create(:brewery, name: "赤武酒造", area: area)
+        existing_brand = create(:brand, name: "赤武", brewery: existing_brewery)
+
+        form = SakeLogForm.new(
+          {
+            product_name: "純米酒",
+            manual_brand_name: "赤武",
+            manual_brewery_name: "赤武酒造",
+            area_id: area.id,
+            rating: 3, aroma_strength: 5.0, taste_strength: 5.0
+          },
+          user: user
+        )
+
+        expect { form.save }.to change(Brand, :count).by(0)
+        expect(form.sake_log.sake.brand).to eq existing_brand
+      end
+    end
+
     context "編集（既存 sake_log を渡す）" do
       it "rating を更新できる" do
         sake_log = create(:sake_log, rating: 2)
