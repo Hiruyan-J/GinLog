@@ -3,8 +3,8 @@
 # SimpleCov はアプリのコードが読み込まれる前に起動する必要がある（計測漏れ防止）
 require "simplecov"
 SimpleCov.start "rails" do
-  add_filter "/spec/"
-  add_filter "/config/"
+  skip "/spec/"
+  skip "/config/"
   # enable_coverage :branch  # 分岐網羅
 end
 
