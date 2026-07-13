@@ -1,0 +1,6 @@
+{
+  "breweries": [
+    { "id": 101, "name": "赤武酒造", "areaId": 1 },
+    { "id": 102, "name": "新政酒造", "areaId": 2 }
+  ]
+}
