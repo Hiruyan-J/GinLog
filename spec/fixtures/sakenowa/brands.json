@@ -1,0 +1,6 @@
+{
+  "brands": [
+    { "id": 1001, "name": "赤武", "breweryId": 101 },
+    { "id": 1002, "name": "No.6", "breweryId": 102 }
+  ]
+}
