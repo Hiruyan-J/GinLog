@@ -180,10 +180,12 @@ RSpec.describe SakenowaApiClient do
       expect(Brand.find_by(sakenowa_id: 1002).brewery_id).to eq brewery2.id
     end
 
-    it "空データで raise する" do
+    it "空データで raise する（全件論理削除の暴発が起きない）" do
+      existing = create(:brand, sakenowa_id: 9999, brewery: brewery1, is_deleted: false)
       stub_sakenowa(:brands, body: { "brands" => [] })
 
       expect { client.send(:import_brands, []) }.to raise_error(RuntimeError, /データが空です/)
+      expect(existing.reload.is_deleted).to be false
     end
 
     context "name が空の銘柄" do
@@ -252,6 +254,24 @@ RSpec.describe SakenowaApiClient do
       brand = Brand.find_by(sakenowa_id: 1001)
       expect(brand.brewery.sakenowa_id).to eq 101
       expect(brand.brewery.area.sakenowa_id).to eq 1
+    end
+
+    it "name 空の蔵元に紐づく銘柄まで連鎖して論理削除される (breweries→brands の受け渡し)" do
+      stub_sakenowa(:areas, body: { "areas" => [ { "id" => 1, "name" => "岩手" } ] })
+      stub_sakenowa(:breweries, body: { "breweries" => [
+        { "id" => 101, "name" => "", "areaId" => 1 },
+        { "id" => 102, "name" => "新政酒造", "areaId" => 1 }
+      ] })
+      stub_sakenowa(:brands, body: { "brands" => [
+        { "id" => 1001, "name" => "赤武", "breweryId" => 101 },
+        { "id" => 1002, "name" => "No.6", "breweryId" => 102 }
+      ] })
+
+      client.import_all
+
+      # 削除された蔵元(101)の銘柄は、name があっても連鎖で論理削除される（配線が効いるかの確認）
+      expect(Brand.find_by(sakenowa_id: 1001).is_deleted).to be true
+      expect(Brand.find_by(sakenowa_id: 1002).is_deleted).to be false
     end
 
     it "途中 breweries で空データを受け取ると raise し、それ以降を実行しない" do
