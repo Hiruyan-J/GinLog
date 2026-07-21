@@ -34,6 +34,9 @@ class Brewery < ApplicationRecord
 
   scope :active, -> { where(is_deleted: false) }
 
+  # import_brands の統合先解決マップ作成で使用
+  scope :merged, -> { where.not(merged_into_id: nil) }
+
   # オートコンプリート用の蔵元検索スコープ
   # 都道府県を eager load し、蔵元名で部分位置検索(上位10件)
   # @param query [String] 検索文字列
@@ -48,6 +51,12 @@ class Brewery < ApplicationRecord
   }
 
   belongs_to :area
+  # 統合先の蔵元（自分が重複データだった場合のみ設定される）
+  belongs_to :merged_into, class_name: "Brewery", optional: true
+
+  # 自分を統合先としている重複蔵元の一覧
+  has_many :merged_from, class_name: "Brewery", foreign_key: :merged_into_id,
+                         inverse_of: :merged_into, dependent: :restrict_with_exception
   # マスターデータのため削除不可。誤って destroy が呼ばれた場合に例外で知らせる
   has_many :brands, dependent: :restrict_with_exception
 end

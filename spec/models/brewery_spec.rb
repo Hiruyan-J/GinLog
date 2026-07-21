@@ -43,6 +43,12 @@ RSpec.describe Brewery, type: :model do
   describe "アソシエーション" do
     it { is_expected.to belong_to(:area) }
     it { is_expected.to have_many(:brands).dependent(:restrict_with_exception) }
+    it { is_expected.to belong_to(:merged_into).class_name("Brewery").optional }
+    it {
+      is_expected.to have_many(:merged_from).class_name("Brewery")
+        .with_foreign_key(:merged_into_id).inverse_of(:merged_into)
+        .dependent(:restrict_with_exception)
+    }
   end
 
   describe "正規化(normalizes_text :name)" do
@@ -61,6 +67,16 @@ RSpec.describe Brewery, type: :model do
 
       expect(Brewery.active).to include(active_brewery)
       expect(Brewery.active).not_to include(deleted_brewery)
+    end
+  end
+
+  describe ".merged スコープ" do
+    it "merged_into_id があるレコードだけを返す" do
+      merge_target = create(:brewery)
+      merged = create(:brewery, is_deleted: true, merged_into: merge_target)
+
+      expect(Brewery.merged).to include(merged)
+      expect(Brewery.merged).not_to include(merge_target)
     end
   end
 
