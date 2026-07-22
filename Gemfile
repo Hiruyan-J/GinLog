@@ -39,7 +39,7 @@ gem "bootsnap", require: false
 gem "tailwindcss-rails", "~> 4.6"
 gem "tailwindcss-ruby"
 gem "inline_svg"
-gem "rails-i18n", "~> 8.0.0"
+gem "rails-i18n", "~> 8.1.0"
 
 # ログイン
 gem "devise"
