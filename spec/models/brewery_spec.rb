@@ -4,22 +4,25 @@ require 'rails_helper'
 #
 # Table name: breweries
 #
-#  id          :bigint           not null, primary key
-#  is_deleted  :boolean          default(FALSE), not null
-#  name        :string           not null
-#  created_at  :datetime         not null
-#  updated_at  :datetime         not null
-#  area_id     :bigint           not null
-#  sakenowa_id :integer
+#  id             :bigint           not null, primary key
+#  is_deleted     :boolean          default(FALSE), not null
+#  name           :string           not null
+#  created_at     :datetime         not null
+#  updated_at     :datetime         not null
+#  area_id        :bigint           not null
+#  merged_into_id :bigint
+#  sakenowa_id    :integer
 #
 # Indexes
 #
-#  index_breweries_on_area_id      (area_id)
-#  index_breweries_on_sakenowa_id  (sakenowa_id) UNIQUE WHERE (sakenowa_id IS NOT NULL)
+#  index_breweries_on_area_id         (area_id)
+#  index_breweries_on_merged_into_id  (merged_into_id)
+#  index_breweries_on_sakenowa_id     (sakenowa_id) UNIQUE WHERE (sakenowa_id IS NOT NULL)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (area_id => areas.id)
+#  fk_rails_...  (merged_into_id => breweries.id)
 #
 RSpec.describe Brewery, type: :model do
   describe "バリデーション" do
@@ -40,6 +43,12 @@ RSpec.describe Brewery, type: :model do
   describe "アソシエーション" do
     it { is_expected.to belong_to(:area) }
     it { is_expected.to have_many(:brands).dependent(:restrict_with_exception) }
+    it { is_expected.to belong_to(:merged_into).class_name("Brewery").optional }
+    it {
+      is_expected.to have_many(:merged_from).class_name("Brewery")
+        .with_foreign_key(:merged_into_id).inverse_of(:merged_into)
+        .dependent(:restrict_with_exception)
+    }
   end
 
   describe "正規化(normalizes_text :name)" do
@@ -58,6 +67,16 @@ RSpec.describe Brewery, type: :model do
 
       expect(Brewery.active).to include(active_brewery)
       expect(Brewery.active).not_to include(deleted_brewery)
+    end
+  end
+
+  describe ".merged スコープ" do
+    it "merged_into_id があるレコードだけを返す" do
+      merge_target = create(:brewery)
+      merged = create(:brewery, is_deleted: true, merged_into: merge_target)
+
+      expect(Brewery.merged).to include(merged)
+      expect(Brewery.merged).not_to include(merge_target)
     end
   end
 

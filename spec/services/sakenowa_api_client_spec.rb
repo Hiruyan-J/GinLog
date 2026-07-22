@@ -148,6 +148,98 @@ RSpec.describe SakenowaApiClient do
       end
     end
 
+    context "蔵元の重複統合(merged_into_id)" do
+      let!(:area) { create(:area, sakenowa_id: 1) }
+
+      it "新規レコードが既存 active な蔵元と name + area_id で重複 → 論理削除 + merged_into_id を記録する" do
+        existing = create(:brewery, sakenowa_id: 305, area: area, name: "朝日酒造", is_deleted: false)
+        stub_sakenowa(:breweries, body: { "breweries" => [
+          { "id" => 305, "name" => "朝日酒造", "areaId" => 1 },
+          { "id" => 909, "name" => "朝日酒造", "areaId" => 1 }
+        ] })
+
+        client.send(:import_breweries)
+
+        duplicated = Brewery.find_by(sakenowa_id: 909)
+        expect(duplicated.is_deleted).to be true
+        expect(duplicated.merged_into).to eq existing
+        # 統合先は active のまま維持される
+        expect(existing.reload.is_deleted).to be false
+      end
+
+      it "name, area_id の両方が一致しない蔵元は統合しない" do
+        create(:area, sakenowa_id: 2)
+        create(:brewery, sakenowa_id: 305, area: area, name: "朝日酒造", is_deleted: false)
+        stub_sakenowa(:breweries, body: { "breweries" => [
+          { "id" => 305, "name" => "朝日酒造", "areaId" => 1 },
+          { "id" => 808, "name" => "朝日酒造", "areaId" => 2 },
+          { "id" => 909, "name" => "新政酒造", "areaId" => 1 }
+        ] })
+
+        client.send(:import_breweries)
+
+        aggregate_failures do
+          # name は同じだが別エリア
+          same_name_other_area = Brewery.find_by(sakenowa_id: 808)
+          expect(same_name_other_area.is_deleted).to be false
+          expect(same_name_other_area.merged_into_id).to be_nil
+
+          # 同じエリアだが name が違う
+          same_area_other_name = Brewery.find_by(sakenowa_id: 909)
+          expect(same_area_other_name.is_deleted).to be false
+          expect(same_area_other_name.merged_into_id).to be_nil
+        end
+      end
+
+      it "統合済み既存レコード（merged_into_id あり）は、APIに name ありで再登場しても is_deleted を false に巻き戻さない" do
+        merge_target = create(:brewery, sakenowa_id: 305, area: area, name: "朝日酒造", is_deleted: false)
+        merged = create(:brewery, sakenowa_id: 909, area: area, name: "朝日酒造",
+                        is_deleted: true, merged_into: merge_target)
+        stub_sakenowa(:breweries, body: { "breweries" => [
+          { "id" => 305, "name" => "朝日酒造", "areaId" => 1 },
+          { "id" => 909, "name" => "朝日酒造", "areaId" => 1 }
+        ] })
+
+        client.send(:import_breweries)
+
+        expect(merged.reload.is_deleted).to be true
+        expect(merged.merged_into).to eq merge_target
+      end
+
+      it "論理削除済みの同名蔵元は統合先にならない" do
+        create(:brewery, sakenowa_id: 305, area: area, name: "朝日酒造", is_deleted: true)
+        # 305 は API 未掲載なので論理削除のまま。909 だけが新規で入る
+        stub_sakenowa(:breweries, body: { "breweries" => [
+          { "id" => 909, "name" => "朝日酒造", "areaId" => 1 }
+        ] })
+
+        client.send(:import_breweries)
+
+        new_brewery = Brewery.find_by(sakenowa_id: 909)
+        expect(new_brewery.merged_into_id).to be_nil
+        expect(new_brewery.is_deleted).to be false
+      end
+
+      it "3件以上の重複はすべて最小IDの蔵元へ統合される" do
+        stub_sakenowa(:breweries, body: { "breweries" => [
+          { "id" => 305, "name" => "朝日酒造", "areaId" => 1 },
+          { "id" => 909, "name" => "朝日酒造", "areaId" => 1 },
+          { "id" => 918, "name" => "朝日酒造", "areaId" => 1 }
+        ] })
+
+        client.send(:import_breweries)
+
+        # 最初に保存された 305 が統合先(最小ID)として active のまま残る
+        merge_target = Brewery.find_by(sakenowa_id: 305)
+        expect(merge_target.is_deleted).to be false
+        expect(merge_target.merged_into_id).to be_nil
+
+        merged = Brewery.where(sakenowa_id: [ 909, 918 ])
+        expect(merged.pluck(:is_deleted)).to all(be true)
+        expect(merged.pluck(:merged_into_id)).to all(eq merge_target.id)
+      end
+    end
+
     it "API 未掲載の既存 active 蔵元が is_deleted: true になる" do
       area = create(:area, sakenowa_id: 1)
       kept = create(:brewery, sakenowa_id: 101, area: area, is_deleted: false)
@@ -208,6 +300,30 @@ RSpec.describe SakenowaApiClient do
         brand = Brand.find_by(sakenowa_id: 1001)
         expect(brand.name).to eq "元の銘柄名"
         expect(brand.is_deleted).to be true
+      end
+    end
+
+    context "統合済み蔵元の銘柄" do
+      it "merged_into_id がある蔵元の銘柄は統合先の brewery_id で保存される" do
+        create(:brewery, sakenowa_id: 909, merged_into: brewery1, is_deleted: true)
+        stub_sakenowa(:brands, body: { "brands" => [ { "id" => 1001, "name" => "得月", "breweryId" => 909 } ] })
+
+        client.send(:import_brands, [])
+
+        brand = Brand.find_by(sakenowa_id: 1001)
+        expect(brand.brewery_id).to eq brewery1.id
+        expect(brand.is_deleted).to be false
+      end
+
+      it "既存銘柄が統合前の蔵元に紐づいている場合、再importで統合先へ付け替わる" do
+        merged_brewery = create(:brewery, sakenowa_id: 909, merged_into: brewery1, is_deleted: true)
+        brand = create(:brand, sakenowa_id: 1001, brewery: merged_brewery, name: "得月", is_deleted: false)
+        stub_sakenowa(:brands, body: { "brands" => [ { "id" => 1001, "name" => "得月", "breweryId" => 909 } ] })
+
+        client.send(:import_brands, [])
+
+        expect(brand.reload.brewery_id).to eq brewery1.id
+        expect(brand.is_deleted).to be false
       end
     end
 
@@ -272,6 +388,32 @@ RSpec.describe SakenowaApiClient do
       # 削除された蔵元(101)の銘柄は、name があっても連鎖で論理削除される（配線が効いるかの確認）
       expect(Brand.find_by(sakenowa_id: 1001).is_deleted).to be true
       expect(Brand.find_by(sakenowa_id: 1002).is_deleted).to be false
+    end
+
+    it "重複蔵元を含む import を2回実行しても結果が同じ（冪等性）" do
+      stub_sakenowa(:areas, body: { "areas" => [ { "id" => 1, "name" => "新潟" } ] })
+      stub_sakenowa(:breweries, body: { "breweries" => [
+        { "id" => 305, "name" => "朝日酒造", "areaId" => 1 },
+        { "id" => 909, "name" => "朝日酒造", "areaId" => 1 }
+      ] })
+      stub_sakenowa(:brands, body: { "brands" => [
+        { "id" => 1001, "name" => "久保田", "breweryId" => 305 },
+        { "id" => 1002, "name" => "得月", "breweryId" => 909 }
+      ] })
+
+      client.import_all
+
+      # 2回目の実行で蔵元・銘柄の状態が一切変わらないこと
+      expect { client.import_all }.not_to change {
+        [
+          Brewery.order(:id).pluck(:sakenowa_id, :is_deleted, :merged_into_id),
+          Brand.order(:id).pluck(:sakenowa_id, :brewery_id, :is_deleted)
+        ]
+      }
+
+      # 全銘柄が統合先(古いID側)へ集約されていること
+      merge_target = Brewery.find_by(sakenowa_id: 305)
+      expect(merge_target.brands.active.pluck(:name)).to contain_exactly("久保田", "得月")
     end
 
     it "途中 breweries で空データを受け取ると raise し、それ以降を実行しない" do

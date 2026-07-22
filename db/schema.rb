@@ -10,9 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_11_224549) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_20_072448) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension "pg_catalog.plpgsql"
 
   create_table "areas", force: :cascade do |t|
     t.integer "sakenowa_id", null: false
@@ -40,7 +40,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_11_224549) do
     t.boolean "is_deleted", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "merged_into_id"
     t.index ["area_id"], name: "index_breweries_on_area_id"
+    t.index ["merged_into_id"], name: "index_breweries_on_merged_into_id"
     t.index ["sakenowa_id"], name: "index_breweries_on_sakenowa_id", unique: true, where: "(sakenowa_id IS NOT NULL)"
   end
 
@@ -81,6 +83,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_11_224549) do
 
   add_foreign_key "brands", "breweries"
   add_foreign_key "breweries", "areas"
+  add_foreign_key "breweries", "breweries", column: "merged_into_id"
   add_foreign_key "sake_logs", "sakes"
   add_foreign_key "sake_logs", "users"
   add_foreign_key "sakes", "brands"
