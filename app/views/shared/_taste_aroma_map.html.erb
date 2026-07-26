@@ -1,0 +1,56 @@
+<%# 味 × 香りの4象限マップ
+  locals:
+    taste:   味の濃淡の値（SakeLog#taste_strength / Sake#average_taste_strength）
+    aroma:   香りの濃淡の値（SakeLog#aroma_strength / Sake#average_aroma_strength）
+    variant: 表示方式（:quadrant = 該当する1象限だけをハイライト）
+    size:    外枠サイズ（省略時 :sm / :md / :lg。呼び出し側は用途名で指定）
+    labels:  軸ラベルの表示方式（省略時 :always = 常に表示 / :responsive = スマホで非表示）
+  サイズは呼び出し側のラッパー要素の幅で制御する（内部は幅 100% で描画）
+%>
+
+<% active_quadrant = taste_aroma_quadrant(taste, aroma) if variant == :quadrant %>
+
+<%# 外枠サイズ（size 省略時は :sm）・軸ラベルの表示クラス（labels 省略時は :always） %>
+<% size_class = quadrant_map_size_class(local_assigns.fetch(:size, :sm)) %>
+<% label_class = quadrant_label_class(local_assigns.fetch(:labels, :always)) %>
+
+<div class="<%= size_class %> grid grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr_auto] items-center justify-items-center gap-1 text-[10px] leading-none text-neutral-500">
+  <%# 上の軸ラベル %>
+  <p class="col-start-2 row-start-1 <%= label_class %>">香りが華やか</p>
+
+  <%# 左の軸ラベル(縦書き) %>
+  <p class="col-start-1 row-start-2 [writing-mode:vertical-rl] <%= label_class %>">味がスッキリ</p>
+
+  <%# 2×2 の象限グリッド（並び順は 左上 → 右上 → 左下 → 右下） %>
+  <div class="grid relative grid-cols-2 col-start-2 grid-rows-2 row-start-2 gap-1 w-full aspect-[3/2]">
+    <%# 左上: 香り華やか × 味スッキリ（緑） %>
+    <div class="rounded-md border <%= quadrant_cell_class(:aroma_high_taste_light, active_quadrant) %>"></div>
+
+    <%# 右上: 香り華やか × 味濃い（ピンク） %>
+    <div class="rounded-md border <%= quadrant_cell_class(:aroma_high_taste_strong, active_quadrant) %>"></div>
+
+    <%# 左下: 香り穏やか × 味スッキリ（水色） %>
+    <div class="rounded-md border <%= quadrant_cell_class(:aroma_low_taste_light, active_quadrant) %>"></div>
+
+    <%# 右下: 香り穏やか × 味濃い（クリーム） %>
+    <div class="rounded-md border <%= quadrant_cell_class(:aroma_low_taste_strong, active_quadrant) %>"></div>
+
+    <%# 座標軸（縦横線 + 4方向の矢印）。マップ中央に重ねる。%>
+    <svg class="absolute inset-0 w-full h-full pointer-events-none text-neutral-400" viewBox="0 0 300 200" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <%# 横軸（味）・縦軸（香り） %>
+      <line x1="6" y1="100" x2="294" y2="100" />
+      <line x1="150" y1="6" x2="150" y2="194" />
+      <%# 矢印（右・左・上・下） %>
+      <polyline points="286,94 294,100 286,106" />
+      <polyline points="14,94 6,100 14,106" />
+      <polyline points="144,14 150,6 156,14" />
+      <polyline points="144,186 150,194 15e6,186" />
+    </svg>
+  </div>
+
+  <%# 右の軸ラベル(縦書き) %>
+  <p class="col-start-3 row-start-2 [writing-mode:vertical-rl] <%= label_class %>">味が濃い</p>
+
+  <%# 下の軸ラベル %>
+  <p class="col-start-2 row-start-3 <%= label_class %>">香りが穏やか</p>
+</div>
