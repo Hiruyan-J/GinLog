@@ -2,7 +2,7 @@
   locals:
     taste:   味の濃淡の値（SakeLog#taste_strength / Sake#average_taste_strength）
     aroma:   香りの濃淡の値（SakeLog#aroma_strength / Sake#average_aroma_strength）
-    variant: 表示方式（:quadrant = 該当する1象限だけをハイライト）
+    variant: 表示方式（:quadrant = 該当する1象限だけをハイライト / :plot = 全象限を薄く表示し記録値の位置に点を打つ）
     size:    外枠サイズ（省略時 :sm / :md / :lg。呼び出し側は用途名で指定）
     labels:  軸ラベルの表示方式（省略時 :always = 常に表示 / :responsive = スマホで非表示）
   サイズは呼び出し側のラッパー要素の幅で制御する（内部は幅 100% で描画）
@@ -46,6 +46,12 @@
       <polyline points="144,14 150,6 156,14" />
       <polyline points="144,186 150,194 156,186" />
     </svg>
+
+    <%# 記録値の点（variant: :plot のときのみ）
+      style で left / top を % 指定し、translate で点の中心を座標に合わせる %>
+    <% if variant == :plot %>
+      <span class="absolute z-10 w-3 h-3 rounded-full border-2 border-white shadow-md -translate-x-1/2 -translate-y-1/2 bg-primary" style="<%= quadrant_plot_point_style(taste, aroma) %>"></span>
+    <% end %>
   </div>
 
   <%# 右の軸ラベル(縦書き) %>

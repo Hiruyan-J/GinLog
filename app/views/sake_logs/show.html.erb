@@ -1,0 +1,74 @@
+<% content_for :title,  t('.title') %>
+
+<div class="w-full">
+  <%= page_heading %>
+
+  <article id="<%= dom_id @sake_log %>" class="p-2">
+    <%# 投稿者・記録日時 + 各種ボタン %>
+    <section class="flex justify-between items-start">
+      <div>
+        <%# 投稿者 %>
+        <div class="flex gap-1 items-center text-sm text-neutral-500">
+          <span class="material-symbols-rounded ms-size-24">account_circle</span>
+          <span><%= @sake_log.user.name %></span>
+        </div>
+        <%# 記録日時 %>
+        <p class="text-xs text-neutral-500"><%= l @sake_log.created_at, format: :long %></p>
+      </div>
+
+      <div class="flex gap-2 buttons">
+        <% if current_user.own?(@sake_log) %>
+          <%# 編集ボタン %>
+          <%= link_to edit_sake_log_path(@sake_log), id: "button-edit-#{@sake_log.id}" do %>
+            <span class="material-symbols-rounded text-primary ms-size-24">edit_square</span>
+          <% end %>
+          <%# 削除ボタン %>
+          <%= link_to sake_log_path(@sake_log), id: "button-delete-#{@sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
+            <span class="material-symbols-rounded text-primary ms-size-24">delete</span>
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+
+    <%# 銘柄名・商品名・蔵元（都道府県） %>
+    <section class="mt-1">
+      <div class="flex flex-wrap gap-x-2 items-baseline">
+        <h2 class="text-2xl font-bold"><%= @sake_log.sake.brand.name %></h2>
+        <p class="text-base"><%= @sake_log.sake.product_name %></p>
+      </div>
+      <p class="mt-1 badge badge-ghost badge-sm">
+        <%= @sake_log.sake.brand.brewery.name %>（<%= @sake_log.sake.brand.brewery.area.name %>）
+      </p>
+    </section>
+
+    <%# 好み度 %>
+    <section class="mt-2">
+      <div class="flex gap-0 items-center">
+        <% SakeLog::RATING_MAX.times do |rate| %>
+          <span class="inline-block w-5 h-5 mask mask-star-2 <%= star_rating_class(rate, @sake_log.rating) %>"></span>
+        <% end %>
+      </div>
+    </section>
+
+    <%# 味 × 香りの4象限マップ（点プロット） %>
+    <section class="flex flex-col items-center my-6">
+      <%= render "shared/taste_aroma_map", taste: @sake_log.taste_strength, aroma: @sake_log.aroma_strength, variant: :plot, size: :lg %>
+      <p class="mt-3 text-xs text-neutral-500">
+        味の濃淡 <%= @sake_log.taste_strength %> ／ 香りの濃淡 <%= @sake_log.aroma_strength %>
+      </p>
+    </section>
+
+    <%# 感想 %>
+    <% if @sake_log.review.present? %>
+      <section class="mt-4">
+        <h3 class="text-sm font-semibold text-neutral-500">感想</h3>
+        <%= simple_format(h(@sake_log.review), class: "py-2") %>
+      </section>
+    <% end %>
+
+    <%# 一覧へ戻るリンク %>
+    <section class="flex justify-center mt-6">
+      <%= link_to "マイログに戻る", sake_logs_path, class: "btn btn-outline btn-primary" %>
+    </section>
+  </article>
+</div>

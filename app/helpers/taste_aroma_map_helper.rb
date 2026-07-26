@@ -69,4 +69,16 @@ module TasteAromaMapHelper
   def quadrant_map_size_class(size)
     QUADRANT_MAP_SIZES.fetch(size)
   end
+
+  # 点プロット（variant: :plot）で打つ点の位置を style 属性の文字列として返す
+  # 味（横軸）は左から右へ、香り（縦軸）は下から上へ値が大きくなるように配置する。
+  #
+  # @param taste_strength [Float] 味の濃淡（0〜10）
+  # @param aroma_strength [Float] 香りの濃淡（0〜10）
+  # @return [String] style 属性に渡す文字列（例: "left: 30.0%; top: 80.0%;"）
+  def quadrant_plot_point_style(taste_strength, aroma_strength)
+    left_percent = (taste_strength.to_f / SakeLog::TASTE_STRENGTH_MAX * 100).round(1)
+    top_percent = ((1 - aroma_strength.to_f / SakeLog::AROMA_STRENGTH_MAX) * 100).round(1)
+    "left: #{left_percent}%; top: #{top_percent}%;"
+  end
 end
