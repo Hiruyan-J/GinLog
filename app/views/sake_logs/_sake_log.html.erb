@@ -1,11 +1,12 @@
-<article id="<%= dom_id sake_log %>">
+<article id="<%= dom_id sake_log %>" class="relative">
+  <%= link_to "", sake_log_path(sake_log), class: "absolute inset-0" %>
   <section class="p-2 body">
 
     <%# タイトル %>
     <section class="flex justify-between">
       <h2 class="text-xl font-bold title"><%= sake_log.sake.product_name %></h2>
       <%# 各種ボタン %>
-      <div class="flex gap-2 buttons">
+      <div class="flex relative z-10 gap-2 buttons">
         <% if current_user&.own?(sake_log) %>
           <%# 編集ボタン %>
           <%= link_to edit_sake_log_path(sake_log), id: "button-edit-#{sake_log.id}" do %>

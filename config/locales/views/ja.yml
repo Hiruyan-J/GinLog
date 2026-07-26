@@ -36,6 +36,8 @@ ja:
       title: 日本酒記録編集
     index:
       title: マイログ
+    show:
+      title: 記録の詳細
     sakenowa_attribution_html: "%{link}を利用しています"
   timeline:
     index:
