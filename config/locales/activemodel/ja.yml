@@ -17,5 +17,8 @@ ja:
         brewery_id: 蔵元
         manual_brewery_name: 蔵元
         area_id: 都道府県
-
+        front_label_image: 表ラベル
+        back_label_image: 裏ラベル
+        sub_image1: その他1
+        sub_image2: その他2
 
