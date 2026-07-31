@@ -73,3 +73,10 @@ span.ms-fill {
   color: rgba(255, 255, 255, 0.3);
   font-variation-settings: 'GRAD' -25;
 }
+
+/* Material Symbols の display:inline-block が Tailwind の .hidden より優先されるため、
+   詳細度を上げて display:none を適用する。 */
+.material-symbols-rounded.hidden,
+.material-symbols-outlined.hidden {
+  display: none;
+}
