@@ -37,6 +37,10 @@
     <%= SakeLog.human_attribute_name(attachment_name) %>
   </span>
 
+  <button type="button" class="hidden text-xs link link-primary"
+          data-image-preview-target="clearButton"
+          data-action="image-preview#clear">選択を取り消す</button>
+
   <%# 保存済みの画像があるときだけ「削除」チェックボックスを出す %>
   <% if attachment %>
     <label class="flex gap-1 items-center text-xs cursor-pointer">
