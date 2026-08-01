@@ -41,6 +41,29 @@
       </p>
     </section>
 
+    <%# ラベル画像 %>
+    <% attached_images = @sake_log.attached_images %>
+    <% if attached_images.any? %>
+      <section class="mt-4">
+        <div class="grid grid-cols-4 gap-2">
+          <% attached_images.each do |attachment_name, attachment| %>
+            <%# タップで原寸に近い画像を別タブで開く %>
+            <%= link_to sake_log_image_url(attachment, width: 1600),
+                  target: "_blank", rel: "noopener noreferrer",
+                  class: "flex flex-col gap-1 items-center" do %>
+              <span class="overflow-hidden w-full rounded-lg aspect-square bg-base-200">
+                <%= sake_log_image_tag attachment, width: 300,
+                      class: "object-contain w-full h-full" %>
+              </span>
+              <span class="text-xs text-neutral-500">
+                <%= SakeLog.human_attribute_name(attachment_name) %>
+              </span>
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
     <%# 好み度 %>
     <section class="mt-2">
       <div class="flex gap-0 items-center">
