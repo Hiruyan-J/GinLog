@@ -128,9 +128,10 @@ class SakeLogForm
       raise ActiveRecord::Rollback
     end
 
-    # 画像の実体削除はトランザクションの外（＝コミット後）で行う
-    # ランザクション内で purge すると、ロールバック時に
-    # 「DBは元に戻ったのに Cloudinary 上のファイルだけ消えた」状態になってしまう
+    # 画像の削除はトランザクションの外（＝コミット後）で行う。
+    # ジョブは別コネクションで動くため、トランザクション内で呼ぶと
+    # 「添付行の削除がまだ見えない」状態で実行され、外部キー違反を
+    # 握りつぶして何も削除せずに完了してしまう（孤児ファイルが残る）。
     purge_removed_images if saved
 
     saved
@@ -306,10 +307,14 @@ class SakeLogForm
       next if public_send(attachment_name).present?        # 差し替え済み
       next unless public_send("remove_#{attachment_name}") # 削除チェックなし
 
-      @sake_log.public_send(attachment_name).purge
+      # .purge は Cloudinary への削除リクエストまでリクエストスレッドで実行するため、
+      # 通信エラーが起きると「DBの削除は完了しているのに 500 が返る」状態になる。
+      # .purge_later なら添付の切り離し(DBの削除)は同期実行され、
+      # Cloudinary上の画像削除だけが非同期処理に移るため、
+      # 通信エラーが発生してもリクエストには影響しない。
+      @sake_log.public_send(attachment_name).purge_later
     end
   end
-
 
   # モデルのバリデーションエラーをFormObjectに転記する
   # @param record [ActiveRecord::Base] エラーが発生したレコード（Sake/SakeLog/Brand/Brewery）
