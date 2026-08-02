@@ -106,84 +106,96 @@
 */
 
 /* アイコンの共通設定。
-    ms-size-* / ms-fill に上書きされる側なので、いちばん弱い base レイヤーに置く。 */
+    ms-size-* / ms-fill に上書きされる側なので、いちばん弱い base レイヤーに置く。
+
+    可変フォントの4軸をそれぞれ CSS 変数に逃がし、
+    font-variation-settings の組み立てはここ1箇所だけで行う。
+    こうすると ms-size-* と ms-fill が別々の変数を書き換えるだけになり、
+    同じプロパティを奪い合わなくなる（＝定義順に依存しなくなる）。
+
+    軸名は大文字・小文字が区別される。
+    ・FILL / GRAD … このフォント独自の軸なので大文字
+    ・wght / opsz … 標準で登録された軸なので小文字 */
 @layer base {
   .material-symbols-rounded,
   .material-symbols-outlined {
+    --ms-fill: 0;
+    --ms-wght: 400;
+    --ms-grad: 0;
+    --ms-opsz: 24;
     font-variation-settings:
-      'FILL' 0,
-      'wght' 400,
-      'GRAD' 0,
-      'opsz' 24;
+      'FILL' var(--ms-fill),
+      'wght' var(--ms-wght),
+      'GRAD' var(--ms-grad),
+      'opsz' var(--ms-opsz);
   }
 }
 
 /* アイコンサイズ。
     @utility で定義すると Tailwind が md: などの変種を自動生成してくれる
-    （素の CSS クラスのままだと md:ms-size-24 は存在しないクラスになり空振りする）。 */
+    （素の CSS クラスのままだと md:ms-size-24 は存在しないクラスになり空振りする）。
+    opsz はこのフォントでは 20〜48 しか受け付けないため、64px / 80px でも上限の 48 を指定する。 */
 @utility ms-size-16 {
   font-size: 16px;
-  font-variation-settings: 'OPSZ' 20;
+  --ms-opsz: 20;
 }
 
 @utility ms-size-20 {
   font-size: 20px;
-  font-variation-settings: 'OPSZ' 20;
+  --ms-opsz: 20;
 }
 
 @utility ms-size-24 {
   font-size: 24px;
-  font-variation-settings: 'OPSZ' 24;
+  --ms-opsz: 24;
 }
 
 @utility ms-size-32 {
   font-size: 32px;
-  font-variation-settings: 'OPSZ' 32;
+  --ms-opsz: 32;
 }
 
 @utility ms-size-40 {
   font-size: 40px;
-  font-variation-settings: 'OPSZ' 40;
+  --ms-opsz: 40;
 }
 
 @utility ms-size-48 {
   font-size: 48px;
-  font-variation-settings: 'OPSZ' 48;
+  --ms-opsz: 48;
 }
 
 @utility ms-size-64 {
   font-size: 64px;
-  font-variation-settings: 'OPSZ' 48;
+  --ms-opsz: 48;
 }
 
 @utility ms-size-80 {
   font-size: 80px;
-  font-variation-settings: 'OPSZ' 48;
+  --ms-opsz: 48;
 }
 
 /* 塗りつぶし設定。
-    ms-size-* と同じ font-variation-settings を指定するので、
-    後に書いて ms-size-* より優先されるようにする（移設前の span.ms-fill と同じ優先順位）。
-    ※ 並び順を変えるとフッターの add_circle の塗りつぶしが効かなくなるので注意。 */
+    塗りつぶしと太さの変数だけを設定する。
+    ms-size-* とは別の変数を触るので、記述順が入れ替わっても影響を受けない。 */
 @utility ms-fill {
-  font-variation-settings:
-    'FILL' 1,
-    'wght' 700;
+  --ms-fill: 1;
+  --ms-wght: 700;
 }
 
 /* 明るい背景に黒としてアイコンを使用する際のルール。
-    ベース設定より強く、ms-size-* より弱い components レイヤーに置く。 */
+    濃さの変数だけを設定する。base の既定値を上書きするため components レイヤーに置く。 */
 @layer components {
   .dark {
     background: black;
     color: rgba(255, 255, 255, 1);
-    font-variation-settings: 'GRAD' -25;
+    --ms-grad: -25;
   }
 
   .dark-inactive {
     background: black;
     color: rgba(255, 255, 255, 0.3);
-    font-variation-settings: 'GRAD' -25;
+    --ms-grad: -25;
   }
 }
 
