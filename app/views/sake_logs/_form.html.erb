@@ -1,7 +1,29 @@
-<%= form_with model: sake_log, url: sake_log.persisted? ? sake_log_path(sake_log.sake_log) : sake_logs_path do |f| %>
+<%# 日本酒記録の入力フォーム（新規作成・編集で共用）
+    sake_log : SakeLogForm（モデルの SakeLog ではない点に注意）
+               編集時は sake_log.sake_log で元の SakeLog レコードを参照できる
+%>
+<%= form_with model: sake_log,
+      url: sake_log.persisted? ? sake_log_path(sake_log.sake_log) : sake_logs_path,
+      html: { multipart: true } do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
 
   <section class="flex flex-col gap-6 items-center px-2">
+
+    <%# 写真（すべて任意） %>
+    <div class="flex flex-col w-full md:w-8/12">
+      <div class="flex gap-2 items-baseline">
+        <span class="font-semibold whitespace-nowrap">写真</span>
+      </div>
+
+      <div class="grid grid-cols-4 gap-2 mt-2">
+        <% SakeLog::IMAGE_ATTACHMENT_NAMES.each do |attachment_name| %>
+          <%= render "sake_logs/image_field",
+                f: f,
+                attachment_name: attachment_name,
+                attachment: sake_log.attached_image(attachment_name) %>
+        <% end %>
+      </div>
+    </div>
 
     <%# 銘柄(オートコンプリート) %>
     <div class="flex flex-col w-full md:w-8/12"

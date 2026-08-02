@@ -158,7 +158,7 @@
 | バックエンド   | Ruby 3.3.6 / Rails 7.2.1 |
 | データベース   | PostgreSQL |
 | 開発環境       | Docker |
-| インフラ       | Render / AWS(S3) |
+| インフラ       | Render / Cloudinary |
 | API            | Google認証：Google OAuth 2.0 API<br>OCR：Google Vision API（表ラベル・裏ラベルのテキスト抽出）（表ラベルの写真をObject Localizationでボトル検出→ラベルの大まかな位置検出を行い、ラベルのicon化に使用）<br>情報抽出：Open AIなどの生成AI系API（OCR抽出したテキストデータから必要な情報の取り出し・分類に使用）<br>購入ページリンク：楽天商品検索API |
 | VCS            | GitHub |
 

@@ -41,6 +41,9 @@ gem "tailwindcss-ruby"
 gem "inline_svg"
 gem "rails-i18n", "~> 8.1.0"
 
+# 画像
+gem "cloudinary", "~> 2.4"
+
 # ログイン
 gem "devise"
 gem "devise-i18n"

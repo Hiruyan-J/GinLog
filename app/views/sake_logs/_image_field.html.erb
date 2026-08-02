@@ -1,0 +1,53 @@
+<%# 写真スロット1枠分のパーシャル
+    f               : フォームビルダー
+    attachment_name : スロット名（:front_label_image など）
+    attachment      : 保存済みの添付（なければ nil）
+%>
+<div class="flex flex-col gap-1 items-center" data-controller="image-preview">
+
+  <%# サムネイル枠（タップでファイル選択ダイアログが開く） %>
+  <label class="flex overflow-hidden justify-center items-center w-full rounded-lg border-2 border-dashed cursor-pointer aspect-square border-base-300 bg-base-200">
+    <% if attachment %>
+      <%# 保存済みの画像を表示 %>
+      <%= sake_log_image_tag attachment, width: 200,
+            class: "object-contain w-full h-full",
+            data: { image_preview_target: "preview" } %>
+      <span class="hidden material-symbols-rounded ms-size-32 text-base-content/40"
+            data-image-preview-target="placeholder">add_a_photo</span>
+    <% else %>
+      <%# 画像がないときは空の img を隠しておき、選択時に src を差し込む %>
+      <img class="hidden object-contain w-full h-full"
+           data-image-preview-target="preview">
+      <span class="material-symbols-rounded ms-size-32 text-base-content/40"
+            data-image-preview-target="placeholder">add_a_photo</span>
+    <% end %>
+
+    <%# 実体のファイル入力欄（見た目は隠して、上のラベル全体をクリック領域にする） %>
+    <%= f.file_field attachment_name,
+          accept: "image/*",
+          class: "hidden",
+          data: {
+            image_preview_target: "input",
+            action: "change->image-preview#select"
+          } %>
+  </label>
+
+  <%# スロット名（表ラベル / 裏ラベル / その他1 / その他2） %>
+  <span class="text-xs text-base-content/70">
+    <%= SakeLog.human_attribute_name(attachment_name) %>
+  </span>
+
+  <button type="button" class="hidden text-xs link link-primary"
+          data-image-preview-target="clearButton"
+          data-action="image-preview#clear">選択を取り消す</button>
+
+  <%# 保存済みの画像があるときだけ「削除」チェックボックスを出す %>
+  <% if attachment %>
+    <label class="flex gap-1 items-center text-xs cursor-pointer">
+      <%= f.check_box "remove_#{attachment_name}",
+            class: "checkbox checkbox-xs checkbox-primary",
+            data: { image_preview_target: "removeField" } %>
+      <span>削除</span>
+    </label>
+  <% end %>
+</div>

@@ -11,5 +11,9 @@ ja:
         taste_strength: 味の濃淡
         review: 感想
         product_name: 商品名
+        front_label_image: 表ラベル
+        back_label_image: 裏ラベル
+        sub_image1: その他1
+        sub_image2: その他2
       sake:
         product_name: 商品名

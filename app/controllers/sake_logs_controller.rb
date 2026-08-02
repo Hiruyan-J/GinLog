@@ -4,7 +4,12 @@ class SakeLogsController < ApplicationController
   end
 
   def show
-    @sake_log = SakeLog.includes(:user, sake: { brand: { brewery: :area } }).find(params[:id])
+    @sake_log = SakeLog.includes(:user, sake: { brand: { brewery: :area } })
+                        .with_attached_front_label_image
+                        .with_attached_back_label_image
+                        .with_attached_sub_image1
+                        .with_attached_sub_image2
+                        .find(params[:id])
   end
 
   def new
@@ -58,7 +63,10 @@ class SakeLogsController < ApplicationController
     params.require(:sake_log).permit(
       :rating, :aroma_strength, :taste_strength, :review,
       :product_name, :brand_id, :sake_id,
-      :manual_brand_name, :manual_brewery_name, :brewery_id, :area_id
+      :manual_brand_name, :manual_brewery_name, :brewery_id, :area_id,
+      :front_label_image, :back_label_image, :sub_image1, :sub_image2,
+      :remove_front_label_image, :remove_back_label_image,
+      :remove_sub_image1, :remove_sub_image2
     )
   end
 end

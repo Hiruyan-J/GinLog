@@ -19,6 +19,17 @@ RSpec.describe SakeLogForm, type: :model do
     SakeLogForm.new(attributes, user: user)
   end
 
+  # テスト用の小さな画像をフォームに渡せる形にする
+  # @param filename [String] spec/fixtures/files 配下のファイル名
+  # @param content_type [String] 送信されたことにする Content-Type
+  # @return [Rack::Test::UploadedFile]
+  def uploaded_file(filename = "label.png", content_type = "image/png")
+    Rack::Test::UploadedFile.new(
+      Rails.root.join("spec/fixtures/files", filename),
+      content_type
+    )
+  end
+
   # ------------------------------------------------------------------
   # バリデーション
   # ------------------------------------------------------------------
@@ -329,6 +340,119 @@ RSpec.describe SakeLogForm, type: :model do
 
         expect { form.save }.to change(SakeLog, :count).by(1)
         expect(form.sake_log.sake).to eq existing
+      end
+    end
+
+    describe "ラベル画像" do
+      context "新規作成" do
+        it "画像を渡さなくても保存できる(すべて任意)" do
+          form = build_form
+
+          expect(form.save).to be true
+          expect(form.sake_log.front_label_image).not_to be_attached
+        end
+
+        it "渡した画像だけが添付される" do
+          form = build_form(front_label_image: uploaded_file, sub_image1: uploaded_file)
+
+          expect(form.save).to be true
+          expect(form.sake_log.front_label_image).to be_attached
+          expect(form.sake_log.sub_image1).to be_attached
+          expect(form.sake_log.back_label_image).not_to be_attached
+          expect(form.sake_log.sub_image2).not_to be_attached
+        end
+      end
+
+      context "編集" do
+        # 表ラベルだけ添付済みの記録を用意する
+        let(:sake_log) do
+          create(:sake_log).tap do |log|
+            log.front_label_image.attach(uploaded_file)
+          end
+        end
+
+        it "画像を渡さなければ既存の添付はそのまま残る" do
+          before_blob_id = sake_log.front_label_image.blob.id
+          form = SakeLogForm.new({ rating: 5 }, user: sake_log.user, sake_log: sake_log)
+
+          expect(form.save).to be true
+          expect(sake_log.reload.front_label_image.blob.id).to eq before_blob_id
+        end
+
+        it "同じスロットに新しい画像を渡すと差し替わる" do
+          before_blob_id = sake_log.front_label_image.blob.id
+          form = SakeLogForm.new({ front_label_image: uploaded_file },
+                                 user: sake_log.user, sake_log: sake_log)
+
+          expect(form.save).to be true
+          expect(sake_log.reload.front_label_image.blob.id).not_to eq before_blob_id
+        end
+
+        it "別スロットに画像を渡しても既存スロットは消えない" do
+          before_blob_id = sake_log.front_label_image.blob.id
+          form = SakeLogForm.new({ back_label_image: uploaded_file },
+                                 user: sake_log.user, sake_log: sake_log)
+
+          expect(form.save).to be true
+          expect(sake_log.reload.front_label_image.blob.id).to eq before_blob_id
+          expect(sake_log.reload.back_label_image).to be_attached
+        end
+
+        it "削除フラグを立てるとそのスロットの画像が消える" do
+          form = SakeLogForm.new({ remove_front_label_image: "1" },
+                                 user: sake_log.user, sake_log: sake_log)
+
+          expect(form.save).to be true
+          expect(sake_log.reload.front_label_image).not_to be_attached
+        end
+
+        it "削除フラグと新しい画像が両方来たときは差し替えを優先する(消さない)" do
+          before_blob_id = sake_log.front_label_image.blob.id
+          form = SakeLogForm.new({ remove_front_label_image: "1", front_label_image: uploaded_file },
+                                 user: sake_log.user, sake_log: sake_log)
+
+          expect(form.save).to be true
+          expect(sake_log.reload.front_label_image).to be_attached
+          expect(sake_log.reload.front_label_image.blob.id).not_to eq before_blob_id
+        end
+      end
+
+      context "許可されていない形式の画像を渡したとき" do
+        it "save は false を返し、スロット名付きのエラーが転記される" do
+          form = build_form(front_label_image: uploaded_file("not_image.txt", "text/plain"))
+
+          expect(form.save).to be false
+          expect(form.errors[:front_label_image]).to include("はJPEG・PNG・WebP・HEIC・HEIF形式のみアップロードできます")
+        end
+
+        it "Sake / SakeLog は作成されない(ロールバックされる)" do
+          form = build_form(front_label_image: uploaded_file("not_image.txt", "text/plain"))
+
+          expect { form.save }
+            .to change(Sake, :count).by(0)
+            .and change(SakeLog, :count).by(0)
+        end
+
+        it "銘柄手入力モードでも Brewery / Brand が残らない(ロールバックされる)" do
+          area = create(:area)
+          form = SakeLogForm.new(
+            {
+              manual_brand_name: "ロールバック銘柄",
+              manual_brewery_name: "ロールバック酒造",
+              area_id: area.id,
+              product_name: "純米酒",
+              rating: 3,
+              aroma_strength: 5.0,
+              taste_strength: 5.0,
+              front_label_image: uploaded_file("not_image.txt", "text/plain")
+            },
+            user: user
+          )
+
+          expect { form.save }
+            .to change(Brewery, :count).by(0)
+            .and change(Brand, :count).by(0)
+        end
       end
     end
   end

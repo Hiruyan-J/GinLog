@@ -12,6 +12,16 @@ class SakeLogForm
   attribute :aroma_strength, :float
   attribute :taste_strength, :float
   attribute :review, :string
+  # ラベル画像の属性
+  attribute :front_label_image
+  attribute :back_label_image
+  attribute :sub_image1
+  attribute :sub_image2
+  # 既存画像の削除フラグ(編集画面の「削除」チェックボックス)
+  attribute :remove_front_label_image, :boolean
+  attribute :remove_back_label_image, :boolean
+  attribute :remove_sub_image1, :boolean
+  attribute :remove_sub_image2, :boolean
   # 銘柄手入力モード用の属性
   attribute :manual_brand_name, :string
   attribute :manual_brewery_name, :string
@@ -76,6 +86,8 @@ class SakeLogForm
   def save
     return false if invalid?
 
+    saved = false
+
     SakeLog.transaction do
       # 銘柄手入力モード時は Brand/Brewery を先に作成
       resolve_brand_id! if manual_brand_mode?
@@ -106,15 +118,23 @@ class SakeLogForm
         @sake_log.save!
       end
 
-      true
+      saved = true
     rescue ActiveRecord::RecordInvalid => e
       # モデルのエラーをFormObjectに転記
       copy_errors_from_record(e.record)
-      false
+      raise ActiveRecord::Rollback
     rescue ActiveRecord::RecordNotFound
       errors.add(:base, "指定された日本酒が見つかりませんでした")
-      false
+      raise ActiveRecord::Rollback
     end
+
+    # 画像の削除はトランザクションの外（＝コミット後）で行う。
+    # ジョブは別コネクションで動くため、トランザクション内で呼ぶと
+    # 「添付行の削除がまだ見えない」状態で実行され、外部キー違反を
+    # 握りつぶして何も削除せずに完了してしまう（孤児ファイルが残る）。
+    purge_removed_images if saved
+
+    saved
   end
 
   # from_withとの連携用メソッド
@@ -125,6 +145,18 @@ class SakeLogForm
 
   def model_name
     SakeLog.model_name
+  end
+
+  # 保存済みの添付画像を返す（編集画面用）
+  # @param attachment_name [Symbol] スロット名（:front_label_image など）
+  # @return [ActiveStorage::Attached::One, nil] 保存済みの添付があれば添付、なければ nil
+  def attached_image(attachment_name)
+    return nil if @sake_log.nil?
+
+    attachment = @sake_log.public_send(attachment_name)
+    return nil unless attachment.attachment&.persisted?
+
+    attachment
   end
 
   # 銘柄名（通常モード: Brand.name、手入力モード: manual_brand_name）
@@ -249,13 +281,39 @@ class SakeLogForm
     end
   end
 
+  # SakeLog へ渡す属性をまとめる
+  # @return [Hash] SakeLog に代入する属性
   def sake_log_attributes
-    {
+    attributes = {
       rating: rating,
       aroma_strength: aroma_strength,
       taste_strength: taste_strength,
       review: review
     }
+
+    SakeLog::IMAGE_ATTACHMENT_NAMES.each do |attachment_name|
+      file = public_send(attachment_name)
+      attributes[attachment_name] = file if file.present?
+    end
+
+    attributes
+  end
+
+  # 「削除」チェックが入っているスロットの画像を実際に削除する
+  # 新しい画像が選ばれているスロットは差し替え済みなので対象外
+  # @return [void]
+  def purge_removed_images
+    SakeLog::IMAGE_ATTACHMENT_NAMES.each do |attachment_name|
+      next if public_send(attachment_name).present?        # 差し替え済み
+      next unless public_send("remove_#{attachment_name}") # 削除チェックなし
+
+      # .purge は Cloudinary への削除リクエストまでリクエストスレッドで実行するため、
+      # 通信エラーが起きると「DBの削除は完了しているのに 500 が返る」状態になる。
+      # .purge_later なら添付の切り離し(DBの削除)は同期実行され、
+      # Cloudinary上の画像削除だけが非同期処理に移るため、
+      # 通信エラーが発生してもリクエストには影響しない。
+      @sake_log.public_send(attachment_name).purge_later
+    end
   end
 
   # モデルのバリデーションエラーをFormObjectに転記する
