@@ -1,3 +1,16 @@
+/* レイヤーの優先順位。
+    後ろに書いたレイヤーほど強い（theme < base < components < utilities）。*/
+@layer theme, base, components, utilities;
+
+/* Material Symbols のフォント定義を base レイヤーに取り込む。
+    layout の <link rel="stylesheet"> で読むと、この CSS はどのレイヤーにも属さない
+    「レイヤー外」の扱いになる。レイヤー外の指定は詳細度に関係なくレイヤー内より強いため、
+    Google Fonts 側の .material-symbols-rounded { font-size: 24px } が
+    utilities レイヤーの .ms-size-* に常に勝ってしまい、アイコンサイズが 24px 固定になる。
+    layer(base) を付けて base レイヤーへ入れることで、utilities の ms-size-* が上書きできる。 */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block') layer(base);
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block') layer(base);
+
 @import 'tailwindcss';
 
 @config '../../../config/tailwind.config.js';
@@ -91,6 +104,88 @@
 }
 
 */
+
+/* アイコンの共通設定。
+    ms-size-* / ms-fill に上書きされる側なので、いちばん弱い base レイヤーに置く。 */
+@layer base {
+  .material-symbols-rounded,
+  .material-symbols-outlined {
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
+  }
+}
+
+/* アイコンサイズ。
+    @utility で定義すると Tailwind が md: などの変種を自動生成してくれる
+    （素の CSS クラスのままだと md:ms-size-24 は存在しないクラスになり空振りする）。 */
+@utility ms-size-16 {
+  font-size: 16px;
+  font-variation-settings: 'OPSZ' 20;
+}
+
+@utility ms-size-20 {
+  font-size: 20px;
+  font-variation-settings: 'OPSZ' 20;
+}
+
+@utility ms-size-24 {
+  font-size: 24px;
+  font-variation-settings: 'OPSZ' 24;
+}
+
+@utility ms-size-32 {
+  font-size: 32px;
+  font-variation-settings: 'OPSZ' 32;
+}
+
+@utility ms-size-40 {
+  font-size: 40px;
+  font-variation-settings: 'OPSZ' 40;
+}
+
+@utility ms-size-48 {
+  font-size: 48px;
+  font-variation-settings: 'OPSZ' 48;
+}
+
+@utility ms-size-64 {
+  font-size: 64px;
+  font-variation-settings: 'OPSZ' 48;
+}
+
+@utility ms-size-80 {
+  font-size: 80px;
+  font-variation-settings: 'OPSZ' 48;
+}
+
+/* 塗りつぶし設定。
+    ms-size-* と同じ font-variation-settings を指定するので、
+    後に書いて ms-size-* より優先されるようにする（移設前の span.ms-fill と同じ優先順位）。
+    ※ 並び順を変えるとフッターの add_circle の塗りつぶしが効かなくなるので注意。 */
+@utility ms-fill {
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 700;
+}
+
+/* 明るい背景に黒としてアイコンを使用する際のルール。
+    ベース設定より強く、ms-size-* より弱い components レイヤーに置く。 */
+@layer components {
+  .dark {
+    background: black;
+    color: rgba(255, 255, 255, 1);
+    font-variation-settings: 'GRAD' -25;
+  }
+
+  .dark-inactive {
+    background: black;
+    color: rgba(255, 255, 255, 0.3);
+    font-variation-settings: 'GRAD' -25;
+  }
+}
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
