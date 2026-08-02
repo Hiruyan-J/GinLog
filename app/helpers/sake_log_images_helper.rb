@@ -1,11 +1,9 @@
 # 日本酒記録のラベル画像を表示するためのヘルパー
 #
-# Cloudinary を使っているときは、URL に変換パラメータを付けて
-# 「CDN側でリサイズ済みの画像」を受け取る。
-#   w_400        … 幅400pxに縮小
-#   f_auto       … ブラウザが対応していれば WebP / AVIF で配信
-#   q_auto       … 見た目を保ちつつ自動で圧縮
-# これにより、元が2MBのスマホ写真でも数十KBで表示でき、無料枠の転送量を節約できる。
+# 画像のリサイズは Rails 側（Active Storage の variant）ではなく、
+# Cloudinary の URL 変換に任せている。
+# そのため image_processing gem と libvips が不要で、
+# 元が2MBのスマホ写真でも数十KBで配信でき、無料枠の転送量を節約できる。
 module SakeLogImagesHelper
   # ラベル画像の img タグを返す
   #
@@ -21,6 +19,14 @@ module SakeLogImagesHelper
   end
 
   # ラベル画像の配信URLを返す（サムネイルから原寸を開くリンク用）
+  #
+  # 渡した引数は Cloudinary によって URL 内の変換パラメータに変換される。
+  # 例)
+  #   width: 300         -> w_300   … 幅300pxに縮小
+  #   crop: :limit       -> c_limit … 指定幅以内に収める（元より拡大しない）
+  #   fetch_format: :auto-> f_auto  … 対応ブラウザには WebP / AVIF で配信
+  #   quality: :auto     -> q_auto  … 見た目を保ちつつ自動で圧縮
+  # 生成例: https://res.cloudinary.com/<cloud_name>/image/upload/c_limit,f_auto,q_auto,w_300/<key>
   #
   # @param attachment [ActiveStorage::Attached::One, nil] 表示対象の添付
   # @param width [Integer] 配信する画像の幅(px)
