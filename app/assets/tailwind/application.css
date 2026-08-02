@@ -1,3 +1,16 @@
+/* レイヤーの優先順位。
+    後ろに書いたレイヤーほど強い（theme < base < components < utilities）。*/
+@layer theme, base, components, utilities;
+
+/* Material Symbols のフォント定義を base レイヤーに取り込む。
+    layout の <link rel="stylesheet"> で読むと、この CSS はどのレイヤーにも属さない
+    「レイヤー外」の扱いになる。レイヤー外の指定は詳細度に関係なくレイヤー内より強いため、
+    Google Fonts 側の .material-symbols-rounded { font-size: 24px } が
+    utilities レイヤーの .ms-size-* に常に勝ってしまい、アイコンサイズが 24px 固定になる。
+    layer(base) を付けて base レイヤーへ入れることで、utilities の ms-size-* が上書きできる。 */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block') layer(base);
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block') layer(base);
+
 @import 'tailwindcss';
 
 @config '../../../config/tailwind.config.js';
@@ -91,6 +104,100 @@
 }
 
 */
+
+/* アイコンの共通設定。
+    ms-size-* / ms-fill に上書きされる側なので、いちばん弱い base レイヤーに置く。
+
+    可変フォントの4軸をそれぞれ CSS 変数に逃がし、
+    font-variation-settings の組み立てはここ1箇所だけで行う。
+    こうすると ms-size-* と ms-fill が別々の変数を書き換えるだけになり、
+    同じプロパティを奪い合わなくなる（＝定義順に依存しなくなる）。
+
+    軸名は大文字・小文字が区別される。
+    ・FILL / GRAD … このフォント独自の軸なので大文字
+    ・wght / opsz … 標準で登録された軸なので小文字 */
+@layer base {
+  .material-symbols-rounded,
+  .material-symbols-outlined {
+    --ms-fill: 0;
+    --ms-wght: 400;
+    --ms-grad: 0;
+    --ms-opsz: 24;
+    font-variation-settings:
+      'FILL' var(--ms-fill),
+      'wght' var(--ms-wght),
+      'GRAD' var(--ms-grad),
+      'opsz' var(--ms-opsz);
+  }
+}
+
+/* アイコンサイズ。
+    @utility で定義すると Tailwind が md: などの変種を自動生成してくれる
+    （素の CSS クラスのままだと md:ms-size-24 は存在しないクラスになり空振りする）。
+    opsz はこのフォントでは 20〜48 しか受け付けないため、64px / 80px でも上限の 48 を指定する。 */
+@utility ms-size-16 {
+  font-size: 16px;
+  --ms-opsz: 20;
+}
+
+@utility ms-size-20 {
+  font-size: 20px;
+  --ms-opsz: 20;
+}
+
+@utility ms-size-24 {
+  font-size: 24px;
+  --ms-opsz: 24;
+}
+
+@utility ms-size-32 {
+  font-size: 32px;
+  --ms-opsz: 32;
+}
+
+@utility ms-size-40 {
+  font-size: 40px;
+  --ms-opsz: 40;
+}
+
+@utility ms-size-48 {
+  font-size: 48px;
+  --ms-opsz: 48;
+}
+
+@utility ms-size-64 {
+  font-size: 64px;
+  --ms-opsz: 48;
+}
+
+@utility ms-size-80 {
+  font-size: 80px;
+  --ms-opsz: 48;
+}
+
+/* 塗りつぶし設定。
+    塗りつぶしと太さの変数だけを設定する。
+    ms-size-* とは別の変数を触るので、記述順が入れ替わっても影響を受けない。 */
+@utility ms-fill {
+  --ms-fill: 1;
+  --ms-wght: 700;
+}
+
+/* 明るい背景に黒としてアイコンを使用する際のルール。
+    濃さの変数だけを設定する。base の既定値を上書きするため components レイヤーに置く。 */
+@layer components {
+  .dark {
+    background: black;
+    color: rgba(255, 255, 255, 1);
+    --ms-grad: -25;
+  }
+
+  .dark-inactive {
+    background: black;
+    color: rgba(255, 255, 255, 0.3);
+    --ms-grad: -25;
+  }
+}
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
