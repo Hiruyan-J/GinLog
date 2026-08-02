@@ -422,7 +422,7 @@ RSpec.describe SakeLogForm, type: :model do
           form = build_form(front_label_image: uploaded_file("not_image.txt", "text/plain"))
 
           expect(form.save).to be false
-          expect(form.errors[:front_label_image]).to include("はJPEG・PNG・WebP・HEIC形式のみアップロードできます")
+          expect(form.errors[:front_label_image]).to include("はJPEG・PNG・WebP・HEIC・HEIF形式のみアップロードできます")
         end
 
         it "Sake / SakeLog は作成されない(ロールバックされる)" do

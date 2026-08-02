@@ -107,7 +107,7 @@ RSpec.describe SakeLog, type: :model do
         sake_log.front_label_image.attach(uploaded_file("not_image.txt", "text/plain"))
 
         expect(sake_log).to be_invalid
-        expect(sake_log.errors[:front_label_image]).to include("はJPEG・PNG・WebP・HEIC形式のみアップロードできます")
+        expect(sake_log.errors[:front_label_image]).to include("はJPEG・PNG・WebP・HEIC・HEIF形式のみアップロードできます")
       end
     end
 

@@ -82,7 +82,7 @@ class SakeLog < ApplicationRecord
   def validate_image_content_type(attachment_name, blob)
     return if IMAGE_CONTENT_TYPES.include?(detected_content_type(attachment_name, blob))
 
-    errors.add(attachment_name, "はJPEG・PNG・WebP・HEIC形式のみアップロードできます")
+    errors.add(attachment_name, "はJPEG・PNG・WebP・HEIC・HEIF形式のみアップロードできます")
   end
 
   # 添付ファイルの実際の形式を返す
