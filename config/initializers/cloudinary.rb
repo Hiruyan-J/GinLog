@@ -5,7 +5,8 @@ cloudinary_url = Rails.application.credentials.dig(:cloudinary, :url)
 # 保存先が Cloudinary なのに接続情報が無い場合は起動時に落とす。
 # 素通りさせると、最初の画像アップロード・表示まで設定漏れに気づけない。
 if Rails.application.config.active_storage.service.to_s == "cloudinary" &&
-   cloudinary_url.blank? && ENV["CLOUDINARY_URL"].blank?
+    ENV["SECRET_KEY_BASE_DUMMY"].blank? &&
+    cloudinary_url.blank? && ENV["CLOUDINARY_URL"].blank?
   raise "Cloudinary の接続情報がありません。" \
         "credentialsに cloudinary.url を設定するか、" \
         "環境変数 CLOUDINARY_URL を指定してください。"
