@@ -1,0 +1,11 @@
+<%# 2ページ目以降のカードを返すテンプレート
+
+  【なぜ turbo_frame_tag で包むのか】
+  Turbo は返ってきた HTML の中から「リクエスト元の frame と同じ id を持つ frame」を探し、
+  その中身だけを差し替える。id が一致しないと "Content missing" になってしまう。
+%>
+<%= turbo_frame_tag "timeline_page_#{@sake_logs.current_page}",
+      class: "flex flex-col gap-0 divide-y" do %>
+  <%= render partial: "timelines/sake_log", collection: @sake_logs %>
+  <%= render "timelines/next_page_frame", sake_logs: @sake_logs %>
+<% end %>
