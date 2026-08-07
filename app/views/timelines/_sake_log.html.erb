@@ -21,7 +21,7 @@
             <span class="material-symbols-rounded text-primary ms-size-24">edit_square</span>
           <% end %>
           <%# 削除ボタン %>
-          <%= link_to sake_log_path(sake_log, from: "timeline"), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
+          <%= link_to sake_log_path(sake_log, from: "list"), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
             <span class="material-symbols-rounded text-primary ms-size-24">delete</span>
           <% end %>
         <% end %>
