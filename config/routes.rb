@@ -32,8 +32,8 @@ Rails.application.routes.draw do
   end
 
   resources :sake_logs, only: %i[index show new create edit update destroy]
-  get "timeline", to: "timeline#index", as: :timeline
+  get "timeline", to: "timelines#index", as: :timeline
 
   # Defines the root path route ("/")
-  root "timeline#index"
+  root "timelines#index"
 end

@@ -1,14 +1,13 @@
 class SakeLogsController < ApplicationController
+  skip_before_action :authenticate_user!, only: %i[show]
+
   def index
-    @sake_logs = current_user.sake_logs.includes(:sake).order(created_at: :desc)
+    @sake_logs = current_user.sake_logs.includes(:sake).order(created_at: :desc, id: :desc)
   end
 
   def show
     @sake_log = SakeLog.includes(:user, sake: { brand: { brewery: :area } })
-                        .with_attached_front_label_image
-                        .with_attached_back_label_image
-                        .with_attached_sub_image1
-                        .with_attached_sub_image2
+                        .with_attached_images
                         .find(params[:id])
   end
 
@@ -44,12 +43,29 @@ class SakeLogsController < ApplicationController
     end
   end
 
+  # 削除元によって応答を変える
+  #   一覧（タイムライン）から削除 → Turbo Stream でそのカードだけ消す（ページ遷移しない）
+  #   記録詳細から削除            → マイログ一覧へ戻る
   def destroy
     set_sake_log
-    if @sake_log.destroy
-      redirect_to sake_logs_path, success: t("defaults.flash_message.deleted", item: SakeLog.model_name.human), status: :see_other
+
+    unless @sake_log.destroy
+      redirect_back fallback_location: sake_logs_path,
+                    error: t("defaults.flash_message.not_deleted", item: SakeLog.model_name.human),
+                    status: :see_other
+      return
+    end
+
+    if delete_from_list?
+      flash.now[:success] = t("defaults.flash_message.deleted", item: SakeLog.model_name.human)
+      render turbo_stream: [
+        turbo_stream.remove(@sake_log),
+        turbo_stream.replace("flash_messages", partial: "shared/flash_message")
+      ]
     else
-      redirect_back fallback_location: sake_logs_path, error: t("defaults.flash_message.not_deleted", item: SakeLog.model_name.human), status: :see_other
+      redirect_to sake_logs_path,
+                  success: t("defaults.flash_message.deleted", item: SakeLog.model_name.human),
+                  status: :see_other
     end
   end
 
@@ -57,6 +73,12 @@ class SakeLogsController < ApplicationController
 
   def set_sake_log
     @sake_log = current_user.sake_logs.find(params[:id])
+  end
+
+  # 一覧画面からの削除かどうか（一覧ではページ遷移せず、そのカードだけを消す）
+  #   一覧のカードにある削除リンクだけが from=list を付けて送ってくる。
+  def delete_from_list?
+    params[:from] == "list"
   end
 
   def sake_log_form_params

@@ -39,6 +39,6 @@ ja:
     show:
       title: 記録の詳細
     sakenowa_attribution_html: "%{link}を利用しています"
-  timeline:
+  timelines:
     index:
       title: タイムライン

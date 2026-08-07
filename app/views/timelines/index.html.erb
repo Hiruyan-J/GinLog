@@ -4,7 +4,7 @@
   <%= page_heading %>
   <div id="timeline" class="flex flex-col gap-0 divide-y">
     <% if @sake_logs.any? %>
-      <%= render partial: 'timeline/sake_log', collection: @sake_logs %>
+      <%= render partial: 'timelines/sake_log', collection: @sake_logs %>
     <% else %>
       <p class="my-10 text-center">まだ投稿がありません</p>
     <% end %>
