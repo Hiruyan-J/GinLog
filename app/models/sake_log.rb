@@ -46,6 +46,15 @@ class SakeLog < ApplicationRecord
   has_one_attached :sub_image1
   has_one_attached :sub_image2
 
+  # 添付画像4種類をまとめて事前読み込みするスコープ
+  # @return [ActiveRecord::Relation] 添付画像を事前読み込みした SakeLog のリレーション
+  scope :with_attached_images, -> {
+    with_attached_front_label_image
+      .with_attached_back_label_image
+      .with_attached_sub_image1
+      .with_attached_sub_image2
+  }
+
   validates :rating, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: RATING_MIN, less_than_or_equal_to: RATING_MAX }
   validates :taste_strength, presence: true, numericality: { greater_than_or_equal_to: TASTE_STRENGTH_MIN, less_than_or_equal_to: TASTE_STRENGTH_MAX }
   validates :aroma_strength, presence: true, numericality: { greater_than_or_equal_to: AROMA_STRENGTH_MIN, less_than_or_equal_to: AROMA_STRENGTH_MAX }
