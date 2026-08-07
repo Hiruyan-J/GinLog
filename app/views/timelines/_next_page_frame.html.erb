@@ -1,0 +1,19 @@
+<%# 次ページ読み込み用の Turbo Frame
+  locals:
+    sake_logs: kaminari でページングされた記録（next_page を持つ）
+
+  【class を付けている理由】
+  turbo-frame 要素は既定で display: inline のため、そのままだとカードが横に並んでしまう。
+  親の #timeline と同じ flex-col / divide-y を指定して、カードの積み方と区切り線を揃える。
+%>
+<% if sake_logs.next_page %>
+  <%= turbo_frame_tag "timeline_page_#{sake_logs.next_page}",
+        src: timeline_path(page: sake_logs.next_page),
+        loading: :lazy,
+        class: "flex flex-col gap-0 divide-y" do %>
+    <%# 読み込み中に表示される中身。読み込みが終わると、次ページの内容ごと置き換わる %>
+    <div class="flex justify-center py-6">
+      <span class="loading loading-dots loading-md text-primary"></span>
+    </div>
+  <% end %>
+<% end %>
