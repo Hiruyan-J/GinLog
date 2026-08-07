@@ -2,7 +2,7 @@ class SakeLogsController < ApplicationController
   skip_before_action :authenticate_user!, only: %i[show]
 
   def index
-    @sake_logs = current_user.sake_logs.includes(:sake).order(created_at: :desc)
+    @sake_logs = current_user.sake_logs.includes(:sake).order(created_at: :desc, id: :desc)
   end
 
   def show
