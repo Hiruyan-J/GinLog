@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+
+# set -e は付けない。
+# 付けるとチェックが 1 つ落ちた時点でスクリプトが終わってしまい、
+# 「全部走らせて最後にまとめて結果を見る」という目的が果たせないため。
+set -uo pipefail
+
+# どこから実行してもプロジェクトルート（compose.yml のある場所）で動くようにする
+cd "$(dirname "$0")/.." || exit 1
+
+# 使い方を表示する
+usage() {
+  cat <<'USAGE'
+使い方: bin/check [オプション]
+
+実装後のチェック（Rubocop / Tailwind sort / Brakeman / RSpec）をまとめて実行します。
+1 つ失敗しても止まらず、最後に結果の一覧を表示します。
+
+オプション:
+  --fix       rubocop -a と yarn tailwind:sort で自動修正してからチェックする
+  -h, --help  このヘルプを表示する
+
+個別に実行したいときは、これまで通り以下を直接実行してください。
+  docker compose exec web bin/rubocop
+  docker compose exec web yarn tailwind:check
+  docker compose exec web bin/brakeman --no-pager
+  docker compose exec web bundle exec rspec
+USAGE
+}
+
+# ---- オプションの解析 ----
+FIX_MODE=false
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --fix)
+      FIX_MODE=true
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "不明なオプションです: $1"
+      echo
+      usage
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+# ---- 表示用の色 ----
+# 出力先が端末のときだけ色を付ける（ファイルに保存したときに制御文字が混ざらないように）
+if [ -t 1 ]; then
+  BOLD=$'\e[1m'
+  GREEN=$'\e[32m'
+  RED=$'\e[31m'
+  RESET=$'\e[0m'
+else
+  BOLD=""
+  GREEN=""
+  RED=""
+  RESET=""
+fi
+
+# ---- docker compose exec のオプション ----
+# 標準入力が端末でない場合（パイプ経由など）は -T を付けて TTY エラーを避ける
+EXEC_OPTS=()
+if [ ! -t 0 ]; then
+  EXEC_OPTS=(-T)
+fi
+
+# ---- web コンテナが起動しているか確認 ----
+if ! docker compose ps --services --filter status=running 2>/dev/null | grep -qx "web"; then
+  printf "%sweb コンテナが起動していません。%s\n" "$RED" "$RESET"
+  echo "先に docker compose up -d を実行してください。"
+  exit 1
+fi
+
+# ---- チェック結果の記録用 ----
+# CHECK_NAMES と CHECK_RESULTS は同じ添字で対になっている
+CHECK_NAMES=()
+CHECK_RESULTS=()
+
+# チェックを 1 つ実行し、結果を記録する
+# 第 1 引数: 表示名 / 第 2 引数以降: コンテナ内で実行するコマンド
+run_check() {
+  local name="$1"
+  shift
+
+  printf "\n%s==> %s%s\n" "$BOLD" "$name" "$RESET"
+
+  CHECK_NAMES+=("$name")
+  if docker compose exec "${EXEC_OPTS[@]}" web "$@"; then
+    CHECK_RESULTS+=("ok")
+  else
+    CHECK_RESULTS+=("ng")
+  fi
+}
+
+# ---- --fix 指定時の自動修正 ----
+if [ "$FIX_MODE" = true ]; then
+  printf "\n%s==> 自動修正 (rubocop -a / tailwind:sort)%s\n" "$BOLD" "$RESET"
+  docker compose exec "${EXEC_OPTS[@]}" web bin/rubocop -a
+  docker compose exec "${EXEC_OPTS[@]}" web yarn tailwind:sort
+fi
+
+# ---- チェックの実行 ----
+# 速いものから順に並べているので、軽い違反はすぐ画面に出る
+run_check "Rubocop"       bin/rubocop
+run_check "Tailwind sort" yarn tailwind:check
+run_check "Brakeman"      bin/brakeman --no-pager
+run_check "RSpec"         bundle exec rspec
+
+# ---- 結果サマリ ----
+failed_count=0
+
+printf "\n%s========== チェック結果 ==========%s\n" "$BOLD" "$RESET"
+
+for i in "${!CHECK_NAMES[@]}"; do
+  if [ "${CHECK_RESULTS[$i]}" = "ok" ]; then
+    printf "  %s✅ %s%s\n" "$GREEN" "${CHECK_NAMES[$i]}" "$RESET"
+  else
+    printf "  %s❌ %s%s\n" "$RED" "${CHECK_NAMES[$i]}" "$RESET"
+    failed_count=$((failed_count + 1))
+  fi
+done
+
+if [ "$failed_count" -eq 0 ]; then
+  printf "\n%s全てのチェックを通過しました。%s\n" "$GREEN" "$RESET"
+  exit 0
+fi
+
+printf "\n%s%d 件のチェックが失敗しました。%s\n" "$RED" "$failed_count" "$RESET"
+if [ "$FIX_MODE" = false ]; then
+  echo "bin/check --fix で自動修正できるものがあるかもしれません。"
+fi
+exit 1
