@@ -1,4 +1,7 @@
 class SakeLogsController < ApplicationController
+  # 一覧からの削除（＝ページ遷移せず、そのカードだけを消す）とみなす遷移元
+  LIST_ORIGINS = %w[timeline].freeze
+
   skip_before_action :authenticate_user!, only: %i[show]
 
   def index
@@ -9,6 +12,9 @@ class SakeLogsController < ApplicationController
     @sake_log = SakeLog.includes(:user, sake: { brand: { brewery: :area } })
                         .with_attached_images
                         .find(params[:id])
+    # どの画面から来たか（"timeline" / "mylog"）。無い場合は nil 。
+    #   値の判定はビュー側の sake_log_back_link に任せる（知らない値が来ても既定の戻り先になる）
+    @origin = params[:from]
   end
 
   def new
@@ -76,9 +82,9 @@ class SakeLogsController < ApplicationController
   end
 
   # 一覧画面からの削除かどうか（一覧ではページ遷移せず、そのカードだけを消す）
-  #   一覧のカードにある削除リンクだけが from=list を付けて送ってくる。
+  #   一覧のカードにある削除リンクだけが遷移元（from）を付けて送ってくる。
   def delete_from_list?
-    params[:from] == "list"
+    LIST_ORIGINS.include?(params[:from])
   end
 
   def sake_log_form_params
