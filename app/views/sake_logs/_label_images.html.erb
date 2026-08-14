@@ -1,0 +1,36 @@
+<%# ラベル画像
+  locals:
+    sake_log: 表示対象の記録
+
+  枚数ごとの見せ方
+    1枚    … 中央に大きく1枚
+    2枚    … 大きく2枚並び
+    3〜4枚 … 横スクロール。2.2枚分の幅を見せて3枚目を見切らせ、スクロールできると気づかせる
+
+  画像をタップすると image-modal コントローラが拡大モーダルを開く。
+  親要素（show.html.erb の div）に data-controller="image-modal" が付いている前提。
+%>
+<% attached_images = sake_log.attached_images %>
+<% if attached_images.any? %>
+  <% image_count = attached_images.size %>
+  <section class="mt-4">
+    <div class="<%= sake_log_detail_images_class(image_count) %>">
+      <% attached_images.each do |attachment_name, attachment| %>
+        <figure class="<%= sake_log_detail_image_class(image_count) %>">
+          <button type="button" class="block w-full cursor-zoom-in"
+                  data-action="image-modal#open"
+                  data-image-modal-url-param="<%= sake_log_image_url(attachment, width: 1600) %>"
+                  data-image-modal-caption-param="<%= SakeLog.human_attribute_name(attachment_name) %>">
+            <span class="block overflow-hidden rounded-lg aspect-square bg-base-200">
+              <%= sake_log_image_tag attachment, width: 600,
+                    class: "object-contain w-full h-full" %>
+            </span>
+          </button>
+          <figcaption class="mt-1 text-xs text-center text-neutral-500">
+            <%= SakeLog.human_attribute_name(attachment_name) %>
+          </figcaption>
+        </figure>
+      <% end %>
+    </div>
+  </section>
+<% end %>

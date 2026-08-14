@@ -16,6 +16,9 @@ application.register("brewery-autocomplete", BreweryAutocompleteController)
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
 
+import ImageModalController from "./image_modal_controller"
+application.register("image-modal", ImageModalController)
+
 import ImagePreviewController from "./image_preview_controller"
 application.register("image-preview", ImagePreviewController)
 

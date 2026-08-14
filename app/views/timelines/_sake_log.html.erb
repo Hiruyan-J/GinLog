@@ -1,5 +1,5 @@
 <article id="<%= dom_id sake_log %>" class="relative py-3">
-  <%= link_to "", sake_log_path(sake_log), class: "absolute inset-0" %>
+  <%= link_to "", sake_log_path(sake_log, from: "timeline"), class: "absolute inset-0" %>
 
   <%# 投稿者・投稿日時・操作ボタン・好み度 %>
   <header class="flex gap-2 items-start">
@@ -21,7 +21,7 @@
             <span class="material-symbols-rounded text-primary ms-size-24">edit_square</span>
           <% end %>
           <%# 削除ボタン %>
-          <%= link_to sake_log_path(sake_log, from: "list"), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
+          <%= link_to sake_log_path(sake_log, from: "timeline"), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
             <span class="material-symbols-rounded text-primary ms-size-24">delete</span>
           <% end %>
         <% end %>

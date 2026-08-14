@@ -1,6 +1,8 @@
 <% content_for :title,  t('.title') %>
 
-<div class="w-full">
+<%# data-action は「Turbo がこのページをキャッシュする直前に close を呼ぶ」指定 %>
+<div class="w-full" data-controller="image-modal"
+     data-action="turbo:before-cache@document->image-modal#close">
   <%= page_heading %>
 
   <article id="<%= dom_id @sake_log %>" class="p-2">
@@ -40,29 +42,6 @@
       </p>
     </section>
 
-    <%# ラベル画像 %>
-    <% attached_images = @sake_log.attached_images %>
-    <% if attached_images.any? %>
-      <section class="mt-4">
-        <div class="grid grid-cols-4 gap-2">
-          <% attached_images.each do |attachment_name, attachment| %>
-            <%# タップで原寸に近い画像を別タブで開く %>
-            <%= link_to sake_log_image_url(attachment, width: 1600),
-                  target: "_blank", rel: "noopener noreferrer",
-                  class: "flex flex-col gap-1 items-center" do %>
-              <span class="overflow-hidden w-full rounded-lg aspect-square bg-base-200">
-                <%= sake_log_image_tag attachment, width: 300,
-                      class: "object-contain w-full h-full" %>
-              </span>
-              <span class="text-xs text-neutral-500">
-                <%= SakeLog.human_attribute_name(attachment_name) %>
-              </span>
-            <% end %>
-          <% end %>
-        </div>
-      </section>
-    <% end %>
-
     <%# 好み度 %>
     <section class="mt-2">
       <div class="flex gap-0 items-center">
@@ -71,6 +50,9 @@
         <% end %>
       </div>
     </section>
+
+    <%# ラベル画像 %>
+    <%= render "label_images", sake_log: @sake_log %>
 
     <%# 味 × 香りの4象限マップ（点プロット） %>
     <section class="flex flex-col items-center my-6">
@@ -88,13 +70,35 @@
       </section>
     <% end %>
 
-    <%# 一覧へ戻るリンク %>
-    <section class="flex justify-center mt-6">
-      <% if current_user&.own?(@sake_log) %>
-        <%= link_to "マイログに戻る", sake_logs_path, class: "btn btn-outline btn-primary" %>
-      <% else %>
-        <%= link_to "タイムラインに戻る", timeline_path, class: "btn btn-outline btn-primary" %>
+    <%# いいね・コメント・シェア %>
+    <footer class="flex justify-around items-center pt-3 mt-6 border-t border-base-300 text-neutral-300">
+      <%# いいね（未実装） %>
+      <span class="material-symbols-rounded ms-size-24">favorite</span>
+      <%# コメント件数（未実装） %>
+      <span class="flex gap-1 items-center">
+        <span class="material-symbols-rounded ms-size-24">chat_bubble</span>
+        <span class="text-xs">0</span>
+      </span>
+      <%# シェア（未実装） %>
+      <span class="material-symbols-rounded ms-size-24">share</span>
+    </footer>
+
+    <%# コメント欄 %>
+    <section id="comments" class="mt-6">
+      <h3 class="text-sm font-semibold text-neutral-500">コメント</h3>
+      <p class="py-4 text-sm text-center text-neutral-400">コメント機能は準備中です</p>
+    </section>
+
+    <%# 戻るリンク %>
+    <% back_label, back_path = sake_log_back_link(origin: @origin, owned: current_user&.own?(@sake_log)) %>
+    <section class="flex flex-wrap gap-2 justify-center mt-6">
+      <%= link_to back_label, back_path, class: "btn btn-outline btn-primary" %>
+      <%# 戻り先がタイムラインでないときだけ、タイムラインへの導線を出す %>
+      <% if back_path != timeline_path %>
+        <%= link_to "タイムラインで見る", timeline_path, class: "btn btn-primary" %>
       <% end %>
     </section>
   </article>
+
+  <%= render "image_modal" %>
 </div>

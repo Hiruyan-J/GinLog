@@ -1,0 +1,24 @@
+<%# 拡大モーダル
+  locals: なし
+
+  中身は image_modal_controller.js が書き換える。
+  ・open()  … 押された画像のURLとキャプションを流し込んで showModal()
+  ・閉じる  … <form method="dialog"> のボタン、背景タップ、Esc キー（JavaScript 不要）
+%>
+<dialog class="modal" data-image-modal-target="dialog">
+  <div class="max-w-3xl modal-box">
+    <img data-image-modal-target="image" class="object-contain mx-auto w-full max-h-[70vh]">
+    <p class="mt-2 text-sm text-center text-neutral-500" data-image-modal-target="caption"></p>
+
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn">閉じる</button>
+      </form>
+    </div>
+  </div>
+
+  <%# モーダルの外側（背景）をタップしても閉じられるようにする %>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
