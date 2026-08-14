@@ -46,9 +46,9 @@
   <%# ラベル画像（先頭2枚のみ。3枚目以降があれば最後のマスに +N バッジを重ねる） %>
   <% attached_images = sake_log.attached_images %>
   <% if attached_images.any? %>
-    <% card_images = timeline_card_images(attached_images) %>
-    <% hidden_image_count = timeline_hidden_image_count(attached_images) %>
-    <section class="grid gap-1 mt-2 <%= timeline_card_image_grid_class(card_images.size) %>">
+    <% card_images = sake_log_card_images(attached_images) %>
+    <% hidden_image_count = sake_log_hidden_image_count(attached_images) %>
+    <section class="grid gap-1 mt-2 <%= sake_log_card_image_grid_class(card_images.size) %>">
       <% card_images.each_with_index do |(_attachment_name, attachment), index| %>
         <div class="overflow-hidden relative rounded-lg aspect-[4/3] bg-base-200">
           <%= sake_log_image_tag attachment, width: 600, class: "object-cover w-full h-full" %>
