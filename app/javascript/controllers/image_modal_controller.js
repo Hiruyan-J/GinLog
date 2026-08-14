@@ -17,9 +17,10 @@ export default class extends Controller {
     this.dialogTarget.showModal()
   }
 
-  // Turbo でページを離れるときに、開いたままのモーダルが
-  // 次に戻ってきたときのキャッシュに残らないようにする
-  disconnect() {
+  // 拡大表示中にページを離れたとき、開いたままの状態が Turbo のキャッシュに残らないよう閉じる。
+  // disconnect() ではキャッシュを取ったあとに呼ばれて間に合わないため、
+  // show.html.erb の data-action で turbo:before-cache から呼んでいる。
+  close() {
     if (this.hasDialogTarget && this.dialogTarget.open) {
       this.dialogTarget.close()
     }
