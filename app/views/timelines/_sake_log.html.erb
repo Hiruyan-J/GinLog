@@ -48,9 +48,9 @@
   <% if attached_images.any? %>
     <% card_images = sake_log_card_images(attached_images) %>
     <% hidden_image_count = sake_log_hidden_image_count(attached_images) %>
-    <section class="grid gap-1 mt-2 <%= sake_log_card_image_grid_class(card_images.size) %>">
+    <section class="grid gap-1 mt-2 <%= sake_log_card_grid_class %>">
       <% card_images.each_with_index do |(_attachment_name, attachment), index| %>
-        <div class="overflow-hidden relative rounded-lg aspect-[4/3] bg-base-200">
+        <div class="overflow-hidden relative rounded-lg aspect-[4/3] bg-base-200 <%= sake_log_card_image_class(card_images.size) %>">
           <%= sake_log_image_tag attachment, width: 600, class: "object-cover w-full h-full" %>
           <%# 残り枚数バッジは最後のマスにだけ重ねる %>
           <% if hidden_image_count.positive? && index == card_images.size - 1 %>
