@@ -34,8 +34,11 @@ Rails.application.configure do
   # Store uploaded files on Cloudinary (see config/storage.yml for options).
   config.active_storage.service = :cloudinary
 
-  # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
+  # メール送信失敗時に例外を発生させる
+  config.action_mailer.raise_delivery_errors = true
+
+  # 送信されたメールは http://localhost:3000/letter_opener で閲覧できる
+  config.action_mailer.delivery_method = :letter_opener_web
 
   # Disable caching for Action Mailer templates even if Action Controller
   # caching is enabled.
