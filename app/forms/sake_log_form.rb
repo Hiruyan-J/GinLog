@@ -137,10 +137,11 @@ class SakeLogForm
     saved
   end
 
-  # from_withとの連携用メソッド
+  # form_withとの連携用メソッド
   # form_withが PATCH か POST かを判別
   def persisted?
-    @sake_log&.persisted? # sake_logがDBに存在するかどうか
+    # 新規作成時は @sake_log が nil のため、`|| false` でbooleanを返す
+    @sake_log&.persisted? || false # sake_logがDBに存在するかどうか
   end
 
   def model_name

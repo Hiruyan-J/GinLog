@@ -27,14 +27,14 @@ class SakeLogsController < ApplicationController
   end
 
   def new
-    @form = SakeLogForm.new(user: current_user)
+    @sake_log_form = SakeLogForm.new(user: current_user)
   end
 
   def create
-    @form = SakeLogForm.new(sake_log_form_params, user: current_user)
+    @sake_log_form = SakeLogForm.new(sake_log_form_params, user: current_user)
 
-    if @form.save
-      redirect_to sake_log_path(@form.sake_log), success: t("defaults.flash_message.created", item: SakeLog.model_name.human)
+    if @sake_log_form.save
+      redirect_to sake_log_path(@sake_log_form.sake_log), success: t("defaults.flash_message.created", item: SakeLog.model_name.human)
     else
       flash.now[:error] = t("defaults.flash_message.not_created", item: SakeLog.model_name.human) # TODO: ログ出力
       render :new, status: :unprocessable_entity
@@ -43,15 +43,15 @@ class SakeLogsController < ApplicationController
 
   def edit
     set_sake_log
-    @form = SakeLogForm.new(user: current_user, sake_log: @sake_log)
+    @sake_log_form = SakeLogForm.new(user: current_user, sake_log: @sake_log)
   end
 
   def update
     set_sake_log
-    @form = SakeLogForm.new(sake_log_form_params, user: current_user, sake_log: @sake_log)
+    @sake_log_form = SakeLogForm.new(sake_log_form_params, user: current_user, sake_log: @sake_log)
 
-    if @form.save
-      redirect_to sake_log_path(@form.sake_log), success: t("defaults.flash_message.updated", item: SakeLog.model_name.human)
+    if @sake_log_form.save
+      redirect_to sake_log_path(@sake_log_form.sake_log), success: t("defaults.flash_message.updated", item: SakeLog.model_name.human)
     else
       flash.now[:error] = t("defaults.flash_message.not_updated", item: SakeLog.model_name.human) # TODO: ログ出力
       render :edit, status: :unprocessable_entity
