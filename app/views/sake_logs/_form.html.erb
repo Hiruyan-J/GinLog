@@ -1,7 +1,7 @@
 <%# 日本酒記録の入力フォーム（新規作成・編集で共用）
-    sake_log_form : SakeLogForm
-                    編集時は sake_log_form.sake_log で元の SakeLog レコードを参照できる
+    編集時は sake_log_form.sake_log で元の SakeLog レコードを参照できる
 %>
+
 <%= form_with model: sake_log_form,
       url: sake_log_form.persisted? ? sake_log_path(sake_log_form.sake_log) : sake_logs_path,
       html: { multipart: true } do |f| %>
