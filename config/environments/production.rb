@@ -71,7 +71,7 @@ Rails.application.configure do
     user_name: Rails.application.credentials.dig(:smtp, :user_name),
     password: Rails.application.credentials.dig(:smtp, :password),
     authentication: :plain,
-    enable_starttls_auto: true
+    enable_starttls: :always
   }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
