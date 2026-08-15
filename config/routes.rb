@@ -36,4 +36,7 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "timelines#index"
+
+  # 開発環境で送信メールを確認する画面（/letter_opener）
+  mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
 end
