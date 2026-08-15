@@ -1,44 +1,89 @@
-<article id="<%= dom_id sake_log %>" class="relative">
-  <%= link_to "", sake_log_path(sake_log, from: "mylog"), class: "absolute inset-0" %>
-  <section class="p-2 body">
+<article id="<%= dom_id sake_log %>" class="relative py-3">
+  <%# カード全体を記録詳細へのリンクにする（ストレッチリンク）
+    from: "mylog" を付けておくと、詳細画面の「戻る」がマイログ一覧に戻る
 
-    <%# タイトル %>
-    <section class="flex justify-between">
-      <h2 class="text-xl font-bold title"><%= sake_log.sake.product_name %></h2>
-      <%# 各種ボタン %>
-      <div class="flex relative z-10 gap-2 buttons">
-        <% if current_user&.own?(sake_log) %>
-          <%# 編集ボタン %>
-          <%= link_to edit_sake_log_path(sake_log), id: "button-edit-#{sake_log.id}" do %>
-            <span class="material-symbols-rounded text-primary ms-size-24">edit_square</span>
-          <% end %>
-          <%# 削除ボタン %>
-          <%= link_to sake_log_path(sake_log), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm')} do %>
-            <span class="material-symbols-rounded text-primary ms-size-24">delete</span>
-          <% end %>
+    z-10 は必須。画像のラッパー div に relative が付いているため、
+    リンクに階層を与えないと画像に上を取られ、画像タップで遷移しなくなる %>
+  <%= link_to "", sake_log_path(sake_log, from: "mylog"), class: "absolute inset-0 z-10" %>
+
+  <div class="flex gap-2 px-2">
+
+    <%# ---------- 左: 銘柄名・商品名 ＋（都道府県・好み度・記録日 ＋ 4象限マップ） ---------- %>
+    <div class="flex flex-col flex-1 gap-1 min-w-0">
+
+      <%# 1段目: 銘柄名 商品名 %>
+      <div class="flex gap-2 items-baseline">
+        <h2 class="text-lg font-bold truncate"><%= sake_log.sake.brand.name %></h2>
+        <p class="text-sm truncate"><%= sake_log.sake.product_name %></p>
+      </div>
+
+      <%# 2段目: 左に文字情報、右に4象限マップ %>
+      <div class="flex gap-2 items-end">
+
+        <div class="flex flex-col flex-1 gap-1 min-w-0">
+          <%# 都道府県 %>
+          <p class="text-xs text-neutral-500"><%= sake_log.sake.brand.brewery.area.name %></p>
+
+          <%# 好み度 %>
+          <div class="flex gap-0 items-center">
+            <% SakeLog::RATING_MAX.times do |rate| %>
+              <span class="inline-block w-3 h-3 md:w-4 md:h-4 mask mask-star-2 <%= star_rating_class(rate, sake_log.rating) %>"></span>
+            <% end %>
+          </div>
+
+          <%# 記録日 %>
+          <p class="text-xs text-neutral-500"><%= l sake_log.created_at, format: :long %></p>
+        </div>
+
+        <%# 味 × 香りの4象限マップ %>
+        <div class="shrink-0">
+          <%= render "shared/taste_aroma_map", taste: sake_log.taste_strength, aroma: sake_log.aroma_strength, variant: :quadrant, size: :sm, labels: :responsive %>
+        </div>
+      </div>
+    </div>
+
+    <%# ---------- 右: 編集・削除ボタン（上段）＋ ラベル画像（下段） ---------- %>
+    <div class="flex flex-col gap-1 w-32 md:w-48 shrink-0">
+
+      <%# 編集・削除ボタン
+        この一覧は current_user.sake_logs だけを描画するので、
+        タイムラインカードのような own? の判定は入れていない %>
+      <div class="flex relative z-20 gap-1 justify-end">
+        <%# 編集ボタン %>
+        <%= link_to edit_sake_log_path(sake_log), id: "button-edit-#{sake_log.id}" do %>
+          <span class="material-symbols-rounded text-primary ms-size-24">edit_square</span>
+        <% end %>
+        <%# 削除ボタン
+          from: "mylog" を付けると、コントローラが Turbo Stream で
+          このカードだけを消してくれる（ページ遷移しない） %>
+        <%= link_to sake_log_path(sake_log, from: "mylog"), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
+          <span class="material-symbols-rounded text-primary ms-size-24">delete</span>
         <% end %>
       </div>
-    </section>
 
-    <%# 各指標 %>
-    <section>
-      <%# 好み度 %>
-      <div class="flex gap-0 items-center">
-        <% SakeLog::RATING_MAX.times do |rate| %>
-          <span class="inline-block w-3 h-3 md:w-5 md:h-5 mask mask-star-2 <%= star_rating_class(rate, sake_log.rating) %> " aria-hidden="true"></span>
+      <%# ラベル画像（先頭2枚のみ。3枚目以降は +N バッジ） %>
+      <% attached_images = sake_log.attached_images %>
+      <% card_images = sake_log_card_images(attached_images) %>
+      <% hidden_image_count = sake_log_hidden_image_count(attached_images) %>
+      <div class="grid gap-1 mt-auto <%= sake_log_card_grid_class %>">
+        <% if card_images.any? %>
+          <% card_images.each_with_index do |(_attachment_name, attachment), index| %>
+            <div class="overflow-hidden relative rounded-lg aspect-[4/3] bg-base-200 <%= sake_log_card_image_class(card_images.size) %>">
+              <%= sake_log_image_tag attachment, width: 300, class: "object-cover w-full h-full" %>
+              <%# 残り枚数バッジは最後のマスにだけ重ねる %>
+              <% if hidden_image_count.positive? && index == card_images.size - 1 %>
+                <span class="absolute right-1 bottom-1 badge badge-neutral badge-xs">+<%= hidden_image_count %></span>
+              <% end %>
+            </div>
+          <% end %>
+        <% else %>
+          <%# 画像が無い記録でもカードの横幅が揃うようにプレースホルダーを置く
+            引数の 0 で「1マスしか無い」扱いになり、画像1枚のときと同じ位置・大きさになる %>
+          <div class="flex justify-center items-center rounded-lg aspect-[4/3] bg-base-200 text-neutral-300 <%= sake_log_card_image_class(0) %>">
+            <span class="material-symbols-rounded ms-size-24">no_photography</span>
+          </div>
         <% end %>
       </div>
-      <%# 味 × 香りの4象限マップ %>
-      <div class="my-2">
-        <%= render "shared/taste_aroma_map", taste: sake_log.taste_strength, aroma: sake_log.aroma_strength, variant: :quadrant, size: :sm, labels: :responsive %>
-      </div>
-      <%# 感想 %>
-      <%= simple_format(h(sake_log.review), class: "py-2") %>
-    </section>
-
-    <%# 記録時刻 %>
-    <section>
-      <p class="text-xs text-neutral-500"><%= l sake_log.created_at, format: :long %></p>
-    </section>
-  </section>
+    </div>
+  </div>
 </article>
