@@ -4,7 +4,9 @@
 
     z-10 は必須。画像のラッパー div に relative が付いているため、
     リンクに階層を与えないと画像に上を取られ、画像タップで遷移しなくなる %>
-  <%= link_to "", sake_log_path(sake_log, from: "mylog"), class: "absolute inset-0 z-10" %>
+  <%= link_to "", sake_log_path(sake_log, from: "mylog"),
+        class: "absolute inset-0 z-10",
+        data: { turbo_frame: "_top" } %>
 
   <div class="flex gap-2 px-2">
 
@@ -49,8 +51,11 @@
         この一覧は current_user.sake_logs だけを描画するので、
         タイムラインカードのような own? の判定は入れていない %>
       <div class="flex relative z-20 gap-1 justify-end">
-        <%# 編集ボタン %>
-        <%= link_to edit_sake_log_path(sake_log), id: "button-edit-#{sake_log.id}" do %>
+        <%# 削除ボタン
+          Turbo Stream で応答するため frame と無関係に動く。turbo_frame: "_top" は付けない %>
+        <%= link_to edit_sake_log_path(sake_log),
+              id: "button-edit-#{sake_log.id}",
+              data: { turbo_frame: "_top" } do %>
           <span class="material-symbols-rounded text-primary ms-size-24">edit_square</span>
         <% end %>
         <%# 削除ボタン

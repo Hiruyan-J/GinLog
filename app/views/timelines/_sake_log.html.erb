@@ -1,5 +1,7 @@
 <article id="<%= dom_id sake_log %>" class="relative py-3">
-  <%= link_to "", sake_log_path(sake_log, from: "timeline"), class: "absolute inset-0 z-10" %>
+  <%= link_to "", sake_log_path(sake_log, from: "timeline"),
+        class: "absolute inset-0 z-10",
+        data: { turbo_frame: "_top" } %>
 
   <%# 投稿者・投稿日時・操作ボタン・好み度 %>
   <header class="flex gap-2 items-start">
@@ -17,10 +19,13 @@
       <div class="flex relative z-20 gap-2">
         <% if current_user&.own?(sake_log) %>
           <%# 編集ボタン %>
-          <%= link_to edit_sake_log_path(sake_log), id: "button-edit-#{sake_log.id}" do %>
+          <%= link_to edit_sake_log_path(sake_log),
+                id: "button-edit-#{sake_log.id}",
+                data: { turbo_frame: "_top" } do %>
             <span class="material-symbols-rounded text-primary ms-size-24">edit_square</span>
           <% end %>
-          <%# 削除ボタン %>
+          <%# 削除ボタン
+            Turbo Stream で応答するため frame と無関係に動く。turbo_frame: "_top" は付けない %>
           <%= link_to sake_log_path(sake_log, from: "timeline"), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
             <span class="material-symbols-rounded text-primary ms-size-24">delete</span>
           <% end %>
