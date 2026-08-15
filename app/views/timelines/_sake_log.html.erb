@@ -1,5 +1,7 @@
 <article id="<%= dom_id sake_log %>" class="relative py-3">
-  <%= link_to "", sake_log_path(sake_log, from: "timeline"), class: "absolute inset-0" %>
+  <%= link_to "", sake_log_path(sake_log, from: "timeline"),
+        class: "absolute inset-0 z-10",
+        data: { turbo_frame: "_top" } %>
 
   <%# 投稿者・投稿日時・操作ボタン・好み度 %>
   <header class="flex gap-2 items-start">
@@ -14,13 +16,16 @@
 
     <div class="flex flex-col gap-1 items-end ml-auto">
       <%# 編集・削除ボタン %>
-      <div class="flex relative z-10 gap-2">
+      <div class="flex relative z-20 gap-2">
         <% if current_user&.own?(sake_log) %>
           <%# 編集ボタン %>
-          <%= link_to edit_sake_log_path(sake_log), id: "button-edit-#{sake_log.id}" do %>
+          <%= link_to edit_sake_log_path(sake_log),
+                id: "button-edit-#{sake_log.id}",
+                data: { turbo_frame: "_top" } do %>
             <span class="material-symbols-rounded text-primary ms-size-24">edit_square</span>
           <% end %>
-          <%# 削除ボタン %>
+          <%# 削除ボタン
+            Turbo Stream で応答するため frame と無関係に動く。turbo_frame: "_top" は付けない %>
           <%= link_to sake_log_path(sake_log, from: "timeline"), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
             <span class="material-symbols-rounded text-primary ms-size-24">delete</span>
           <% end %>
@@ -46,11 +51,11 @@
   <%# ラベル画像（先頭2枚のみ。3枚目以降があれば最後のマスに +N バッジを重ねる） %>
   <% attached_images = sake_log.attached_images %>
   <% if attached_images.any? %>
-    <% card_images = timeline_card_images(attached_images) %>
-    <% hidden_image_count = timeline_hidden_image_count(attached_images) %>
-    <section class="grid gap-1 mt-2 <%= timeline_card_image_grid_class(card_images.size) %>">
+    <% card_images = sake_log_card_images(attached_images) %>
+    <% hidden_image_count = sake_log_hidden_image_count(attached_images) %>
+    <section class="grid gap-1 mt-2 <%= sake_log_card_grid_class %>">
       <% card_images.each_with_index do |(_attachment_name, attachment), index| %>
-        <div class="overflow-hidden relative rounded-lg aspect-[4/3] bg-base-200">
+        <div class="overflow-hidden relative rounded-lg aspect-[4/3] bg-base-200 <%= sake_log_card_image_class(card_images.size) %>">
           <%= sake_log_image_tag attachment, width: 600, class: "object-cover w-full h-full" %>
           <%# 残り枚数バッジは最後のマスにだけ重ねる %>
           <% if hidden_image_count.positive? && index == card_images.size - 1 %>

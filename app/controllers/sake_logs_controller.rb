@@ -1,11 +1,20 @@
 class SakeLogsController < ApplicationController
   # 一覧からの削除（＝ページ遷移せず、そのカードだけを消す）とみなす遷移元
-  LIST_ORIGINS = %w[timeline].freeze
+  LIST_ORIGINS = %w[timeline mylog].freeze
 
   skip_before_action :authenticate_user!, only: %i[show]
 
+  # マイログ一覧（自分の記録の一覧）
+  #   1ページ 10件（config/initializers/kaminari_config.rb の default_per_page）で、
+  #   2ページ目以降は末尾の Turbo Frame から読み込まれる（無限スクロール）
   def index
-    @sake_logs = current_user.sake_logs.includes(:sake).order(created_at: :desc, id: :desc)
+    @sake_logs = current_user.sake_logs
+                             .includes(sake: { brand: { brewery: :area } })
+                             .with_attached_images
+                             .order(created_at: :desc, id: :desc)
+                             .page(params[:page])
+
+    render :page if turbo_frame_request?
   end
 
   def show
@@ -50,8 +59,8 @@ class SakeLogsController < ApplicationController
   end
 
   # 削除元によって応答を変える
-  #   一覧（タイムライン）から削除 → Turbo Stream でそのカードだけ消す（ページ遷移しない）
-  #   記録詳細から削除            → マイログ一覧へ戻る
+  #   一覧（タイムライン / マイログ一覧）から削除 → Turbo Stream でそのカードだけ消す（ページ遷移しない）
+  #   記録詳細から削除                          → マイログ一覧へ戻る
   def destroy
     set_sake_log
 
