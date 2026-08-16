@@ -83,6 +83,9 @@ RSpec.configure do |config|
   # create(:user) のように FactoryBot.create を省略して書けるようにする
   config.include FactoryBot::Syntax::Methods
 
+  # travel_to でテスト中の時刻を進められるようにする
+  config.include ActiveSupport::Testing::TimeHelpers
+
   # テスト中の外部HTTP通信をブロック（localhost は capybara 等のため許可）
   WebMock.disable_net_connect!(allow_localhost: true)
 end

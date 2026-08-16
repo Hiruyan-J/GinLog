@@ -51,6 +51,15 @@ RSpec.describe User, type: :model do
         user.confirm
         expect(user.active_for_authentication?).to be true
       end
+
+      # confirm_within = 3.days（確認リンクの有効期限）の検証
+      it "確認リンクの期限が切れると確認できない" do
+        user = create(:user, :unconfirmed)
+
+        travel_to((User.confirm_within + 1.day).from_now) do
+          expect(user.confirm).to be false
+        end
+      end
     end
 
     describe "メールアドレス変更時" do
