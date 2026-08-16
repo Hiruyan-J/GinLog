@@ -80,7 +80,7 @@ ja:
     passwords:
       edit:
         change_my_password: パスワードを変更する
-        change_your_password: パスワードを変更
+        change_your_password: パスワード変更
         confirm_new_password: 確認用新しいパスワード
         new_password: 新しいパスワード
       new:
