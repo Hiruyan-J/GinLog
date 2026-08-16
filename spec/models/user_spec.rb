@@ -36,6 +36,37 @@ RSpec.describe User, type: :model do
     it { is_expected.to have_many(:sake_logs).dependent(:destroy) }
   end
 
+  describe "メールアドレス確認(confirmable)" do
+    describe "新規登録時" do
+      # User に :confirmable が付いていること検証
+      it "確認メールが1通送信される" do
+        expect { create(:user, :unconfirmed) }.to change { ActionMailer::Base.deliveries.size }.by(1)
+      end
+
+      # allow_unconfirmed_access_for = 0.days（猶予なし）の検証
+      it "確認が済むまではログインできず、確認するとログインできる" do
+        user = create(:user, :unconfirmed)
+        expect(user.active_for_authentication?).to be false
+
+        user.confirm
+        expect(user.active_for_authentication?).to be true
+      end
+    end
+
+    describe "メールアドレス変更時" do
+      # reconfirmable = true を検証する
+      it "確認が済むまでemailは変わらず、確認後に切り替わる" do
+        user = create(:user, email: "before@example.com")
+        user.update!(email: "after@example.com")
+        expect(user.reload.email).to eq "before@example.com"
+        expect(user.unconfirmed_email).to eq "after@example.com"
+
+        user.confirm
+        expect(user.reload.email).to eq "after@example.com"
+      end
+    end
+  end
+
   describe "#own?" do
     let(:user) { create(:user) }
 

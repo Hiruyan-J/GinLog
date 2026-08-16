@@ -27,5 +27,10 @@ FactoryBot.define do
     sequence(:email) { |n| "user#{n}@example.com" }
     sequence(:name) { |n| "テストユーザー#{n}" }
     password { "password" }
+    confirmed_at { Time.current }
+
+    trait :unconfirmed do
+      confirmed_at { nil }
+    end
   end
 end
