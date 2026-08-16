@@ -76,6 +76,15 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "パスワード再設定(recoverable)" do
+    # メール送信は画面を開くだけでは確認できない副作用なので、テストで押さえる
+    it "再設定メールが1通送信される" do
+      user = create(:user)
+
+      expect { user.send_reset_password_instructions }.to change { ActionMailer::Base.deliveries.size }.by(1)
+    end
+  end
+
   describe "#own?" do
     let(:user) { create(:user) }
 
