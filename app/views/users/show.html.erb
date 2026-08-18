@@ -1,0 +1,25 @@
+<% content_for :title, t('.title') %>
+<%= page_heading %>
+
+<div class="flex flex-col gap-6 items-center py-2">
+  <%# ユーザー名 %>
+  <section class="w-full md:w-8/12">
+    <h2 class="font-bold"><%= User.human_attribute_name(:name) %></h2>
+    <p class="pl-4 break-all"><%= @user.name %></p>
+  </section>
+
+  <%# メールアドレス（本人専用画面のため表示してよい） %>
+  <section class="w-full md:w-8/12">
+    <h2 class="font-bold"><%= User.human_attribute_name(:email) %></h2>
+    <p class="pl-4 break-all"><%= @user.email %></p>
+  </section>
+
+  <%# ログアウト・編集 %>
+  <div class="flex gap-4 justify-center pt-4">
+    <%= link_to t('header.logout'), destroy_user_session_path,
+          data: { turbo_method: :delete },
+          class: "btn btn-outline btn-primary" %>
+    <%= link_to t('defaults.edit'), edit_user_registration_path,
+          class: "btn btn-primary" %>
+  </div>
+</div>
