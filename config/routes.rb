@@ -34,6 +34,7 @@ Rails.application.routes.draw do
 
   resources :sake_logs, only: %i[index show new create edit update destroy]
   get "timeline", to: "timelines#index", as: :timeline
+  get "mypage", to: "users#show", as: :mypage
 
   # Defines the root path route ("/")
   root "timelines#index"

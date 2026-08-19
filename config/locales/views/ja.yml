@@ -22,6 +22,8 @@ ja:
   header:
     login: ログイン
     logout: ログアウト
+    my_account: マイアカウント
+    account_menu_title: アカウント
     data_menu_title: データについて
     sakenowa_attribution: さけのわデータを利用しています
   footer:
@@ -29,6 +31,9 @@ ja:
     search: 検索
     my_log: マイログ
     analyze_preferences: 好み分析
+  users:
+    show:
+      title: マイアカウント
   sake_logs:
     new:
       title: 日本酒記録
