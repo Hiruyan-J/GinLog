@@ -151,16 +151,30 @@
   - 「みんなで一緒に記録」の一覧
   - 4象限マトリクス上に今まで飲んだ日本酒のラベルアイコンを表示
 
-# ■ 機能の実装方針予定
+# ■ 使用技術
+
 | カテゴリ       | 使用技術 |
 |----------------|----------|
-| フロントエンド | TailwindCSS / daisyUI |
-| バックエンド   | Ruby 3.3.6 / Rails 7.2.1 |
-| データベース   | PostgreSQL |
-| 開発環境       | Docker |
-| インフラ       | Render / Cloudinary |
-| API            | Google認証：Google OAuth 2.0 API<br>OCR：Google Vision API（表ラベル・裏ラベルのテキスト抽出）（表ラベルの写真をObject Localizationでボトル検出→ラベルの大まかな位置検出を行い、ラベルのicon化に使用）<br>情報抽出：Open AIなどの生成AI系API（OCR抽出したテキストデータから必要な情報の取り出し・分類に使用）<br>購入ページリンク：楽天商品検索API |
+| フロントエンド | Tailwind CSS v4 / daisyUI v5 / Hotwire（Turbo・Stimulus）/ esbuild |
+| バックエンド   | Ruby 3.3.6 / Rails 8.1.3 |
+| データベース   | PostgreSQL（Neon） |
+| 認証           | Devise |
+| メール送信     | Resend（Action Mailer から SMTP 経由で送信） |
+| 画像管理       | Active Storage + Cloudinary（ラベル写真の保存・配信） |
+| API            | 銘柄・蔵元マスター：さけのわAPI |
+| テスト         | RSpec / FactoryBot / Capybara / WebMock / SimpleCov |
+| 静的解析・CI   | RuboCop / Brakeman / rustywind / GitHub Actions |
+| 開発環境       | Docker（Docker Compose） |
+| インフラ       | Render<br> 独自ドメイン：app-ginlog.com |
 | VCS            | GitHub |
+
+### 今後の導入予定
+| カテゴリ | 使用技術 | 用途 |
+|----------|----------|------|
+| 認証     | Google OAuth 2.0 API | Googleアカウントでのログイン |
+| OCR      | Google Vision API | 表ラベル・裏ラベルからのテキスト抽出<br>Object Localization でボトル検出 → ラベル位置を特定し、ラベルのアイコン化に使用 |
+| 情報抽出 | OpenAI などの生成AI系API | OCRで抽出したテキストから銘柄・スペック情報を取り出し・分類 |
+| 購入リンク | 楽天商品検索API | 日本酒の購入ページへのリンク表示 |
 
 # ■ 画面遷移図
 [詳細はこちら](https://www.figma.com/design/Qwwzc2zR2v1g4OReCM8769/GinLog%E7%94%BB%E9%9D%A2%E9%81%B7%E7%A7%BB%E5%9B%B3?node-id=74-2068&t=dvXVXbQztUNlcbXg-1)
