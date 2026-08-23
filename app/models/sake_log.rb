@@ -46,6 +46,10 @@ class SakeLog < ApplicationRecord
   has_one_attached :sub_image1
   has_one_attached :sub_image2
 
+  # 保存・削除が DB に確定した後、紐づく sake の集計値を再計算するジョブを登録する
+  # after_commit は作成・更新・削除のすべてで呼ばれる（on: を省略すると全部が対象）
+  after_commit :enqueue_sake_aggregation
+
   # 添付画像4種類をまとめて事前読み込みするスコープ
   # @return [ActiveRecord::Relation] 添付画像を事前読み込みした SakeLog のリレーション
   scope :with_attached_images, -> {
@@ -71,6 +75,27 @@ class SakeLog < ApplicationRecord
   end
 
   private
+
+  # 紐づく sake の集計ジョブを登録する
+  # 編集で別の sake に付け替えられた場合は、元の sake も再集計する
+  # （元の sake の投稿が0件になっていればジョブ側で削除される）
+  #
+  # ジョブの登録に失敗しても、記録の保存自体は成功させる。
+  # after_commit は「コミット済み」の後に走るため、ここで例外を投げると
+  # 記録は保存されているのにエラー画面になり、ユーザーが再投稿して重複を作ってしまう。
+  # 集計値は次の投稿か rake タスク（sakes:aggregate_all）で復旧できる派生データなので、
+  # ログだけ残して握りつぶす。
+  #
+  # @return [void]
+  def enqueue_sake_aggregation
+    SakeAggregationJob.perform_later(sake_id)
+
+    # previous_changes には直前の保存で変わったカラムが { "カラム名" => [変更前, 変更後] } で入っている
+    previous_sake_id = previous_changes["sake_id"]&.first
+    SakeAggregationJob.perform_later(previous_sake_id) if previous_sake_id.present? && previous_sake_id != sake_id
+  rescue => e
+    Rails.logger.error("集計ジョブの登録に失敗しました (sake_id: #{sake_id}): #{e.message}")
+  end
 
   # 添付された画像すべての形式・サイズを検証する
   # @return [void]

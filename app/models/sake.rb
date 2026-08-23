@@ -45,4 +45,37 @@ class Sake < ApplicationRecord
     where(brand_id: brand_id)
       .where("product_name LIKE ?", "%#{sanitize_sql_like(query)}%")
   }
+
+  # sake_logs の平均値と件数を再計算して保存する
+  # SakeAggregationJobとrakeタスク(sakes:aggregate_all)から呼ばれる
+  #
+  # sake_logs_count は Rails の counter_cache 機能では更新していない。
+  # counter_cache と同じ命名だが、平均値と同じタイミング・同じ集計処理でまとめて
+  # 更新したいため、ここで一緒に計算している。
+  # （そのため SakeLog の belongs_to :sake に counter_cache: true は付けない）
+  #
+  # @return [void]
+  def refresh_aggregation!
+    update!(
+      sake_logs_count: sake_logs.count,
+      average_rating: rounded_average(:rating),
+      average_taste_strength: rounded_average(:taste_strength),
+      average_aroma_strength: rounded_average(:aroma_strength)
+    )
+  end
+
+  # 集計値が算出済みかどうか
+  # （投稿直後はジョブ実行前のため nil のことがある。集計時は平均3つが同時に入るので代表して1つを見る）
+  def aggregated?
+    average_rating.present?
+  end
+
+  private
+
+  # sake_logs の指定カラムの平均を小数第2位で丸めて返す
+  # @param column [Symbol] 平均を取るカラム名（:rating など）
+  # @return [Float, nil] 平均値（投稿が0件なら nil）
+  def rounded_average(column)
+    sake_logs.average(column)&.round(2)&.to_f
+  end
 end
