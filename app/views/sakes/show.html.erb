@@ -1,0 +1,58 @@
+<%# ブラウザタブ・OGP 用のタイトル（<title> は application_helper の default_meta_tags が組み立てる） %>
+<% content_for :title, "#{@sake.brand.name} #{@sake.product_name}" %>
+
+<div class="w-full">
+  <article class="p-2">
+    <%# ---------- ヘッダ: 銘柄名・商品名・蔵元（都道府県） ---------- %>
+    <section class="mt-1">
+      <div class="flex flex-wrap gap-x-2 items-baseline">
+        <h1 class="text-2xl font-bold"><%= @sake.brand.name %></h1>
+        <p class="text-base"><%= @sake.product_name %></p>
+      </div>
+      <p class="mt-1 badge badge-ghost badge-sm">
+        <%= @sake.brand.brewery.name %>（<%= @sake.brand.brewery.area.name %>）
+      </p>
+    </section>
+
+    <% if @sake.aggregated? %>
+      <%# ---------- 好み度の平均（星 ＋ 数値 ＋ 件数） ---------- %>
+      <section class="flex gap-2 items-center mt-2">
+        <div class="flex gap-0 items-center">
+          <%# 星は平均値を四捨五入した個数だけ点灯させる %>
+          <% SakeLog::RATING_MAX.times do |rate| %>
+            <span class="inline-block w-5 h-5 mask mask-star-2 <%= star_rating_class(rate, @sake.average_rating.round) %>"></span>
+          <% end %>
+        </div>
+        <p class="text-sm text-neutral-500">
+          <%= @sake.average_rating.round(1) %>（<%= @sake.sake_logs_count %>件の平均）
+        </p>
+      </section>
+
+      <%# ---------- 味 × 香りの4象限マップ（平均値） ---------- %>
+      <section class="flex flex-col items-center my-6">
+        <%= render "shared/taste_aroma_map", taste: @sake.average_taste_strength, aroma: @sake.average_aroma_strength, variant: :quadrant, size: :lg %>
+        <p class="mt-3 text-xs text-neutral-500">
+          味の濃淡 <%= @sake.average_taste_strength.round(1) %> ／ 香りの濃淡 <%= @sake.average_aroma_strength.round(1) %>
+        </p>
+      </section>
+    <% else %>
+      <%# 投稿直後はジョブ実行前で集計値が入っていないことがある %>
+      <p class="my-6 text-sm text-center text-neutral-500">集計中です。しばらくしてから開き直してください。</p>
+    <% end %>
+
+    <%# ---------- みんなの記録（無限スクロール） ---------- %>
+    <section class="mt-6">
+      <h2 class="pb-1 text-sm font-semibold border-b border-base-300 text-neutral-500">みんなの記録</h2>
+      <% if @sake_logs.any? %>
+        <div id="sake_records" class="flex flex-col gap-0 divide-y">
+          <%# origin: "sake" を渡すと、カードから開いた記録詳細の「戻る」がこの画面に戻ってくる %>
+          <%= render partial: "timelines/sake_log", collection: @sake_logs, locals: { origin: "sake" } %>
+          <%# 2ページ目以降を遅延読み込みする Turbo Frame %>
+          <%= render "next_page_frame", sake_logs: @sake_logs, sake: @sake %>
+        </div>
+      <% else %>
+        <p class="my-10 text-center">まだ記録がありません</p>
+      <% end %>
+    </section>
+  </article>
+</div>
