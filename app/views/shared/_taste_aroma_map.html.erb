@@ -2,13 +2,13 @@
   locals:
     taste:   味の濃淡の値（SakeLog#taste_strength / Sake#average_taste_strength）
     aroma:   香りの濃淡の値（SakeLog#aroma_strength / Sake#average_aroma_strength）
-    variant: 表示方式（:quadrant = 該当する1象限だけをハイライト / :plot = 全象限を薄く表示し記録値の位置に点を打つ）
+    variant: 表示方式（:quadrant = 該当する1象限だけをハイライト / :plot = 該当する1象限だけをハイライトし記録値の位置に点を打つ）
     size:    外枠サイズ（省略時 :sm / :md / :lg。呼び出し側は用途名で指定）
     labels:  軸ラベルの表示方式（省略時 :always = 常に表示 / :responsive = スマホで非表示）
   サイズは呼び出し側のラッパー要素の幅で制御する（内部は幅 100% で描画）
 %>
 
-<% active_quadrant = taste_aroma_quadrant(taste, aroma) if variant == :quadrant %>
+<% active_quadrant = taste_aroma_quadrant(taste, aroma) %>
 
 <%# 外枠サイズ（size 省略時は :sm）・軸ラベルの表示クラス（labels 省略時は :always） %>
 <% size_class = quadrant_map_size_class(local_assigns.fetch(:size, :sm)) %>

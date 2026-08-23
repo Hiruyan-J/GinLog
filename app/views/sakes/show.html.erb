@@ -30,7 +30,7 @@
 
       <%# ---------- 味 × 香りの4象限マップ（平均値） ---------- %>
       <section class="flex flex-col items-center my-6">
-        <%= render "shared/taste_aroma_map", taste: @sake.average_taste_strength, aroma: @sake.average_aroma_strength, variant: :quadrant, size: :lg %>
+        <%= render "shared/taste_aroma_map", taste: @sake.average_taste_strength, aroma: @sake.average_aroma_strength, variant: :plot, size: :lg %>
         <p class="mt-3 text-xs text-neutral-500">
           味の濃淡 <%= @sake.average_taste_strength.round(1) %> ／ 香りの濃淡 <%= @sake.average_aroma_strength.round(1) %>
         </p>
