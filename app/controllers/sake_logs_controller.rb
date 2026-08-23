@@ -1,6 +1,6 @@
 class SakeLogsController < ApplicationController
   # 一覧からの削除（＝ページ遷移せず、そのカードだけを消す）とみなす遷移元
-  LIST_ORIGINS = %w[timeline mylog].freeze
+  LIST_ORIGINS = %w[timeline mylog sake].freeze
 
   skip_before_action :authenticate_user!, only: %i[show]
 
@@ -21,7 +21,7 @@ class SakeLogsController < ApplicationController
     @sake_log = SakeLog.includes(:user, sake: { brand: { brewery: :area } })
                         .with_attached_images
                         .find(params[:id])
-    # どの画面から来たか（"timeline" / "mylog"）。無い場合は nil 。
+    # どの画面から来たか（"timeline" / "mylog" / "sake"）。無い場合は nil 。
     #   値の判定はビュー側の sake_log_back_link に任せる（知らない値が来ても既定の戻り先になる）
     @origin = params[:from]
   end
@@ -59,7 +59,7 @@ class SakeLogsController < ApplicationController
   end
 
   # 削除元によって応答を変える
-  #   一覧（タイムライン / マイログ一覧）から削除 → Turbo Stream でそのカードだけ消す（ページ遷移しない）
+  #   一覧（タイムライン / マイログ一覧 / 日本酒詳細）から削除 → Turbo Stream でそのカードだけ消す（ページ遷移しない）
   #   記録詳細から削除                          → マイログ一覧へ戻る
   def destroy
     set_sake_log

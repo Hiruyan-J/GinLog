@@ -16,7 +16,11 @@
       <%# 1段目: 銘柄名 商品名 %>
       <div class="flex gap-2 items-baseline">
         <h2 class="text-lg font-bold truncate"><%= sake_log.sake.brand.name %></h2>
-        <p class="text-sm truncate"><%= sake_log.sake.product_name %></p>
+        <p class="text-sm truncate">
+          <%= link_to sake_log.sake.product_name, sake_path(sake_log.sake_id),
+                class: "relative z-20 link link-hover",
+                data: { turbo_frame: "_top" } %>
+        </p>
       </div>
 
       <%# 2段目: 左に文字情報、右に4象限マップ %>
