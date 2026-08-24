@@ -57,17 +57,19 @@ module SakeLogsHelper
 
   # 記録詳細の「戻る」リンクの文言と遷移先を返す
   #
-  # 遷移元（from）が分かるときはその一覧へ戻す。
+  # 遷移元（from）が分かるときはその画面へ戻す。
   # 直リンクや検索エンジン経由で from が無いときは、
   # 自分の記録ならマイログ、他人の記録ならタイムラインへ戻す。
   #
-  # @param origin [String, nil] 遷移元（"timeline" / "mylog"）
+  # @param origin [String, nil] 遷移元（"timeline" / "mylog" / "sake"）
   # @param owned [Boolean, nil] 表示中の記録がログイン中のユーザーのものか
+  # @param sake_id [Integer] 表示中の記録に紐づく sake の ID（from=sake の戻り先に使う）
   # @return [Array(String, String)] [リンクの文言, 遷移先のパス]
-  def sake_log_back_link(origin:, owned:)
+  def sake_log_back_link(origin:, owned:, sake_id:)
     case origin
     when "timeline" then [ "タイムラインに戻る", timeline_path ]
     when "mylog"    then [ "マイログに戻る", sake_logs_path ]
+    when "sake"     then [ "日本酒詳細に戻る", sake_path(sake_id) ]
     else
       owned ? [ "マイログに戻る", sake_logs_path ] : [ "タイムラインに戻る", timeline_path ]
     end

@@ -4,11 +4,15 @@ require 'rails_helper'
 #
 # Table name: sakes
 #
-#  id           :bigint           not null, primary key
-#  product_name :string           not null
-#  created_at   :datetime         not null
-#  updated_at   :datetime         not null
-#  brand_id     :bigint           not null
+#  id                                                              :bigint           not null, primary key
+#  average_aroma_strength(香りの濃淡の平均。未集計・投稿0件は nil) :float
+#  average_rating(好み度の平均。未集計・投稿0件は nil)             :float
+#  average_taste_strength(味の濃淡の平均。未集計・投稿0件は nil)   :float
+#  product_name                                                    :string           not null
+#  sake_logs_count(投稿件数。未集計でも0でよいため not null)       :integer          default(0), not null
+#  created_at                                                      :datetime         not null
+#  updated_at                                                      :datetime         not null
+#  brand_id                                                        :bigint           not null
 #
 # Indexes
 #
@@ -82,6 +86,55 @@ RSpec.describe Sake, type: :model do
       create(:sake, brand: brand, product_name: "純米大吟醸")
 
       expect(Sake.search_by_product_name(brand.id, "")).to be_empty
+    end
+  end
+
+  describe "#refresh_aggregation!" do
+    let(:sake) { create(:sake) }
+
+    it "紐づく記録の平均値と件数を保存する" do
+      create(:sake_log, sake: sake, rating: 2, taste_strength: 3.0, aroma_strength: 6.0)
+      create(:sake_log, sake: sake, rating: 5, taste_strength: 4.0, aroma_strength: 7.0)
+
+      sake.refresh_aggregation!
+
+      expect(sake.sake_logs_count).to eq 2
+      expect(sake.average_rating).to eq 3.5
+      expect(sake.average_taste_strength).to eq 3.5
+      expect(sake.average_aroma_strength).to eq 6.5
+    end
+
+    it "平均は小数第2位に丸めて保存する" do
+      create(:sake_log, sake: sake, rating: 1)
+      create(:sake_log, sake: sake, rating: 1)
+      create(:sake_log, sake: sake, rating: 2)
+
+      sake.refresh_aggregation!
+
+      expect(sake.average_rating).to eq 1.33 # 4 ÷ 3 = 1.333... → 1.33
+    end
+
+    it "投稿が0件なら件数0・平均nilで保存する" do
+      sake.refresh_aggregation!
+
+      expect(sake.sake_logs_count).to eq 0
+      expect(sake.average_rating).to be_nil
+      expect(sake.average_taste_strength).to be_nil
+      expect(sake.average_aroma_strength).to be_nil
+    end
+  end
+
+  describe "#aggregated?" do
+    it "集計済み（average_rating あり）なら true" do
+      sake = build(:sake, average_rating: 3.5)
+
+      expect(sake).to be_aggregated
+    end
+
+    it "未集計（average_rating が nil）なら false" do
+      sake = build(:sake, average_rating: nil)
+
+      expect(sake).not_to be_aggregated
     end
   end
 end

@@ -1,5 +1,8 @@
+<%# 描画元の画面（省略時はタイムライン）。記録詳細の「戻る」と削除時の応答の出し分けに使用 %>
+<% origin = local_assigns.fetch(:origin, "timeline") %>
+
 <article id="<%= dom_id sake_log %>" class="relative py-3">
-  <%= link_to "", sake_log_path(sake_log, from: "timeline"),
+  <%= link_to "", sake_log_path(sake_log, from: origin),
         class: "absolute inset-0 z-10",
         data: { turbo_frame: "_top" } %>
 
@@ -26,7 +29,7 @@
           <% end %>
           <%# 削除ボタン
             Turbo Stream で応答するため frame と無関係に動く。turbo_frame: "_top" は付けない %>
-          <%= link_to sake_log_path(sake_log, from: "timeline"), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
+          <%= link_to sake_log_path(sake_log, from: origin), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
             <span class="material-symbols-rounded text-primary ms-size-24">delete</span>
           <% end %>
         <% end %>
@@ -44,7 +47,9 @@
   <%# 銘柄名・商品名・都道府県 %>
   <section class="flex flex-wrap gap-x-2 items-baseline mt-1">
     <h2 class="text-xl font-bold"><%= sake_log.sake.brand.name %></h2>
-    <p class="text-sm"><%= sake_log.sake.product_name %></p>
+    <%= link_to sake_log.sake.product_name, sake_path(sake_log.sake_id),
+          class: "relative z-20 text-sm link link-hover",
+          data: { turbo_frame: "_top" } %>
     <span class="badge badge-ghost badge-sm"><%= sake_log.sake.brand.brewery.area.name %></span>
   </section>
 

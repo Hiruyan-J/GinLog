@@ -33,6 +33,7 @@ Rails.application.routes.draw do
   end
 
   resources :sake_logs, only: %i[index show new create edit update destroy]
+  resources :sakes, only: %i[show]
   get "timeline", to: "timelines#index", as: :timeline
   get "mypage", to: "users#show", as: :mypage
 

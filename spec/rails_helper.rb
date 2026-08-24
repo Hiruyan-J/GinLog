@@ -86,6 +86,9 @@ RSpec.configure do |config|
   # travel_to でテスト中の時刻を進められるようにする
   config.include ActiveSupport::Testing::TimeHelpers
 
+  # request spec で Devise の sign_in / sign_out を使えるようにする
+  config.include Devise::Test::IntegrationHelpers, type: :request
+
   # テスト中の外部HTTP通信をブロック（localhost は capybara 等のため許可）
   WebMock.disable_net_connect!(allow_localhost: true)
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_16_021748) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_20_084112) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -88,9 +88,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_16_021748) do
   end
 
   create_table "sakes", force: :cascade do |t|
+    t.float "average_aroma_strength", comment: "香りの濃淡の平均。未集計・投稿0件は nil"
+    t.float "average_rating", comment: "好み度の平均。未集計・投稿0件は nil"
+    t.float "average_taste_strength", comment: "味の濃淡の平均。未集計・投稿0件は nil"
     t.bigint "brand_id", null: false
     t.datetime "created_at", null: false
     t.string "product_name", null: false
+    t.integer "sake_logs_count", default: 0, null: false, comment: "投稿件数。未集計でも0でよいため not null"
     t.datetime "updated_at", null: false
     t.index ["brand_id", "product_name"], name: "index_sakes_on_brand_id_and_product_name", unique: true
     t.index ["brand_id"], name: "index_sakes_on_brand_id"
