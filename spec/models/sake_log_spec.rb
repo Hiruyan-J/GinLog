@@ -74,6 +74,48 @@ RSpec.describe SakeLog, type: :model do
     end
   end
 
+  describe "集計ジョブの登録(after_commit)" do
+    let(:sake) { create(:sake) }
+
+    it "作成すると紐づく sake の集計ジョブが登録される" do
+      expect {
+        create(:sake_log, sake: sake)
+      }.to have_enqueued_job(SakeAggregationJob).with(sake.id)
+    end
+
+    it "更新でも集計ジョブが登録される" do
+      sake_log = create(:sake_log, sake: sake)
+
+      expect {
+        sake_log.update!(rating: 5)
+      }.to have_enqueued_job(SakeAggregationJob).with(sake.id)
+    end
+
+    it "削除でも集計ジョブが登録される" do
+      sake_log = create(:sake_log, sake: sake)
+
+      expect {
+        sake_log.destroy!
+      }.to have_enqueued_job(SakeAggregationJob).with(sake.id)
+    end
+
+    it "別の sake に付け替えると、新旧両方の sake のジョブが登録される" do
+      sake_log = create(:sake_log, sake: sake)
+      new_sake = create(:sake)
+
+      expect {
+        sake_log.update!(sake: new_sake)
+      }.to have_enqueued_job(SakeAggregationJob).with(new_sake.id)
+        .and have_enqueued_job(SakeAggregationJob).with(sake.id)
+    end
+
+    it "ジョブの登録に失敗しても記録の保存は成功する" do
+      allow(SakeAggregationJob).to receive(:perform_later).and_raise(StandardError, "キューが落ちている")
+
+      expect { create(:sake_log, sake: sake) }.not_to raise_error
+    end
+  end
+
   describe "ラベル画像" do
     let(:sake_log) { build(:sake_log) }
 
