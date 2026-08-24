@@ -96,10 +96,10 @@ jobs:
       - name: Install JS dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build Tailwind CSS
+      - name: Precompile assets
         env:
           RAILS_ENV: test
-        run: bin/rails tailwindcss:build
+        run: bin/rails assets:precompile
 
       - name: Run tests
         env:
