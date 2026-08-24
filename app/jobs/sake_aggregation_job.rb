@@ -8,7 +8,9 @@ class SakeAggregationJob < ApplicationJob
   # @return [void]
   def perform(sake_id)
     sake = Sake.find_by(id: sake_id)
-    # ジョブ実行前に sake ごと削除されていることがある（記録の連続削除など）。その場合は何もしない
+    # 同じ sake に対するジョブが複数積まれ、先に実行された方が sake を削除した場合に nil になる
+    # （商品名を編集した直後の削除、sakes:aggregate_all の実行中にユーザーが記録を削除、など）
+    # その場合は何もしない
     return if sake.nil?
 
     sake.refresh_aggregation!
