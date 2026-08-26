@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_20_084112) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_26_121155) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -74,6 +74,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_20_084112) do
     t.index ["sakenowa_id"], name: "index_breweries_on_sakenowa_id", unique: true, where: "(sakenowa_id IS NOT NULL)"
   end
 
+  create_table "label_extraction_logs", comment: "AIラベル読み取りの実行履歴。1日あたりの回数制限に使用", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "executed_on", null: false, comment: "実行日（日本時間）。1日あたりの回数制限の集計キー"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "executed_on"], name: "index_label_extraction_logs_on_user_id_and_executed_on"
+  end
+
   create_table "sake_logs", force: :cascade do |t|
     t.float "aroma_strength", null: false
     t.datetime "created_at", null: false
@@ -123,6 +131,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_20_084112) do
   add_foreign_key "brands", "breweries"
   add_foreign_key "breweries", "areas"
   add_foreign_key "breweries", "breweries", column: "merged_into_id"
+  add_foreign_key "label_extraction_logs", "users"
   add_foreign_key "sake_logs", "sakes"
   add_foreign_key "sake_logs", "users"
   add_foreign_key "sakes", "brands"
