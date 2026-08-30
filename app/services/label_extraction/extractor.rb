@@ -1,0 +1,251 @@
+module LabelExtraction
+  # ラベル画像の読み取りとマスタ照合をまとめて行うサービス
+  #
+  # 戻り値の形:
+  #   {
+  #     extraction:    { brand_name:, product_name:, product_name_alternatives:, ... },
+  #     brand_match:   { status: "single" | "multiple" | "none", candidates: [...] },
+  #     brewery_match: { status: "single" | "multiple" | "none", candidates: [...] },
+  #     area:          { id:, name: } または nil
+  #   }
+  class Extractor
+    PROMPT_PATH = Rails.root.join("app/prompts/label_extraction.md")
+
+    # 商品名の別候補は多すぎると選びにくいため上限を設ける
+    # 変更するときは app/prompts/label_extraction.md の件数の記載も合わせること
+    # （プロンプトは素のテキストのまま扱いたいので、あえて定数を埋め込んでいない）
+    ALTERNATIVES_MAX = 3
+
+    # 銘柄候補の表示上限（既存のオートコンプリート Brand.search_by_name と揃える）
+    # 「どぶろく」のような一般名詞に近い銘柄名は同名が増えやすいため上限を設ける
+    CANDIDATES_MAX = 10
+
+    # 蔵元名の先頭・末尾に付く法人格（マスタ照合の前に取り除く）
+    LEGAL_ENTITY_PATTERN = /\A(株式会社|有限会社|合資会社|合名会社|合同会社)|(株式会社|有限会社|合資会社|合名会社|合同会社)\z/
+
+    # Gemini の構造化出力に強制するスキーマ
+    # これにより「JSONのパースに失敗する」「項目が欠ける」事故を防ぐ
+    RESPONSE_SCHEMA = {
+      type: "OBJECT",
+      properties: {
+        brand_name: { type: "STRING", nullable: true, description: "銘柄" },
+        product_name: { type: "STRING", nullable: true, description: "商品名の第1候補" },
+        product_name_alternatives: { type: "ARRAY", items: { type: "STRING" }, maxItems: ALTERNATIVES_MAX,
+                                     description: "商品名の別候補（最大#{ALTERNATIVES_MAX}件）" },
+        brewery_name: { type: "STRING", nullable: true, description: "蔵元名（法人格を除いた形）" },
+        brewery_name_raw: { type: "STRING", nullable: true, description: "ラベル記載の蔵元名（原文）" },
+        prefecture: { type: "STRING", nullable: true, description: "蔵元の所在地の都道府県" },
+        confidence: { type: "STRING", enum: %w[high medium low], description: "読み取り全体の確信度" }
+      },
+      required: %w[brand_name product_name product_name_alternatives brewery_name brewery_name_raw prefecture confidence]
+    }.freeze
+
+    # 直近のトークン使用量の確認用（評価タスクで使う）
+    # @return [GeminiClient]
+    attr_reader :client
+
+    # @param front_image [Hash] 表ラベル画像 { mime_type: String, data: String(バイナリ) }
+    # @param back_image [Hash, nil] 裏ラベル画像（任意）
+    def initialize(front_image:, back_image: nil)
+      @front_image = front_image
+      @back_image = back_image
+      @client = GeminiClient.new
+    end
+
+    # 読み取りとマスタ照合を実行する
+    # @return [Hash] 抽出結果と照合結果（クラスコメント参照）
+    # @raise [GeminiClient::ApiError] API呼び出しに失敗した場合
+    def call
+      extraction = @client.generate(
+        prompt: File.read(PROMPT_PATH),
+        images: [ @front_image, @back_image ].compact,
+        response_schema: RESPONSE_SCHEMA
+      )
+      extraction = normalize_extraction(extraction)
+
+      {
+        extraction: extraction,
+        brand_match: match_brands(extraction[:brand_name], extraction[:brewery_name], extraction[:prefecture]),
+        brewery_match: match_breweries(extraction[:brewery_name], extraction[:brewery_name_raw], extraction[:prefecture]),
+        area: match_area(extraction[:prefecture])
+      }
+    end
+
+    private
+
+    # 抽出結果の各文字列をマスタと同じルール（Normalizable）で正規化する
+    # 全角スペース等の表記揺れで照合に失敗するのを防ぐ
+    # @param extraction [Hash] Gemini の抽出結果
+    # @return [Hash] 正規化済みの抽出結果
+    def normalize_extraction(extraction)
+      {
+        brand_name: normalize(extraction[:brand_name]),
+        product_name: normalize(extraction[:product_name]),
+        # 件数は maxItems でも縛っているが、スキーマ違反が絶対に起きない保証はないため
+        # ここでも切り詰める（表示側で件数が想定を超えないことを保証する）
+        product_name_alternatives: Array(extraction[:product_name_alternatives])
+                                    .filter_map { |name| normalize(name) }
+                                    .first(ALTERNATIVES_MAX),
+        brewery_name: normalize(extraction[:brewery_name]),
+        brewery_name_raw: normalize(extraction[:brewery_name_raw]),
+        prefecture: normalize(extraction[:prefecture]),
+        confidence: extraction[:confidence]
+      }
+    end
+
+    # @param value [String, nil]
+    # @return [String, nil] 正規化後の文字列（空文字は nil に落とす）
+    def normalize(value)
+      Normalizable.normalize_text(value).presence
+    end
+
+    # 銘柄名をマスタと照合する
+    # 完全一致を優先し、なければ部分一致（既存のオートコンプリートと同じ検索）へ落とす
+    # 「どぶろく」のように同名の銘柄が複数ある場合は、AIが読んだ蔵元名・都道府県で並べ替える
+    # @param brand_name [String, nil] 抽出された銘柄名
+    # @param brewery_name [String, nil] 抽出された蔵元名（並べ替えのヒントに使う）
+    # @param prefecture [String, nil] 抽出された都道府県（並べ替えのヒントに使う）
+    # @return [Hash] { status:, candidates: }
+    def match_brands(brand_name, brewery_name, prefecture)
+      return { status: "none", candidates: [] } if brand_name.blank?
+
+      brands = Brand.active.includes(brewery: :area).where(name: brand_name).to_a
+      brands = Brand.search_by_name(brand_name).to_a if brands.empty?
+      brands = sort_by_likeness(brands, brewery_name, prefecture) { |brand| brand.brewery }
+
+      build_match(brands.first(CANDIDATES_MAX).map { |brand| brand_candidate(brand) })
+    end
+
+    # 候補を、AIが読んだ蔵元名・都道府県に近い順へ並べ替える
+    #
+    # 銘柄候補と蔵元候補の両方で使えるよう、採点対象の Brewery はブロックで取り出す。
+    # 採点基準を1箇所にまとめることで、銘柄と蔵元で並び順の判定がズレるのを防ぐ。
+    #
+    # @param records [Array<Brand, Brewery>] 並べ替え対象
+    # @param brewery_name [String, nil] 抽出された蔵元名
+    # @param prefecture [String, nil] 抽出された都道府県
+    # @yieldparam record [Brand, Brewery] 並べ替え対象の1件
+    # @yieldreturn [Brewery] 採点に使う蔵元
+    # @return [Array<Brand, Brewery>] 一致度の高い順（同点なら元の順序を保つ）
+    def sort_by_likeness(records, brewery_name, prefecture)
+      return records if records.size <= 1
+
+      # sort_by は同点の順序が保証されないため、元の並び順(index)を第2キーにする
+      records.each_with_index
+             .sort_by { |record, index| [ -brewery_likeness(yield(record), brewery_name, prefecture), index ] }
+             .map(&:first)
+    end
+
+    # 蔵元1件が、AIの読み取りとどれだけ一致しているかを点数にする
+    # @param brewery [Brewery] 採点対象の蔵元
+    # @param brewery_name [String, nil] 抽出された蔵元名
+    # @param prefecture [String, nil] 抽出された都道府県
+    # @return [Integer] 大きいほど一致度が高い（0〜5）
+    def brewery_likeness(brewery, brewery_name, prefecture)
+      score = prefecture.present? && brewery.area.name == prefecture ? 1 : 0
+      return score if brewery_name.blank?
+
+      if brewery.name == brewery_name
+        score + 4 # 蔵元名が完全一致
+      elsif brewery.name.include?(brewery_name) || brewery_name.include?(brewery.name)
+        score + 2 # 「山本」と「山本酒造店」のような部分一致
+      else
+        score
+      end
+    end
+
+    # 蔵元名をマスタと照合する（銘柄が特定できなかったときのフォールバック用）
+    # ラベルの蔵元名は「株式会社山本酒造店」のように法人格つきで書かれるため、
+    # 法人格を除いた形でも照合する
+    # @param brewery_name [String, nil] 法人格を除いた蔵元名
+    # @param brewery_name_raw [String, nil] ラベル原文の蔵元名
+    # @param prefecture [String, nil] 抽出された都道府県（並べ替えのヒントに使う）
+    # @return [Hash] { status:, candidates: }
+    def match_breweries(brewery_name, brewery_name_raw, prefecture)
+      query_names = [ brewery_name, strip_legal_entity(brewery_name_raw) ].compact_blank.uniq
+      return { status: "none", candidates: [] } if query_names.empty?
+
+      breweries = Brewery.active.includes(:area).where(name: query_names).to_a
+      # 完全一致が無ければ、読み取れた名前すべてで部分一致を試す。
+      # AIが brewery_name 側だけ短縮・誤読していても、原文側の名前で拾えるようにする
+      # （完全一致は最初から query_names 全件を対象にしているので、そちらに合わせる）
+      breweries = query_names.flat_map { |name| partial_match_breweries(name) }.uniq if breweries.empty?
+      breweries = sort_by_likeness(breweries, brewery_name, prefecture) { |brewery| brewery }
+
+      build_match(breweries.first(CANDIDATES_MAX).map { |brewery| brewery_candidate(brewery) })
+    end
+
+    # 蔵元名の部分一致検索（双方向）
+    # 「山本酒造店」→ マスタ「山本」のように、抽出名がマスタ名を含むケースも拾う
+    # @param name [String] 検索する蔵元名
+    # @return [Array<Brewery>]
+    def partial_match_breweries(name)
+      contains = Brewery.search_by_name(name).to_a
+      contained = Brewery.active.includes(:area)
+                         .where("? LIKE '%' || breweries.name || '%'", name)
+                         .limit(10).to_a
+      (contains + contained).uniq
+    end
+
+    # 銘柄候補1件をフロントへ返すJSONの形にする
+    # （/api/brands/search のレスポンスと同じ形に揃える）
+    # @param brand [Brand]
+    # @return [Hash]
+    def brand_candidate(brand)
+      {
+        id: brand.id,
+        name: brand.name,
+        brewery_id: brand.brewery.id,
+        brewery_name: brand.brewery.name,
+        area_id: brand.brewery.area.id,
+        area_name: brand.brewery.area.name,
+        label: "#{brand.name} - #{brand.brewery.name} (#{brand.brewery.area.name})"
+      }
+    end
+
+    # 蔵元候補1件をフロントへ返すJSONの形にする
+    # @param brewery [Brewery]
+    # @return [Hash]
+    def brewery_candidate(brewery)
+      {
+        id: brewery.id,
+        name: brewery.name,
+        area_id: brewery.area.id,
+        area_name: brewery.area.name,
+        label: "#{brewery.name}（#{brewery.area.name}）"
+      }
+    end
+
+    # 候補の件数から照合ステータスを決める
+    # @param candidates [Array<Hash>]
+    # @return [Hash] { status: "none" | "single" | "multiple", candidates: }
+    def build_match(candidates)
+      status =
+        case candidates.size
+        when 0 then "none"
+        when 1 then "single"
+        else "multiple"
+        end
+      { status: status, candidates: candidates }
+    end
+
+    # 都道府県名を areas マスタと照合する
+    # @param prefecture [String, nil]
+    # @return [Hash, nil] { id:, name: } または nil
+    def match_area(prefecture)
+      return nil if prefecture.blank?
+
+      area = Area.find_by(name: prefecture)
+      area && { id: area.id, name: area.name }
+    end
+
+    # 蔵元名から法人格（株式会社など）を取り除く
+    # @param name [String, nil]
+    # @return [String, nil]
+    def strip_legal_entity(name)
+      return nil if name.blank?
+
+      name.gsub(LEGAL_ENTITY_PATTERN, "").strip
+    end
+  end
+end
