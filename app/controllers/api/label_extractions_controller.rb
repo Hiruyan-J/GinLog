@@ -20,7 +20,7 @@ class Api::LabelExtractionsController < ApplicationController
 
 
   # POST /api/label_extraction
-  # 表(+裏)ラベル画像を受け取り、抽出結果とマスタ照合結果をJSONで返す
+  # 表・裏ラベル画像（どちらか1枚以上）を受け取り、抽出結果とマスタ照合結果をJSONで返す
   # @return [void]
   def create
     if LabelExtractionLog.limit_reached?(current_user)
@@ -30,13 +30,13 @@ class Api::LabelExtractionsController < ApplicationController
     end
 
     front_image = build_image(params[:front_label_image])
-    if front_image.nil?
-      render json: { error: "表ラベルの写真を選択してください（JPEG・PNG・WebP・HEIC・HEIF形式、10MB以下）" },
+    back_image = build_image(params[:back_label_image])
+    if front_image.nil? && back_image.nil?
+      render json: { error: "表ラベルまたは裏ラベルの写真を選択してください（JPEG・PNG・WebP・HEIC・HEIF形式、10MB以下）" },
              status: :unprocessable_entity
       return
     end
 
-    back_image = build_image(params[:back_label_image])
     if images_too_large?(front_image, back_image)
       render json: { error: "写真のサイズが大きすぎます。別の写真を選ぶか、小さいサイズでお試しください" },
              status: :unprocessable_entity

@@ -29,7 +29,8 @@ module LabelExtraction
 
     # 画像つきプロンプトを送り、構造化出力のJSONをHashで受け取る
     # @param prompt [String] プロンプト本文
-    # @param images [Array<Hash>] 画像の配列。要素は { mime_type: String, data: String(バイナリ) }
+    # @param images [Array<Hash>] 画像の配列。
+    #   要素は { label: String, mime_type: String, data: String(バイナリ) }
     # @param response_schema [Hash] 構造化出力のスキーマ（Gemini の responseSchema 形式）
     # @return [Hash] 抽出結果（シンボルキー）
     # @raise [ApiError] 通信失敗・安全性ブロック・レスポンス不正の場合
@@ -55,12 +56,13 @@ module LabelExtraction
     # リクエストボディを組み立てる
     # 画像は inline_data（Base64）で埋め込む。temperature: 0 で結果を安定させる
     # @param prompt [String] プロンプト本文
-    # @param images [Array<Hash>] 画像の配列
+    # @param images [Array<Hash>] 画像の配列（:label, :mime_type, :data）
     # @param response_schema [Hash] 構造化出力のスキーマ
     # @return [Hash] リクエストボディ
     def build_body(prompt, images, response_schema)
       parts = [ { text: prompt } ]
       images.each do |image|
+        parts << { text: "次の画像は#{image[:label]}です。" }
         parts << { inline_data: { mime_type: image[:mime_type], data: Base64.strict_encode64(image[:data]) } }
       end
 

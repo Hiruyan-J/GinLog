@@ -11,6 +11,11 @@ module LabelExtraction
   class Extractor
     PROMPT_PATH = Rails.root.join("app/prompts/label_extraction.md")
 
+    # 画像の役割名。GeminiClient が各画像の直前に置くテキストに使う
+    # 画像の並び順ではなく、この文言で表・裏を伝えるため、
+    # 片方だけを渡しても役割が正しく伝わる
+    IMAGE_LABELS = { front: "表ラベル", back: "裏ラベル" }.freeze
+
     # 商品名の別候補は多すぎると選びにくいため上限を設ける
     # 変更するときは app/prompts/label_extraction.md の件数の記載も合わせること
     # （プロンプトは素のテキストのまま扱いたいので、あえて定数を埋め込んでいない）
@@ -44,9 +49,14 @@ module LabelExtraction
     # @return [GeminiClient]
     attr_reader :client
 
-    # @param front_image [Hash] 表ラベル画像 { mime_type: String, data: String(バイナリ) }
-    # @param back_image [Hash, nil] 裏ラベル画像（任意）
-    def initialize(front_image:, back_image: nil)
+    # @param front_image [Hash, nil] 表ラベル画像 { mime_type: String, data: String(バイナリ) }
+    # @param back_image [Hash, nil] 裏ラベル画像（形式は front_image と同じ）
+    # @raise [ArgumentError] 表・裏のどちらも指定されなかった場合
+    def initialize(front_image: nil, back_image: nil)
+      if front_image.nil? && back_image.nil?
+        raise ArgumentError, "表ラベルと裏ラベルのどちらか1枚以上を指定してください"
+      end
+
       @front_image = front_image
       @back_image = back_image
       @client = GeminiClient.new
@@ -58,7 +68,7 @@ module LabelExtraction
     def call
       extraction = @client.generate(
         prompt: File.read(PROMPT_PATH),
-        images: [ @front_image, @back_image ].compact,
+        images: labeled_images,
         response_schema: RESPONSE_SCHEMA
       )
       extraction = normalize_extraction(extraction)
@@ -72,6 +82,15 @@ module LabelExtraction
     end
 
     private
+
+    # 送信する画像に役割名（表ラベル / 裏ラベル）を付けて並べる
+    #
+    # @return [Array<Hash>] { label:, mime_type:, data: } の配列（指定された画像のみ）
+    def labeled_images
+      { front: @front_image, back: @back_image }.filter_map do |slot, image|
+        image.merge(label: IMAGE_LABELS[slot]) if image
+      end
+    end
 
     # 抽出結果の各文字列をマスタと同じルール（Normalizable）で正規化する
     # 全角スペース等の表記揺れで照合に失敗するのを防ぐ
