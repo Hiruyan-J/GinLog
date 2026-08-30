@@ -30,6 +30,7 @@ Rails.application.routes.draw do
         get :search # GET /api/breweries/search?q=xxx
       end
     end
+    resource :label_extraction, only: %i[create] # POST /api/label_extraction
   end
 
   resources :sake_logs, only: %i[index show new create edit update destroy]
