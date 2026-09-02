@@ -22,6 +22,13 @@ export default class extends Controller {
   // 読み取り精度が低い場合は 2000 まで上げて精度を確認する
   static MAX_DIMENSION = 1000
 
+  // ★★ 追加: サーバーの応答を待つ上限(ミリ秒)
+  // サーバー側は GeminiClient::TOTAL_TIMEOUT(45秒)で必ず打ち切るため、
+  // 画像アップロードとRailsの処理ぶんの余裕を足した値にする。
+  // サーバーが応答を返せない状態（プロセス停止など）でも、
+  // ここで打ち切られるのでボタンが押せないままにならない
+  static REQUEST_TIMEOUT_MS = 60000
+
   connect() {
     this.loading = false
   }
@@ -66,18 +73,33 @@ export default class extends Controller {
           "Accept": "application/json"
         },
         body: formData,
-        credentials: "same-origin"
+        credentials: "same-origin",
+        // この時間を過ぎたら通信を中断する（TimeoutError が throw される）
+        signal: AbortSignal.timeout(this.constructor.REQUEST_TIMEOUT_MS)
       })
       const data = await response.json()
 
       if (!response.ok) {
+        // サーバーは Gemini を呼ぶ前に実行回数を記録するため、
+        // 読み取りに失敗した場合も1回消費されている。
+        // エラー応答に含まれる残り回数で表示を合わせる
+        this.applyRemainingCount(data)
         this.showMessage(data.error || "読み取りに失敗しました。時間をおいて再度お試しください", "error")
         return
       }
       this.applyResult(data)
     } catch (error) {
       console.error("AIラベル読み取りエラー:", error)
-      this.showMessage("通信に失敗しました。時間をおいて再度お試しください", "error")
+      // AbortSignal.timeout() による中断は TimeoutError として飛んでくる。
+      // 通信自体ができなかった場合と原因が違うため、メッセージを分ける
+      if (error.name === "TimeoutError") {
+        // 応答は受け取れなくてもサーバー側で実行可能回数が減っている為1減らす
+        this.remainingValue = Math.max(0, this.remainingValue - 1)
+        this.showMessage("読み取りに時間がかかりすぎました。時間をおいて再度お試しください", "error")
+      } else {
+        // 送信自体が失敗した場合は消費されたか分からないため、表示は変えない
+        this.showMessage("通信に失敗しました。時間をおいて再度お試しください", "error")
+      }
     } finally {
       this.setLoading(false)
     }
@@ -85,10 +107,18 @@ export default class extends Controller {
 
   // --- 結果のフォーム反映 ---
 
+  // サーバーが返した残り回数を表示へ反映する
+  // 成功・失敗のどちらの応答にも含まれる。
+  applyRemainingCount(data) {
+    if (typeof data.remaining_count === "number") {
+      this.remainingValue = data.remaining_count
+    }
+  }
+
   // 読み取り結果をフォーム全体へ反映する
   applyResult(data) {
     const extraction = data.extraction
-    this.remainingValue = data.remaining_count
+    this.applyRemainingCount(data)
 
     if (!extraction.brand_name && !extraction.product_name && !extraction.brewery_name) {
       this.showMessage("ラベルから情報を読み取れませんでした。お手数ですが手動で入力してください", "warning")

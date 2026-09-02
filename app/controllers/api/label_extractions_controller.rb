@@ -24,22 +24,22 @@ class Api::LabelExtractionsController < ApplicationController
   # @return [void]
   def create
     if LabelExtractionLog.limit_reached?(current_user)
-      render json: { error: "本日のAI読み取りの利用上限（#{LabelExtractionLog::DAILY_LIMIT}回）に達しました。明日また利用できます" },
-             status: :too_many_requests
+      render_error("本日のAI読み取りの利用上限（#{LabelExtractionLog::DAILY_LIMIT}回）に達しました。明日また利用できます",
+                   :too_many_requests)
       return
     end
 
     front_image = build_image(params[:front_label_image])
     back_image = build_image(params[:back_label_image])
     if front_image.nil? && back_image.nil?
-      render json: { error: "表ラベルまたは裏ラベルの写真を選択してください（JPEG・PNG・WebP・HEIC・HEIF形式、10MB以下）" },
-             status: :unprocessable_entity
+      render_error("表ラベルまたは裏ラベルの写真を選択してください（JPEG・PNG・WebP・HEIC・HEIF形式、10MB以下）",
+                   :unprocessable_entity)
       return
     end
 
     if images_too_large?(front_image, back_image)
-      render json: { error: "写真のサイズが大きすぎます。別の写真を選ぶか、小さいサイズでお試しください" },
-             status: :unprocessable_entity
+      render_error("写真のサイズが大きすぎます。別の写真を選ぶか、小さいサイズでお試しください",
+                   :unprocessable_entity)
       return
     end
 
@@ -51,13 +51,32 @@ class Api::LabelExtractionsController < ApplicationController
       back_image: back_image
     ).call
 
-    render json: result.merge(remaining_count: LabelExtractionLog.remaining_for(current_user))
+    render json: result.merge(remaining_count: remaining_count)
   rescue LabelExtraction::GeminiClient::ApiError => e
     Rails.logger.error("AIラベル読み取りに失敗しました: #{e.message}")
-    render json: { error: "読み取りに失敗しました。時間をおいて再度お試しください" }, status: :bad_gateway
+    render_error("読み取りに失敗しました。時間をおいて再度お試しください", :bad_gateway)
   end
 
   private
+
+  # エラー応答を返す
+  #
+  # 残り回数を必ず一緒に返す。読み取りの成否にかかわらず、
+  # 画面の「本日あと◯回」をサーバーの実際の値に合わせるため。
+  # 消費されていないエラー（画像未選択など）でも、DBから数え直した値を返すので正しい。
+  #
+  # @param message [String] ユーザーに表示するメッセージ
+  # @param status [Symbol] HTTPステータス（:too_many_requests など）
+  # @return [void]
+  def render_error(message, status)
+    render json: { error: message, remaining_count: remaining_count }, status: status
+  end
+
+  # ログイン中のユーザーの本日の残り実行可能回数
+  # @return [Integer]
+  def remaining_count
+    LabelExtractionLog.remaining_for(current_user)
+  end
 
   # 送信する画像の合計サイズが上限を超えているか
   # @param images [Array<Hash, nil>] build_image の戻り値（nil は無視する）

@@ -10,8 +10,15 @@ module LabelExtraction
 
     BASE_URL = "https://generativelanguage.googleapis.com"
     DEFAULT_MODEL = "gemini-3.7-flash"
+    # 接続確立を待つ時間（秒）
     OPEN_TIMEOUT = 5
-    READ_TIMEOUT = 60
+    # 1回のリクエストでレスポンスを待つ時間（秒）
+    READ_TIMEOUT = 30
+    # リトライを含めた全体の制限時間（秒）
+    # これを超えないよう、各試行の待ち時間を残り時間に合わせて切り詰める
+    TOTAL_TIMEOUT = 45
+    # 残り時間がこれ未満ならリトライしない（間に合わないため）
+    MIN_ATTEMPT_SECONDS = 5
     # リトライ回数と、各リトライ前の待ち時間（秒）
     MAX_RETRIES = 2
     RETRY_WAIT_SECONDS = [ 1, 2 ].freeze
@@ -22,8 +29,12 @@ module LabelExtraction
     # @return [Hash, nil] 例: { "promptTokenCount" => 2375, "candidatesTokenCount" => 71 }
     attr_reader :last_usage
 
+    # compose.yml の `GEMINI_MODEL: ${GEMINI_MODEL:-}` は、未設定でも
+    # 「空文字がセットされた状態」でコンテナに渡る。ENV.fetch はキーの有無しか
+    # 見ないため空文字をそのまま採用してしまい、モデル名なしのURLになる。
+    #
     # @param model [String] 使用するモデル名（環境変数 GEMINI_MODEL で上書き可能）
-    def initialize(model: ENV.fetch("GEMINI_MODEL", DEFAULT_MODEL))
+    def initialize(model: ENV["GEMINI_MODEL"].presence || DEFAULT_MODEL)
       @model = model
     end
 
@@ -77,41 +88,56 @@ module LabelExtraction
     end
 
     # 一時的なエラーならリトライしつつPOSTする
+    #
+    # リトライは「開始から TOTAL_TIMEOUT 秒まで」という締め切りの中だけで行う。
+    # 締め切りが無いと、Gemini 側が無応答のときに
+    # READ_TIMEOUT × 試行回数 ぶん待たされてしまう（実際に183秒かかる事故があった）。
+    #
     # @param body [Hash] リクエストボディ
     # @return [Net::HTTPSuccess] 成功レスポンス
-    # @raise [ApiError] リトライ上限まで失敗した場合
+    # @raise [ApiError] 締め切りまでに成功しなかった場合
     def request_with_retry(body)
-      (MAX_RETRIES + 1).times do |attempt|
-        begin
-          response = post_request(body)
-        rescue Net::OpenTimeout, Net::ReadTimeout
-          raise ApiError, "Gemini API がタイムアウトしました" if attempt >= MAX_RETRIES
+      deadline = current_time + TOTAL_TIMEOUT
+      last_error_message = nil
 
-          sleep(RETRY_WAIT_SECONDS[attempt])
+      (MAX_RETRIES + 1).times do |attempt|
+        remaining = deadline - current_time
+        # 残り時間が短すぎるなら、投げても間に合わないので諦める
+        break if remaining < MIN_ATTEMPT_SECONDS
+
+        begin
+          # 残り時間が READ_TIMEOUT より短ければ、そちらに合わせて切り詰める
+          response = post_request(body, read_timeout: [ READ_TIMEOUT, remaining ].min)
+        rescue Net::OpenTimeout, Net::ReadTimeout
+          # 既に read_timeout ぶん待っているため、追加の待機はせず次の試行へ
+          last_error_message = "Gemini API がタイムアウトしました"
           next
         end
 
         return response if response.is_a?(Net::HTTPSuccess)
 
-        if RETRYABLE_STATUSES.include?(response.code.to_i) && attempt < MAX_RETRIES
-          sleep(RETRY_WAIT_SECONDS[attempt])
-          next
+        unless RETRYABLE_STATUSES.include?(response.code.to_i)
+          raise ApiError, "Gemini API エラー（ステータス: #{response.code}）"
         end
 
-        raise ApiError, "Gemini API エラー（ステータス: #{response.code}）"
+        last_error_message = "Gemini API エラー（ステータス: #{response.code}）"
+        sleep(RETRY_WAIT_SECONDS[attempt]) if attempt < MAX_RETRIES
       end
+
+      raise ApiError, last_error_message || "Gemini API に接続できませんでした"
     end
 
     # generateContent へPOSTする
     # @param body [Hash] リクエストボディ
+    # @param read_timeout [Numeric] レスポンスを待つ秒数
     # @return [Net::HTTPResponse]
-    def post_request(body)
+    def post_request(body, read_timeout:)
       url = URI.parse("#{BASE_URL}/v1beta/models/#{@model}:generateContent")
 
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
       http.open_timeout = OPEN_TIMEOUT
-      http.read_timeout = READ_TIMEOUT
+      http.read_timeout = read_timeout
 
       request = Net::HTTP::Post.new(url.request_uri)
       request["x-goog-api-key"] = api_key
@@ -119,6 +145,16 @@ module LabelExtraction
       request.body = body.to_json
 
       http.request(request)
+    end
+
+    # 経過時間の計測に使う現在時刻（秒）
+    #
+    # Time.current ではなく単調増加時計を使う。
+    # NTPによる時刻補正が入っても巻き戻らないため、締め切りの判定が狂わない。
+    #
+    # @return [Float]
+    def current_time
+      Process.clock_gettime(Process::CLOCK_MONOTONIC)
     end
 
     # レスポンスを検証し、構造化出力のJSONをHashにして返す

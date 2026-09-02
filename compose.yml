@@ -28,6 +28,8 @@ services:
     environment:
       TZ: Asia/Tokyo
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # 使用モデルの上書き用（未指定なら GeminiClient::DEFAULT_MODEL）
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
     ports:
       - "3000:3000"
     depends_on:
