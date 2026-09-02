@@ -25,6 +25,11 @@
       </div>
     </div>
 
+    <%# AIラベル読み取り（新規作成時のみ表示） %>
+    <% unless sake_log_form.persisted? %>
+      <%= render "sake_logs/label_extraction", remaining_count: @label_extraction_remaining %>
+    <% end %>
+
     <%# 銘柄(オートコンプリート) %>
     <div class="flex flex-col w-full md:w-8/12"
          data-controller="brand-autocomplete"

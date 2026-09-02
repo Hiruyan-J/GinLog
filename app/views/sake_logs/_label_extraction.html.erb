@@ -1,0 +1,41 @@
+<div class="w-full md:w-8/12"
+     data-controller="label-extraction"
+     data-label-extraction-url-value="<%= api_label_extraction_path %>"
+     data-label-extraction-remaining-value="<%= remaining_count %>">
+  <div class="card bg-base-200">
+    <div class="gap-3 p-4 card-body">
+      <div class="flex justify-between items-baseline">
+        <h3 class="text-sm font-semibold">AIでラベルを読み取る</h3>
+        <span class="text-xs text-base-content/50"
+              data-label-extraction-target="remaining">本日あと<%= remaining_count %>回</span>
+      </div>
+
+      <p class="text-xs text-base-content/70">
+        ラベルの写真から銘柄・商品名・蔵元を読み取って入力します。
+        表ラベル・裏ラベルのどちらか1枚があれば実行できますが、
+        両方あると精度が上がります（蔵元と都道府県は裏ラベルに記載されていることが多いです）。
+        読み取り結果は間違うことがあるため、登録前に内容を確認してください。
+      </p>
+
+      <button type="button" class="btn btn-primary btn-sm"
+              data-label-extraction-target="button"
+              data-action="label-extraction#extract">
+        <span class="hidden loading loading-spinner loading-xs"
+              data-label-extraction-target="spinner"></span>
+        <span data-label-extraction-target="buttonLabel">ラベルを読み取る</span>
+      </button>
+
+      <%# 読み取り結果・エラーのメッセージ表示枠（JSが alert クラスを付け替える） %>
+      <div class="hidden" data-label-extraction-target="message"></div>
+
+      <%# 銘柄が複数ヒットしたときの候補リスト表示枠 %>
+      <div class="hidden" data-label-extraction-target="brandCandidates"></div>
+
+      <%# 同名の蔵元が複数あるときの候補リスト表示枠 %>
+      <div class="hidden" data-label-extraction-target="breweryCandidates"></div>
+
+      <%# 商品名の別候補チップ表示枠 %>
+      <div class="hidden" data-label-extraction-target="productAlternatives"></div>
+    </div>
+  </div>
+</div>

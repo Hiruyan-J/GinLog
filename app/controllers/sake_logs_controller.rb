@@ -3,6 +3,7 @@ class SakeLogsController < ApplicationController
   LIST_ORIGINS = %w[timeline mylog sake].freeze
 
   skip_before_action :authenticate_user!, only: %i[show]
+  before_action :set_label_extraction_remaining, only: %i[new create]
 
   # マイログ一覧（自分の記録の一覧）
   #   1ページ 10件（config/initializers/kaminari_config.rb の default_per_page）で、
@@ -90,6 +91,12 @@ class SakeLogsController < ApplicationController
 
   def set_sake_log
     @sake_log = current_user.sake_logs.find(params[:id])
+  end
+
+  # AIラベル読み取りの本日の残り回数をフォーム表示用にセットする
+  # @return [void]
+  def set_label_extraction_remaining
+    @label_extraction_remaining = LabelExtractionLog.remaining_for(current_user)
   end
 
   # 削除した後も、表示中の一覧ページがそのまま残るか
