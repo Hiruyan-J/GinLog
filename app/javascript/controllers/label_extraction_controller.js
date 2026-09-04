@@ -19,15 +19,14 @@ export default class extends Controller {
   }
 
   // 送信前に画像を縮小するときの長辺の上限(px)
-  // 読み取り精度が低い場合は 2000 まで上げて精度を確認する
   static MAX_DIMENSION = 1000
 
-  // ★★ 追加: サーバーの応答を待つ上限(ミリ秒)
-  // サーバー側は GeminiClient::TOTAL_TIMEOUT(45秒)で必ず打ち切るため、
+  // サーバーの応答を待つ上限(ミリ秒)
+  // サーバー側は「本命モデル30秒 + 退避モデル30秒」で最長60秒かかりうるため、
   // 画像アップロードとRailsの処理ぶんの余裕を足した値にする。
   // サーバーが応答を返せない状態（プロセス停止など）でも、
   // ここで打ち切られるのでボタンが押せないままにならない
-  static REQUEST_TIMEOUT_MS = 60000
+  static REQUEST_TIMEOUT_MS = 75000
 
   connect() {
     this.loading = false
@@ -134,6 +133,9 @@ export default class extends Controller {
       this.showMessage("銘柄の候補が複数見つかりました。正しいものを選んでください", "info")
     } else if (data.brand_match.status === "none" && data.brewery_match.status === "multiple") {
       this.showMessage("同じ名前の蔵元が複数あります。正しいものを選んでください", "info")
+    } else if (data.brewery_brands?.length > 0) {
+      // 蔵元だけ確定したケース。同じ銘柄を二重に登録しないよう選択を促す
+      this.showMessage("読み取った銘柄は登録済みの一覧にありません。同じ蔵元の銘柄から選ぶこともできます", "info")
     } else {
       this.showMessage("読み取りました。内容を確認してから登録してください", "success")
     }
@@ -184,6 +186,12 @@ export default class extends Controller {
     if (match.status === "single") {
       // 蔵元はマスタにあった → 選択状態にする
       this.selectBrewery(match.candidates[0])
+      // 蔵元は確定したのに銘柄がマスタに無い場合、その蔵元の銘柄から選べるようにする。
+      // 「HIRAN」のようにラベル通りに読むとマスタ（飛鸞）と一致しないことがあり、
+      // そのまま登録すると同じ銘柄が2つできてしまうため
+      if (data.brewery_brands?.length > 0) {
+        this.renderBreweryBrands(data.brewery_brands, match.candidates[0].name)
+      }
     } else if (match.status === "multiple") {
       // 同名の蔵元が複数ある（例: 吉田酒造は5県に存在）→ ユーザーに選ばせる
       // ここで都道府県を自動セットしないのは、AIが酒米の産地を都道府県として
@@ -282,6 +290,14 @@ export default class extends Controller {
   renderBreweryCandidates(candidates) {
     this.renderCandidateList(
       this.breweryCandidatesTarget, "蔵元の候補（上ほど確からしい順）:", candidates, "selectBreweryCandidate"
+    )
+  }
+
+  // 確定した蔵元が持つ銘柄の一覧を描画する
+  // 選んだあとの挙動は通常の銘柄候補と同じなので、描画先とアクションを共用する
+  renderBreweryBrands(candidates, breweryName) {
+    this.renderCandidateList(
+      this.brandCandidatesTarget, `${breweryName} の銘柄から選ぶ:`, candidates, "selectBrandCandidate"
     )
   }
 
