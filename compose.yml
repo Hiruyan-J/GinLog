@@ -28,8 +28,10 @@ services:
     environment:
       TZ: Asia/Tokyo
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      # 使用モデルの上書き用（未指定なら GeminiClient::DEFAULT_MODEL）
+      # 本命モデルの上書き用（未指定なら GeminiClient::PRIMARY_MODEL）
       GEMINI_MODEL: ${GEMINI_MODEL:-}
+      # 本命が失敗したときの退避モデル（未指定なら GeminiClient::FALLBACK_MODEL）
+      GEMINI_FALLBACK_MODEL: ${GEMINI_FALLBACK_MODEL:-}
     ports:
       - "3000:3000"
     depends_on:

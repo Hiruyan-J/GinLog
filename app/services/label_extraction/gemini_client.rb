@@ -2,21 +2,40 @@ require "net/http"
 
 module LabelExtraction
   # Gemini API の generateContent を呼び出す HTTP クライアント
-  # モデルやプロンプトの内容には関知せず、通信とレスポンスの検証だけを担当する
+  #
+  # インスタンスは「指定された1つのモデルを叩く」ことだけを担当する。
+  #
+  # AI を使う機能からは generate_with_fallback を呼ぶ。
+  # そうすれば、機能ごとにモデルの切り替え手順を書かなくて済む。
+  #
   # @see https://ai.google.dev/gemini-api/docs
   class GeminiClient
     # API呼び出しの失敗（通信エラー・ブロック・不正レスポンス）を表す例外
     class ApiError < StandardError; end
 
     BASE_URL = "https://generativelanguage.googleapis.com"
-    DEFAULT_MODEL = "gemini-3.7-flash"
+
+    # 使用するモデル。本命が失敗したら退避モデルを試す
+    #
+    # 退避先は本命と世代を離すこと。
+    # 特定モデルが高負荷で落ちると、利用者が隣の世代へ退避して連鎖的に落ちる
+    # （実際に gemini-3.7-flash の障害中、gemini-3.6-flash も 503 になった）。
+    #
+    # どちらも環境変数で上書きできる（GEMINI_MODEL / GEMINI_FALLBACK_MODEL）
+    PRIMARY_MODEL = "gemini-3.7-flash"
+    FALLBACK_MODEL = "gemini-3.1-flash-lite"
+
     # 接続確立を待つ時間（秒）
     OPEN_TIMEOUT = 5
     # 1回のリクエストでレスポンスを待つ時間（秒）
     READ_TIMEOUT = 30
-    # リトライを含めた全体の制限時間（秒）
-    # これを超えないよう、各試行の待ち時間を残り時間に合わせて切り詰める
-    TOTAL_TIMEOUT = 45
+    # リトライを含めた、このクライアント1つあたりの制限時間（秒）。
+    #
+    # READ_TIMEOUT と同じ値なので、無応答のときは1回で打ち切られる。
+    # 応答しないモデルに同じ内容を投げ直しても結果は変わらないため、
+    # 残り時間は同じモデルへのリトライではなく、次のモデルへの切り替えに使う
+    # 一方 4xx/5xx は数秒で返るので、この30秒の中で3回まで再送できる。
+    TOTAL_TIMEOUT = 30
     # 残り時間がこれ未満ならリトライしない（間に合わないため）
     MIN_ATTEMPT_SECONDS = 5
     # リトライ回数と、各リトライ前の待ち時間（秒）
@@ -25,16 +44,63 @@ module LabelExtraction
     # リトライ対象のHTTPステータス（レート制限・サーバー側の一時エラー）
     RETRYABLE_STATUSES = [ 429, 500, 502, 503 ].freeze
 
-    # 直近のAPI呼び出しのトークン使用量（評価タスクでコスト確認に使う）
+    # 直近のAPI呼び出しのトークン使用量
+    # （自分でクライアントを作って generate を呼んだ場合に参照できる）
     # @return [Hash, nil] 例: { "promptTokenCount" => 2375, "candidatesTokenCount" => 71 }
     attr_reader :last_usage
 
-    # compose.yml の `GEMINI_MODEL: ${GEMINI_MODEL:-}` は、未設定でも
-    # 「空文字がセットされた状態」でコンテナに渡る。ENV.fetch はキーの有無しか
-    # 見ないため空文字をそのまま採用してしまい、モデル名なしのURLになる。
+    # 使用中のモデル名
+    # @return [String]
+    attr_reader :model
+
+    # 試すモデルを本命→退避の順に並べる
     #
-    # @param model [String] 使用するモデル名（環境変数 GEMINI_MODEL で上書き可能）
-    def initialize(model: ENV["GEMINI_MODEL"].presence || DEFAULT_MODEL)
+    # 環境変数が空文字のときも既定値へ落とす。
+    # compose.yml の `GEMINI_MODEL: ${GEMINI_MODEL:-}` は、未設定でも
+    # 「空文字がセットされた状態」でコンテナに渡るため、
+    # ENV.fetch（キーの有無しか見ない）だと空のモデル名を採用してしまう。
+    #
+    # 本命と退避が同じ場合は1つにまとめる（同じモデルへ無駄に投げ直さない）。
+    #
+    # @return [Array<String>] 試す順に並んだモデル名
+    def self.models
+      [
+        ENV["GEMINI_MODEL"].presence || PRIMARY_MODEL,
+        ENV["GEMINI_FALLBACK_MODEL"].presence || FALLBACK_MODEL
+      ].uniq
+    end
+
+    # モデルを順に試し、最初に成功した結果を返す
+    #
+    # AI を使う機能はこのメソッドを呼ぶ（切り替えの手順を機能ごとに書かないため）。
+    # ユーザーから見れば1回の実行なので、利用回数の記録は呼び出し側で1回のまま。
+    # 各モデルの制限時間は TOTAL_TIMEOUT なので、最悪でも
+    # TOTAL_TIMEOUT × モデル数 で打ち切られる。
+    #
+    # @param prompt [String] プロンプト本文
+    # @param images [Array<Hash>] 画像の配列（:label, :mime_type, :data）
+    # @param response_schema [Hash] 構造化出力のスキーマ
+    # @return [Hash] 抽出結果（シンボルキー）
+    # @raise [ApiError] すべてのモデルで失敗した場合
+    def self.generate_with_fallback(prompt:, images:, response_schema:)
+      failures = []
+
+      models.each_with_index do |model, index|
+        return new(model: model).generate(
+          prompt: prompt,
+          images: images,
+          response_schema: response_schema
+        )
+      rescue ApiError => e
+        failures << "#{model}: #{e.message}"
+        raise ApiError, failures.join(" / ") if index == models.size - 1
+
+        Rails.logger.warn("#{model} での読み取りに失敗しました（#{e.message}）。次のモデルを試します")
+      end
+    end
+
+    # @param model [String] 使用するモデル名
+    def initialize(model:)
       @model = model
     end
 
@@ -65,7 +131,10 @@ module LabelExtraction
     end
 
     # リクエストボディを組み立てる
-    # 画像は inline_data（Base64）で埋め込む。temperature: 0 で結果を安定させる
+    #
+    # 画像は inline_data（Base64）で埋め込む。temperature: 0 で結果を安定させる。
+    # 画像の直前に、それが何のラベルかを説明するテキストパートを置く。
+    #
     # @param prompt [String] プロンプト本文
     # @param images [Array<Hash>] 画像の配列（:label, :mime_type, :data）
     # @param response_schema [Hash] 構造化出力のスキーマ
@@ -87,11 +156,15 @@ module LabelExtraction
       }
     end
 
-    # 一時的なエラーならリトライしつつPOSTする
+    # 全体デッドライン方式でリトライする
     #
     # リトライは「開始から TOTAL_TIMEOUT 秒まで」という締め切りの中だけで行う。
     # 締め切りが無いと、Gemini 側が無応答のときに
-    # READ_TIMEOUT × 試行回数 ぶん待たされてしまう（実際に183秒かかる事故があった）。
+    # READ_TIMEOUT × 試行回数 ぶん待たされてしまう。
+    #
+    # 失敗の種類でリトライ有無を変更
+    # - 4xx/5xx が即座に返る場合: サーバーが応答しているので、待ってから再送する
+    # - 無応答（タイムアウト）の場合: 既に長く待っているので、追加の待機はせず次の試行へ進む
     #
     # @param body [Hash] リクエストボディ
     # @return [Net::HTTPSuccess] 成功レスポンス

@@ -3,10 +3,11 @@ module LabelExtraction
   #
   # 戻り値の形:
   #   {
-  #     extraction:    { brand_name:, product_name:, product_name_alternatives:, ... },
-  #     brand_match:   { status: "single" | "multiple" | "none", candidates: [...] },
-  #     brewery_match: { status: "single" | "multiple" | "none", candidates: [...] },
-  #     area:          { id:, name: } または nil
+  #     extraction:     { brand_name:, product_name:, product_name_alternatives:, ... },
+  #     brand_match:    { status: "single" | "multiple" | "none", candidates: [...] },
+  #     brewery_match:  { status: "single" | "multiple" | "none", candidates: [...] },
+  #     brewery_brands: [ 銘柄候補, ... ]（蔵元だけ確定した場合。それ以外は空配列）
+  #     area:           { id:, name: } または nil
   #   }
   class Extractor
     PROMPT_PATH = Rails.root.join("app/prompts/label_extraction.md")
@@ -45,10 +46,6 @@ module LabelExtraction
       required: %w[brand_name product_name product_name_alternatives brewery_name brewery_name_raw prefecture confidence]
     }.freeze
 
-    # 直近のトークン使用量の確認用（評価タスクで使う）
-    # @return [GeminiClient]
-    attr_reader :client
-
     # @param front_image [Hash, nil] 表ラベル画像 { mime_type: String, data: String(バイナリ) }
     # @param back_image [Hash, nil] 裏ラベル画像（形式は front_image と同じ）
     # @raise [ArgumentError] 表・裏のどちらも指定されなかった場合
@@ -59,24 +56,28 @@ module LabelExtraction
 
       @front_image = front_image
       @back_image = back_image
-      @client = GeminiClient.new
     end
 
     # 読み取りとマスタ照合を実行する
     # @return [Hash] 抽出結果と照合結果（クラスコメント参照）
-    # @raise [GeminiClient::ApiError] API呼び出しに失敗した場合
+    # @raise [GeminiClient::ApiError] すべてのモデルで失敗した場合
     def call
-      extraction = @client.generate(
-        prompt: File.read(PROMPT_PATH),
-        images: labeled_images,
-        response_schema: RESPONSE_SCHEMA
+      extraction = normalize_extraction(
+        GeminiClient.generate_with_fallback(
+          prompt: File.read(PROMPT_PATH),
+          images: labeled_images,
+          response_schema: RESPONSE_SCHEMA
+        )
       )
-      extraction = normalize_extraction(extraction)
+
+      brand_match = match_brands(extraction[:brand_name], extraction[:brewery_name], extraction[:prefecture])
+      brewery_match = match_breweries(extraction[:brewery_name], extraction[:brewery_name_raw], extraction[:prefecture])
 
       {
         extraction: extraction,
-        brand_match: match_brands(extraction[:brand_name], extraction[:brewery_name], extraction[:prefecture]),
-        brewery_match: match_breweries(extraction[:brewery_name], extraction[:brewery_name_raw], extraction[:prefecture]),
+        brand_match: brand_match,
+        brewery_match: brewery_match,
+        brewery_brands: brands_of_matched_brewery(brand_match, brewery_match),
         area: match_area(extraction[:prefecture])
       }
     end
@@ -133,6 +134,27 @@ module LabelExtraction
       brands = sort_by_likeness(brands, brewery_name, prefecture) { |brand| brand.brewery }
 
       build_match(brands.first(CANDIDATES_MAX).map { |brand| brand_candidate(brand) })
+    end
+
+    # 蔵元は1件に確定したのに、銘柄がマスタで見つからなかった場合に、
+    # その蔵元の銘柄一覧を返す
+    #
+    # 例: 飛鸞の裏ラベルには、ものによっては「HIRAN」としか書かれておらず、AIがそう読むのは正しい。
+    # しかしマスタの銘柄名は「飛鸞」なので検索が0件になり、
+    # そのまま登録すると森酒造場に「飛鸞」「HIRAN」という重複した銘柄ができてしまう。
+    # 蔵元（森酒造場）は確定しているので、その銘柄から選べれば重複を防げる。
+    #
+    # @param brand_match [Hash] 銘柄の照合結果
+    # @param brewery_match [Hash] 蔵元の照合結果
+    # @return [Array<Hash>] 銘柄候補の配列（該当しない場合は空配列）
+    def brands_of_matched_brewery(brand_match, brewery_match)
+      return [] unless brand_match[:status] == "none" && brewery_match[:status] == "single"
+
+      Brand.active.includes(brewery: :area)
+           .where(brewery_id: brewery_match[:candidates].first[:id])
+           .order(:name)
+           .first(CANDIDATES_MAX)
+           .map { |brand| brand_candidate(brand) }
     end
 
     # 候補を、AIが読んだ蔵元名・都道府県に近い順へ並べ替える
