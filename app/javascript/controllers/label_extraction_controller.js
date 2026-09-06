@@ -140,7 +140,7 @@ export default class extends Controller {
     }
 
     this.applyBrand(extraction, data)
-    this.applyProductName(extraction)
+    const productCandidates = this.applyProductName(extraction, data)
 
     if (extraction.confidence === "low") {
       this.showMessage("読み取りの確度が低めです。内容をよく確認してください", "warning")
@@ -151,6 +151,12 @@ export default class extends Controller {
     } else if (data.brewery_brands?.length > 0) {
       // 蔵元だけ確定したケース。同じ銘柄を二重に登録しないよう選択を促す
       this.showMessage("登録済みの銘柄と一致しませんでした。同じ蔵元の銘柄から選ぶこともできます", "info")
+    } else if (productCandidates.length > 1 && data.brand_sakes?.length > 0) {
+      // 銘柄が確定したケース。同じ商品を二重に登録しないよう選択を促す
+      // 候補が1件のときは一覧を出していないので案内もしない。
+      // AIが登録済みの商品名をそのまま読めた場合がこれにあたり、
+      // 保存時に既存レコードへ紐づくので利用者に選ばせる必要がない
+      this.showMessage("この銘柄には登録済みの商品名があります。同じ商品なら候補から選んでください", "info")
     } else {
       this.showMessage("読み取りました。内容を確認してから登録してください", "success")
     }
@@ -261,17 +267,25 @@ export default class extends Controller {
   }
 
   // 商品名を入力欄へ反映し、候補が2つ以上あれば一覧を表示する
-  applyProductName(extraction) {
+  applyProductName(extraction, data) {
     if (extraction.product_name) {
       this.setAutoFilledValue("sake_log_product_name", extraction.product_name)
       // AIが入れた商品名は既存Sakeの選択ではないため sake_id はクリアする
       this.setFieldValue("sake_log_sake_id", "")
     }
 
-    // 第1候補を先頭に置いた一覧を作る（読み取れなかった値は除く）
-    const names = [ extraction.product_name, ...(extraction.product_name_alternatives || []) ].filter(Boolean)
+    // 登録済みの商品名を先頭に置く（選んでほしいのはこちらのため）
+    const registered = data.brand_sakes || []
+    const registeredNames = new Set(registered.map(sake => sake.product_name))
+    // AIの読み取りは第1候補を先頭に置く（読み取れなかった値と、登録済みと同じ文字列は除く）
+    const readNames = [ extraction.product_name, ...(extraction.product_name_alternatives || []) ]
+      .filter(name => name && !registeredNames.has(name))
+    const candidates = [ ...registered, ...readNames.map(name => ({ label: name, product_name: name })) ]
+
     // 候補が1つだけなら選ぶ余地がないので一覧は出さない
-    if (names.length > 1) this.renderProductCandidates(names)
+    if (candidates.length > 1) this.renderProductCandidates(candidates)
+
+    return candidates
   }
 
   // --- 候補リストの描画 ---
@@ -337,14 +351,12 @@ export default class extends Controller {
   }
 
   // 商品名の候補を描画する
-  // 商品名はマスタ照合をしない単なる文字列なので、一覧が扱える形に包み直す
-  // @param names 商品名の配列（先頭が第1候補）
-  renderProductCandidates(names) {
+  // 登録済み（sake_id つき）とAIの読み取り（文字列だけ）が混ざるため、
+  // 候補の形に揃える役目は呼び出し側にて行う
+  // @param candidates 商品名候補の配列（登録済みが先頭）
+  renderProductCandidates(candidates) {
     this.renderCandidateList(
-      this.productCandidatesTarget,
-      "商品名の候補（上ほど確からしい順）:",
-      names.map(name => ({ label: name, product_name: name })),
-      "selectProductCandidate"
+      this.productCandidatesTarget, "商品名の候補:", candidates, "selectProductCandidate"
     )
   }
 
@@ -368,8 +380,9 @@ export default class extends Controller {
   selectProductCandidate(event) {
     const candidate = JSON.parse(event.currentTarget.dataset.candidate)
     this.setAutoFilledValue("sake_log_product_name", candidate.product_name)
-    // 候補から選んだ商品名も既存Sakeの選択ではないため sake_id はクリアする
-    this.setFieldValue("sake_log_sake_id", "")
+    // 登録済みの商品を選んだときだけ sake_id を立てて既存レコードへ紐づける。
+    // AIの読み取りを選んだ場合は sake_id を持たないので、ここでクリアされる
+    this.setFieldValue("sake_log_sake_id", candidate.sake_id || "")
     this.markSelectedCandidate(event.currentTarget)
   }
 

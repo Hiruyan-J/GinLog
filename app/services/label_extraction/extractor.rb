@@ -7,6 +7,7 @@ module LabelExtraction
   #     brand_match:    { status: "single" | "multiple" | "none", candidates: [...] },
   #     brewery_match:  { status: "single" | "multiple" | "none", candidates: [...] },
   #     brewery_brands: [ 銘柄候補, ... ]（蔵元だけ確定した場合。それ以外は空配列）
+  #     brand_sakes:    [ 商品名候補, ... ]（銘柄が確定した場合。それ以外は空配列）
   #     area:           { id:, name: } または nil
   #   }
   class Extractor
@@ -78,6 +79,7 @@ module LabelExtraction
         brand_match: brand_match,
         brewery_match: brewery_match,
         brewery_brands: brands_of_matched_brewery(brand_match, brewery_match),
+        brand_sakes: sakes_of_matched_brand(brand_match, extraction[:product_name]),
         area: match_area(extraction[:prefecture])
       }
     end
@@ -155,6 +157,60 @@ module LabelExtraction
            .order(:name)
            .first(CANDIDATES_MAX)
            .map { |brand| brand_candidate(brand) }
+    end
+
+    # 銘柄が1件に確定したとき、その銘柄に登録済みの商品名を返す
+    #
+    # AIが読んだ商品名をそのまま登録すると、既存の商品名と
+    # 「恵乃智」「純米吟醸 恵乃智」のようにレコードが割れることがある。
+    # 割れると日本酒詳細のページと集計が2つに分かれてしまう。
+    #
+    # 空白の有無だけの違い（「純米中取り無調整生」と「純米中取り 無調整生」）は
+    # 保存時に Sake 側で吸収するが、それ以外はここで候補として見せてユーザーに選ばせる。
+    # 「久保田 千寿」と「久保田 千寿 秋あがり」のように、
+    # 部分一致でも別商品であるケースが実在し、機械では判断できないため。
+    #
+    # @param brand_match [Hash] 銘柄の照合結果
+    # @param product_name [String, nil] AIが読んだ商品名（並べ替えのヒントに使う）
+    # @return [Array<Hash>] 商品名候補の配列（該当しない場合は空配列）
+    def sakes_of_matched_brand(brand_match, product_name)
+      return [] unless brand_match[:status] == "single"
+
+      sakes = Sake.where(brand_id: brand_match[:candidates].first[:id]).order(:product_name).to_a
+      sort_by_product_name_likeness(sakes, product_name)
+        .first(CANDIDATES_MAX)
+        .map { |sake| sake_candidate(sake) }
+    end
+
+    # 登録済みの商品名を、AIが読んだ商品名に近い順へ並べ替える
+    #
+    # 銘柄によっては商品が20件以上あり、CANDIDATES_MAX で
+    # 切ると肝心の1件が候補から漏れてしまうため、近いものを先頭に寄せる。
+    #
+    # @param sakes [Array<Sake>] 並べ替え対象
+    # @param product_name [String, nil] AIが読んだ商品名
+    # @return [Array<Sake>] 近い順（同点なら元の商品名順を保つ）
+    def sort_by_product_name_likeness(sakes, product_name)
+      return sakes if sakes.size <= 1 || product_name.blank?
+
+      key = Sake.spaceless_key(product_name)
+      # sort_by は同点の順序が保証されないため、元の並び順(index)を第2キーにする
+      sakes.each_with_index
+           .sort_by { |sake, index| [ -product_name_likeness(sake, key), index ] }
+           .map(&:first)
+    end
+
+    # 登録済み商品名が、AIが読んだ商品名とどれだけ近いかを点数にする
+    # ここでの一致は「並べ替えのヒント」であって、統合の判断には使わない
+    # @param sake [Sake] 採点対象の商品
+    # @param key [String] AIが読んだ商品名の照合キー（空白を除いた形）
+    # @return [Integer] 大きいほど近い（0〜2）
+    def product_name_likeness(sake, key)
+      sake_key = Sake.spaceless_key(sake.product_name)
+      return 2 if sake_key == key # 空白の有無だけが違う
+      return 1 if sake_key.include?(key) || key.include?(sake_key) # 「恵乃智」と「純米吟醸恵乃智」
+
+      0
     end
 
     # 候補を、AIが読んだ蔵元名・都道府県に近い順へ並べ替える
@@ -254,6 +310,18 @@ module LabelExtraction
         area_id: brewery.area.id,
         area_name: brewery.area.name,
         label: "#{brewery.name}（#{brewery.area.name}）"
+      }
+    end
+
+    # 商品名候補1件をフロントへ返すJSONの形にする
+    # sake_id を持たせることで、選んだときに既存レコードへ確実に紐づけられる
+    # @param sake [Sake]
+    # @return [Hash]
+    def sake_candidate(sake)
+      {
+        sake_id: sake.id,
+        product_name: sake.product_name,
+        label: "#{sake.product_name}（登録済み）"
       }
     end
 

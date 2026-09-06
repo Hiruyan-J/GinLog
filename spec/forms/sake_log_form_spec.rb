@@ -331,8 +331,8 @@ RSpec.describe SakeLogForm, type: :model do
         # その new_sake の save! だけを失敗させる(existing.save! には一切触れない)。
         # rescue 内の Sake.find_by! はスタブしないので、本物の DB から existing を引く。
         new_sake = Sake.new(product_name: "制約テスト酒", brand_id: brand.id)
-        expect(Sake).to receive(:find_or_initialize_by)
-          .with(product_name: "制約テスト酒", brand_id: brand.id)
+        expect(Sake).to receive(:find_or_initialize_by_product_name)
+          .with(brand.id, "制約テスト酒")
           .and_return(new_sake)
         allow(new_sake).to receive(:save!).and_raise(ActiveRecord::RecordNotUnique)
 
