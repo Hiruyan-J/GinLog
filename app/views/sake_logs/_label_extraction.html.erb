@@ -1,7 +1,8 @@
 <div class="w-full md:w-8/12"
      data-controller="label-extraction"
      data-label-extraction-url-value="<%= api_label_extraction_path %>"
-     data-label-extraction-remaining-value="<%= remaining_count %>">
+     data-label-extraction-remaining-value="<%= remaining_count %>"
+     data-label-extraction-daily-limit-value="<%= LabelExtractionLog::DAILY_LIMIT %>">
   <div class="card bg-base-200">
     <div class="gap-3 p-4 card-body">
       <div class="flex justify-between items-baseline">
@@ -34,8 +35,8 @@
       <%# 同名の蔵元が複数あるときの候補リスト表示枠 %>
       <div class="hidden" data-label-extraction-target="breweryCandidates"></div>
 
-      <%# 商品名の別候補チップ表示枠 %>
-      <div class="hidden" data-label-extraction-target="productAlternatives"></div>
+      <%# 商品名の候補リスト表示枠 %>
+      <div class="hidden" data-label-extraction-target="productCandidates"></div>
     </div>
   </div>
 </div>

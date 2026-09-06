@@ -10,12 +10,13 @@ export default class extends Controller {
     "remaining",           // 「本日あと◯回」の表示
     "brandCandidates",     // 銘柄候補リストの表示枠
     "breweryCandidates",   // 蔵元候補リストの表示枠
-    "productAlternatives"  // 商品名の別候補チップの表示枠
+    "productCandidates"    // 商品名候補リストの表示枠
   ]
 
   static values = {
-    url: String,       // POST /api/label_extraction
-    remaining: Number  // 本日の残り実行可能回数
+    url: String,        // POST /api/label_extraction
+    remaining: Number,  // 本日の残り実行可能回数
+    dailyLimit: Number  // 1日の上限回数（LabelExtractionLog::DAILY_LIMIT）
   }
 
   // 送信前に画像を縮小するときの長辺の上限(px)
@@ -28,8 +29,16 @@ export default class extends Controller {
   // ここで打ち切られるのでボタンが押せないままにならない
   static REQUEST_TIMEOUT_MS = 75000
 
+  // AIが値を入れた入力欄に付ける背景色
+  static AUTO_FILLED_CLASS = "bg-info/30"
+
+  // 選択中の候補に付ける背景色
+  // 候補一覧を消さずに残すようにしたため、どれを選んだのかを色で示す
+  static SELECTED_CANDIDATE_CLASS = "bg-primary/20"
+
   connect() {
     this.loading = false
+    this.autoFilledFields = new Set()
   }
 
   // remainingValue が変わるたびに表示を更新する（Stimulusのvalue変更コールバック）
@@ -50,7 +59,7 @@ export default class extends Controller {
       return
     }
     if (this.remainingValue <= 0) {
-      this.showMessage("本日の利用回数の上限に達しました。明日また利用できます", "warning")
+      this.showMessage(this.limitReachedMessage(), "error")
       return
     }
 
@@ -104,6 +113,12 @@ export default class extends Controller {
     }
   }
 
+  // 上限に達したときのメッセージ
+  // サーバー側の Api::LabelExtractionsController#create と同じ文言にすること
+  limitReachedMessage() {
+    return `本日のAI読み取りの利用上限（${this.dailyLimitValue}回）に達しました。明日また利用できます`
+  }
+
   // --- 結果のフォーム反映 ---
 
   // サーバーが返した残り回数を表示へ反映する
@@ -135,35 +150,54 @@ export default class extends Controller {
       this.showMessage("同じ名前の蔵元が複数あります。正しいものを選んでください", "info")
     } else if (data.brewery_brands?.length > 0) {
       // 蔵元だけ確定したケース。同じ銘柄を二重に登録しないよう選択を促す
-      this.showMessage("読み取った銘柄は登録済みの一覧にありません。同じ蔵元の銘柄から選ぶこともできます", "info")
+      this.showMessage("登録済みの銘柄と一致しませんでした。同じ蔵元の銘柄から選ぶこともできます", "info")
     } else {
       this.showMessage("読み取りました。内容を確認してから登録してください", "success")
     }
   }
 
   // 銘柄の照合結果に応じてフォームへ反映する
-  //   1件一致   → 自動で選択状態にする
-  //   複数一致   → 候補チップを表示してユーザーに選ばせる
-  //   一致なし   → 手入力モードとして反映（蔵元・都道府県も埋める）
+  //   1件一致   → 自動で選択状態にする（蔵元・都道府県も一緒に決まる）
+  //   複数一致   → 候補リストを表示してユーザーに選ばせる
+  //   一致なし   → 銘柄は手入力モードにし、蔵元を別に反映する
   applyBrand(extraction, data) {
     const match = data.brand_match
     if (match.status === "single") {
       this.selectBrand(match.candidates[0])
-    } else if (match.status === "multiple") {
-      this.setFieldValue("sake_log_manual_brand_name", extraction.brand_name)
-      this.setFieldValue("sake_log_brand_id", "")
-      document.dispatchEvent(new CustomEvent("brand:new", { detail: { brandName: extraction.brand_name } }))
-      this.renderBrandCandidates(match.candidates)
-    } else if (extraction.brand_name) {
-      this.applyManualBrand(extraction, data)
+      return
     }
+
+    if (match.status === "multiple") {
+      this.startManualBrand(extraction.brand_name)
+      this.renderBrandCandidates(match.candidates)
+      return
+    }
+
+    this.startManualBrand(extraction.brand_name)
+    this.applyBrewery(extraction, data)
+  }
+
+  // 銘柄を手入力モードへ切り替える
+  //
+  // 銘柄名を読み取れなかった場合（brandName が null）も必ず呼ぶこと。
+  // 蔵元・商品名の入力欄は brand:selected / brand:new を受け取って
+  // はじめて入力できる状態になるため、ここを通さないと
+  // 読み取った蔵元をセットしても入力欄が disabled のままになり、
+  // フォームの送信対象から外れてしまう。
+  //
+  // @param brandName 読み取った銘柄名（読み取れなかった場合は null）
+  startManualBrand(brandName) {
+    this.setFieldValue("sake_log_brand_id", "")
+    // 読み取れなかったときは、利用者がすでに入力した銘柄名を空で上書きしない
+    if (brandName) this.setAutoFilledValue("sake_log_manual_brand_name", brandName)
+    document.dispatchEvent(new CustomEvent("brand:new", { detail: { brandName: brandName || "" } }))
   }
 
   // マスタと一致した銘柄をフォームへ反映する
   // （オートコンプリートで候補を選択したときと同じ状態を作る）
   selectBrand(candidate) {
     this.setFieldValue("sake_log_brand_id", candidate.id)
-    this.setFieldValue("sake_log_manual_brand_name", candidate.name)
+    this.setAutoFilledValue("sake_log_manual_brand_name", candidate.name)
     document.dispatchEvent(new CustomEvent("brand:selected", {
       detail: {
         brandId: candidate.id,
@@ -176,12 +210,11 @@ export default class extends Controller {
     }))
   }
 
-  // 銘柄がマスタにない場合: 手入力モードとして反映し、蔵元・都道府県も埋める
-  applyManualBrand(extraction, data) {
-    this.setFieldValue("sake_log_manual_brand_name", extraction.brand_name)
-    this.setFieldValue("sake_log_brand_id", "")
-    document.dispatchEvent(new CustomEvent("brand:new", { detail: { brandName: extraction.brand_name } }))
-
+  // 蔵元の照合結果に応じてフォームへ反映する。銘柄が確定しなかったときだけ呼ばれる
+  //   1件一致   → 選択状態にし、必要ならその蔵元の銘柄一覧を出す
+  //   複数一致   → 蔵元候補リストを表示してユーザーに選ばせる
+  //   一致なし   → 蔵元手入力モードにして読み取り値を入れる
+  applyBrewery(extraction, data) {
     const match = data.brewery_match
     if (match.status === "single") {
       // 蔵元はマスタにあった → 選択状態にする
@@ -196,18 +229,18 @@ export default class extends Controller {
       // 同名の蔵元が複数ある（例: 吉田酒造は5県に存在）→ ユーザーに選ばせる
       // ここで都道府県を自動セットしないのは、AIが酒米の産地を都道府県として
       // 読んでしまう誤りが実測されているため。候補から選べば正しい県が入る
-      this.setFieldValue("sake_log_manual_brewery_name", extraction.brewery_name)
+      this.setAutoFilledValue("sake_log_manual_brewery_name", extraction.brewery_name)
       this.setFieldValue("sake_log_brewery_id", "")
       document.dispatchEvent(new CustomEvent("brewery:new", { detail: { breweryName: extraction.brewery_name } }))
       this.renderBreweryCandidates(match.candidates)
     } else if (extraction.brewery_name) {
       // 蔵元もマスタにない → 蔵元手入力モードにして読み取り値を入れる
-      this.setFieldValue("sake_log_manual_brewery_name", extraction.brewery_name)
+      this.setAutoFilledValue("sake_log_manual_brewery_name", extraction.brewery_name)
       this.setFieldValue("sake_log_brewery_id", "")
       document.dispatchEvent(new CustomEvent("brewery:new", { detail: { breweryName: extraction.brewery_name } }))
       // 都道府県はマスタと一致したときだけ select にセットする
       if (data.area) {
-        this.setFieldValue("sake_log_area_id", data.area.id)
+        this.setAutoFilledValue("sake_log_area_id", data.area.id)
       }
     }
   }
@@ -215,7 +248,7 @@ export default class extends Controller {
   // マスタと一致した蔵元をフォームへ反映する
   // （蔵元オートコンプリートで候補を選択したときと同じ状態を作る）
   selectBrewery(candidate) {
-    this.setFieldValue("sake_log_manual_brewery_name", candidate.name)
+    this.setAutoFilledValue("sake_log_manual_brewery_name", candidate.name)
     this.setFieldValue("sake_log_brewery_id", candidate.id)
     document.dispatchEvent(new CustomEvent("brewery:selected", {
       detail: {
@@ -227,21 +260,23 @@ export default class extends Controller {
     }))
   }
 
-  // 商品名（第1候補）を入力欄へ反映し、別候補があればチップを表示する
+  // 商品名を入力欄へ反映し、候補が2つ以上あれば一覧を表示する
   applyProductName(extraction) {
     if (extraction.product_name) {
-      this.setFieldValue("sake_log_product_name", extraction.product_name)
+      this.setAutoFilledValue("sake_log_product_name", extraction.product_name)
       // AIが入れた商品名は既存Sakeの選択ではないため sake_id はクリアする
       this.setFieldValue("sake_log_sake_id", "")
     }
-    if (extraction.product_name_alternatives?.length > 0) {
-      this.renderProductAlternatives(extraction.product_name_alternatives)
-    }
+
+    // 第1候補を先頭に置いた一覧を作る（読み取れなかった値は除く）
+    const names = [ extraction.product_name, ...(extraction.product_name_alternatives || []) ].filter(Boolean)
+    // 候補が1つだけなら選ぶ余地がないので一覧は出さない
+    if (names.length > 1) this.renderProductCandidates(names)
   }
 
-  // --- 候補チップの描画 ---
+  // --- 候補リストの描画 ---
 
-  // 候補リストを描画する（銘柄・蔵元で共通）
+  // 候補リストを描画する（銘柄・蔵元・商品名で共通）
   // 取り違えると他の人の集計まで巻き込むため、小さなチップではなく
   // 既存のオートコンプリートと同じ「全幅の行」にしてタップ領域を確保する
   // 並び順はサーバー側で確度の高い順に整えてある
@@ -301,53 +336,53 @@ export default class extends Controller {
     )
   }
 
+  // 商品名の候補を描画する
+  // 商品名はマスタ照合をしない単なる文字列なので、一覧が扱える形に包み直す
+  // @param names 商品名の配列（先頭が第1候補）
+  renderProductCandidates(names) {
+    this.renderCandidateList(
+      this.productCandidatesTarget,
+      "商品名の候補（上ほど確からしい順）:",
+      names.map(name => ({ label: name, product_name: name })),
+      "selectProductCandidate"
+    )
+  }
+
+  // --- 候補の選択 ---
+
   // 銘柄候補を選択したとき
   selectBrandCandidate(event) {
     this.selectBrand(JSON.parse(event.currentTarget.dataset.candidate))
-    this.brandCandidatesTarget.classList.add("hidden")
-    this.showMessage("銘柄を反映しました。内容を確認してから登録してください", "success")
+    this.markSelectedCandidate(event.currentTarget)
+    this.showMessage("銘柄を反映しました。違っていれば候補から選び直せます", "success")
   }
 
   // 蔵元候補を選択したとき
   selectBreweryCandidate(event) {
     this.selectBrewery(JSON.parse(event.currentTarget.dataset.candidate))
-    this.breweryCandidatesTarget.classList.add("hidden")
-    this.showMessage("蔵元を反映しました。内容を確認してから登録してください", "success")
+    this.markSelectedCandidate(event.currentTarget)
+    this.showMessage("蔵元を反映しました。違っていれば候補から選び直せます", "success")
   }
 
-  // 商品名の別候補チップを描画する
-  renderProductAlternatives(alternatives) {
-    const wrapper = this.buildChipsWrapper("商品名の別候補:")
-    alternatives.forEach(name => {
-      const button = document.createElement("button")
-      button.type = "button"
-      button.className = "btn btn-outline btn-primary btn-xs"
-      button.dataset.action = "click->label-extraction#selectProductAlternative"
-      button.dataset.productName = name
-      button.textContent = name
-      wrapper.appendChild(button)
-    })
-
-    this.productAlternativesTarget.innerHTML = ""
-    this.productAlternativesTarget.appendChild(wrapper)
-    this.productAlternativesTarget.classList.remove("hidden")
-  }
-
-  // 商品名の別候補チップを選択したとき（チップは残して選び直せるようにする）
-  selectProductAlternative(event) {
-    this.setFieldValue("sake_log_product_name", event.currentTarget.dataset.productName)
+  // 商品名候補を選択したとき
+  selectProductCandidate(event) {
+    const candidate = JSON.parse(event.currentTarget.dataset.candidate)
+    this.setAutoFilledValue("sake_log_product_name", candidate.product_name)
+    // 候補から選んだ商品名も既存Sakeの選択ではないため sake_id はクリアする
     this.setFieldValue("sake_log_sake_id", "")
+    this.markSelectedCandidate(event.currentTarget)
   }
 
-  // チップの入れ物（見出し + flexコンテナ）を作る
-  buildChipsWrapper(labelText) {
-    const wrapper = document.createElement("div")
-    wrapper.className = "flex flex-wrap gap-1 items-center"
-    const label = document.createElement("span")
-    label.className = "text-xs text-base-content/70"
-    label.textContent = labelText
-    wrapper.appendChild(label)
-    return wrapper
+  // 選択中の候補に色を付ける
+  // 一覧を消さずに残すようにしたため、色が無いとどれを選んだのか分からなくなる。
+  // 同じ一覧の中の他の候補からは色を外す（選択は常に1つ）
+  // @param button 押された候補のボタン要素
+  markSelectedCandidate(button) {
+    const selectedClass = this.constructor.SELECTED_CANDIDATE_CLASS
+    button.closest("ul").querySelectorAll("button").forEach(other => {
+      other.classList.remove(selectedClass, "font-semibold")
+    })
+    button.classList.add(selectedClass, "font-semibold")
   }
 
   // --- 画像・フォームまわりのヘルパー ---
@@ -390,6 +425,31 @@ export default class extends Controller {
     if (field) field.value = value
   }
 
+  // 値をセットしたうえで「AIが入れた欄」と分かるよう背景色を付ける
+  //
+  // hidden フィールド（brand_id など）には使わないこと。見えない欄に色を付けても
+  // 意味がないうえ、利用者が直接編集できないので色を消す機会が無い。
+  //
+  // @param id 入力欄のID
+  // @param value セットする値
+  setAutoFilledValue(id, value) {
+    const field = document.getElementById(id)
+    if (!field) return
+
+    field.value = value
+    field.classList.add(this.constructor.AUTO_FILLED_CLASS)
+    this.autoFilledFields.add(field)
+    // 利用者が手で直した時点でAIの入力ではなくなるため、最初の入力で色を消す。
+    // once を付けているので、色を消したあとはこのリスナー自体も外れる
+    field.addEventListener("input", () => this.unmarkAutoFilled(field), { once: true })
+  }
+
+  // 「AIが入力した」背景色を消す
+  unmarkAutoFilled(field) {
+    field.classList.remove(this.constructor.AUTO_FILLED_CLASS)
+    this.autoFilledFields.delete(field)
+  }
+
   // --- 表示制御 ---
 
   // ローディング状態の切り替え（二重送信防止を兼ねる）
@@ -414,7 +474,10 @@ export default class extends Controller {
     this.brandCandidatesTarget.innerHTML = ""
     this.breweryCandidatesTarget.classList.add("hidden")
     this.breweryCandidatesTarget.innerHTML = ""
-    this.productAlternativesTarget.classList.add("hidden")
-    this.productAlternativesTarget.innerHTML = ""
+    this.productCandidatesTarget.classList.add("hidden")
+    this.productCandidatesTarget.innerHTML = ""
+    // 前回AIが入れた欄の色を戻す。読み取り直しの結果と混ざらないようにするため
+    // （Set を回しながら消すので、いったん配列にコピーしてから処理する）
+    Array.from(this.autoFilledFields).forEach(field => this.unmarkAutoFilled(field))
   }
 }
