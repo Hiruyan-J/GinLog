@@ -150,13 +150,13 @@ export default class extends Controller {
       this.showMessage("同じ名前の蔵元が複数あります。正しいものを選んでください", "info")
     } else if (data.brewery_brands?.length > 0) {
       // 蔵元だけ確定したケース。同じ銘柄を二重に登録しないよう選択を促す
-      this.showMessage("登録済みの銘柄と一致しませんでした。同じ蔵元の銘柄から選ぶこともできます", "info")
+      this.showMessage("吟ログにある銘柄と一致しませんでした。同じ蔵元の銘柄から選ぶこともできます", "info")
     } else if (productCandidates.length > 1 && data.brand_sakes?.length > 0) {
       // 銘柄が確定したケース。同じ商品を二重に登録しないよう選択を促す
       // 候補が1件のときは一覧を出していないので案内もしない。
       // AIが登録済みの商品名をそのまま読めた場合がこれにあたり、
       // 保存時に既存レコードへ紐づくので利用者に選ばせる必要がない
-      this.showMessage("この銘柄には登録済みの商品名があります。同じ商品なら候補から選んでください", "info")
+      this.showMessage("この銘柄には記録済みの商品名があります。同じ商品なら候補から選んでください", "info")
     } else {
       this.showMessage("読み取りました。内容を確認してから登録してください", "success")
     }
@@ -175,7 +175,7 @@ export default class extends Controller {
 
     if (match.status === "multiple") {
       this.startManualBrand(extraction.brand_name)
-      this.renderBrandCandidates(match.candidates)
+      this.renderBrandCandidates(match.candidates, extraction.brand_name)
       return
     }
 
@@ -229,7 +229,7 @@ export default class extends Controller {
       // 「HIRAN」のようにラベル通りに読むとマスタ（飛鸞）と一致しないことがあり、
       // そのまま登録すると同じ銘柄が2つできてしまうため
       if (data.brewery_brands?.length > 0) {
-        this.renderBreweryBrands(data.brewery_brands, match.candidates[0].name)
+        this.renderBreweryBrands(data.brewery_brands, match.candidates[0].name, extraction.brand_name)
       }
     } else if (match.status === "multiple") {
       // 同名の蔵元が複数ある（例: 吉田酒造は5県に存在）→ ユーザーに選ばせる
@@ -280,7 +280,11 @@ export default class extends Controller {
     // AIの読み取りは第1候補を先頭に置く（読み取れなかった値と、登録済みと同じ文字列は除く）
     const readNames = [ extraction.product_name, ...(extraction.product_name_alternatives || []) ]
       .filter(name => name && !registeredNames.has(name))
-    const candidates = [ ...registered, ...readNames.map(name => ({ label: name, product_name: name })) ]
+    const suffix = registered.length > 0 ? "（新しい商品として登録）" : ""
+    const candidates = [
+      ...registered,
+      ...readNames.map(name => ({ label: `${name}${suffix}`, product_name: name }))
+    ]
 
     // 候補が1つだけなら選ぶ余地がないので一覧は出さない
     if (candidates.length > 1) this.renderProductCandidates(candidates)
@@ -329,9 +333,12 @@ export default class extends Controller {
   }
 
   // 銘柄候補を描画する
-  renderBrandCandidates(candidates) {
+  // @param candidates マスタの銘柄候補
+  // @param brandName AIが読み取った銘柄名
+  renderBrandCandidates(candidates, brandName) {
     this.renderCandidateList(
-      this.brandCandidatesTarget, "銘柄の候補（上ほど確からしい順）:", candidates, "selectBrandCandidate"
+      this.brandCandidatesTarget, "銘柄の候補（上ほど確からしい順）:",
+      this.withReadBrand(candidates, brandName), "selectBrandCandidate"
     )
   }
 
@@ -344,10 +351,29 @@ export default class extends Controller {
 
   // 確定した蔵元が持つ銘柄の一覧を描画する
   // 選んだあとの挙動は通常の銘柄候補と同じなので、描画先とアクションを共用する
-  renderBreweryBrands(candidates, breweryName) {
+  // @param candidates その蔵元のマスタ銘柄
+  // @param breweryName 見出しに出す蔵元名
+  // @param brandName AIが読み取った銘柄名
+  renderBreweryBrands(candidates, breweryName, brandName) {
     this.renderCandidateList(
-      this.brandCandidatesTarget, `${breweryName} の銘柄から選ぶ:`, candidates, "selectBrandCandidate"
+      this.brandCandidatesTarget, `${breweryName} の銘柄から選ぶ:`,
+      this.withReadBrand(candidates, brandName), "selectBrandCandidate"
     )
+  }
+
+  // マスタの銘柄候補の末尾に「読み取った名前のまま新しく登録する」選択肢を足す
+  //
+  // これが無いと、候補を押し間違えたときに読み取った銘柄名へ戻す手段がない。
+  // マスタの候補は id を持つので、id が無いことが「マスタに無い銘柄」の目印になる
+  // （selectBrandCandidate はこれを見て分岐する）。
+  //
+  // @param candidates マスタの銘柄候補
+  // @param brandName AIが読み取った銘柄名（読み取れなかった場合は null）
+  // @return 候補の配列
+  withReadBrand(candidates, brandName) {
+    if (!brandName) return candidates
+
+    return [ ...candidates, { name: brandName, label: `${brandName}（新しい銘柄として登録）` } ]
   }
 
   // 商品名の候補を描画する
@@ -364,9 +390,16 @@ export default class extends Controller {
 
   // 銘柄候補を選択したとき
   selectBrandCandidate(event) {
-    this.selectBrand(JSON.parse(event.currentTarget.dataset.candidate))
+    const candidate = JSON.parse(event.currentTarget.dataset.candidate)
+    if (candidate.id) {
+      this.selectBrand(candidate)
+      this.showMessage("銘柄を反映しました。違っていれば候補から選び直せます", "success")
+    } else {
+      // 蔵元・都道府県は brand:new を受け取っても消えないので、そのまま残る
+      this.startManualBrand(candidate.name)
+      this.showMessage("読み取った銘柄名に戻しました。新しい銘柄として登録されます", "info")
+    }
     this.markSelectedCandidate(event.currentTarget)
-    this.showMessage("銘柄を反映しました。違っていれば候補から選び直せます", "success")
   }
 
   // 蔵元候補を選択したとき

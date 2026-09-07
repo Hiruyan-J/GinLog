@@ -321,7 +321,7 @@ module LabelExtraction
       {
         sake_id: sake.id,
         product_name: sake.product_name,
-        label: "#{sake.product_name}（登録済み）"
+        label: "#{sake.product_name}（吟ログに記録あり）"
       }
     end
 
