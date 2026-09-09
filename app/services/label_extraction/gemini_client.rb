@@ -22,7 +22,7 @@ module LabelExtraction
     # （実際に gemini-3.7-flash の障害中、gemini-3.6-flash も 503 になった）。
     #
     # どちらも環境変数で上書きできる（GEMINI_MODEL / GEMINI_FALLBACK_MODEL）
-    PRIMARY_MODEL = "gemini-3.7-flash"
+    PRIMARY_MODEL = "gemini-3.5-flash-lite"
     FALLBACK_MODEL = "gemini-3.1-flash-lite"
 
     # 接続確立を待つ時間（秒）
