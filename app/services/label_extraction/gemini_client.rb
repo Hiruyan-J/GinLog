@@ -197,7 +197,10 @@ module LabelExtraction
         sleep(RETRY_WAIT_SECONDS[attempt]) if attempt < MAX_RETRIES
       end
 
-      raise ApiError, last_error_message || "Gemini API に接続できませんでした"
+      # last_error_message が nil のまま到達するのは、最初の試行の時点で
+      # 残り時間が MIN_ATTEMPT_SECONDS を切っていて、1回もリクエストせずに
+      # break した場合だけ（テストで TOTAL_TIMEOUT を 0 にした場合など）
+      raise ApiError, last_error_message || "Gemini API の制限時間内に処理を開始できませんでした"
     end
 
     # generateContent へPOSTする
