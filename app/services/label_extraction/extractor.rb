@@ -13,10 +13,18 @@ module LabelExtraction
   class Extractor
     PROMPT_PATH = Rails.root.join("app/prompts/label_extraction.md")
 
-    # 画像の役割名。GeminiClient が各画像の直前に置くテキストに使う
+    # 各画像の直前に置く説明文。
+    #
     # 画像の並び順ではなく、この文言で表・裏を伝えるため、
-    # 片方だけを渡しても役割が正しく伝わる
-    IMAGE_LABELS = { front: "表ラベル", back: "裏ラベル" }.freeze
+    # 片方だけを渡しても役割が正しく伝わる。
+    #
+    # app/prompts/label_extraction.md の
+    # 「各画像の直前に、それが表ラベルか裏ラベルかを示す文を置きます」
+    # と対になる文章なので、使用するプロンプトを指定する本クラスで全文を組み立てる。
+    IMAGE_CAPTIONS = {
+      front: "次の画像は表ラベルです。",
+      back: "次の画像は裏ラベルです。"
+    }.freeze
 
     # 商品名の別候補は多すぎると選びにくいため上限を設ける
     # 変更するときは app/prompts/label_extraction.md の件数の記載も合わせること
@@ -66,7 +74,7 @@ module LabelExtraction
       extraction = normalize_extraction(
         GeminiClient.generate_with_fallback(
           prompt: File.read(PROMPT_PATH),
-          images: labeled_images,
+          images: captioned_images,
           response_schema: RESPONSE_SCHEMA
         )
       )
@@ -86,12 +94,12 @@ module LabelExtraction
 
     private
 
-    # 送信する画像に役割名（表ラベル / 裏ラベル）を付けて並べる
+    # 送信する画像に、直前へ置く説明文を付けて並べる
     #
-    # @return [Array<Hash>] { label:, mime_type:, data: } の配列（指定された画像のみ）
-    def labeled_images
+    # @return [Array<Hash>] { caption:, mime_type:, data: } の配列（指定された画像のみ）
+    def captioned_images
       { front: @front_image, back: @back_image }.filter_map do |slot, image|
-        image.merge(label: IMAGE_LABELS[slot]) if image
+        image.merge(caption: IMAGE_CAPTIONS[slot]) if image
       end
     end
 
