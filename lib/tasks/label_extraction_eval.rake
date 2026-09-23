@@ -1,12 +1,17 @@
 # ============================================
 # 使い方:
-#   EVAL_DIR=/path/to/images docker compose exec web bin/rails label_extraction:eval
+#   docker compose exec -e EVAL_DIR=/myapp/claude_code/references/sake_log_form/images \
+#     web bin/rails label_extraction:eval
+#
 #   （EVAL_DIR には画像と eval_expected.csv を置く。CSVの列:
 #     front_image, back_image, brand_name, product_name, brewery_name, prefecture
 #     正解が複数ある場合は「飛鸞/HIRAN」のように / 区切りで書ける）
 #
 # モデルを切り替えて比較する場合:
-#   GEMINI_MODEL=gemini-3.5-flash-lite EVAL_DIR=... bin/rails label_extraction:eval
+#   docker compose exec \
+#     -e EVAL_DIR=/myapp/claude_code/references/sake_log_form/images \
+#     -e GEMINI_MODEL=gemini-3.5-flash-lite \
+#     web bin/rails label_extraction:eval
 # ============================================
 
 # 評価タスク用のヘルパー
@@ -78,7 +83,7 @@ namespace :label_extraction do
     require "csv"
 
     eval_dir = ENV["EVAL_DIR"]
-    abort("使い方: EVAL_DIR=/path/to/images bin/rails label_extraction:eval") if eval_dir.blank?
+    abort("使い方: docker compose exec -e EVAL_DIR=/myapp/path/to/images web bin/rails label_extraction:eval") if eval_dir.blank?
 
     csv_path = File.join(eval_dir, "eval_expected.csv")
     abort("#{csv_path} が見つかりません") unless File.exist?(csv_path)
