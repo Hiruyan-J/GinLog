@@ -192,6 +192,33 @@ RSpec.describe LabelExtraction::GeminiClient do
     end
   end
 
+  describe "接続エラーの扱い" do
+    it "DNSの解決に失敗した場合、ApiError に変換する" do
+      stub_request(:post, endpoint).to_raise(SocketError)
+
+      expect {
+        client.generate(prompt: prompt, images: images, response_schema: response_schema)
+      }.to raise_error(described_class::ApiError, /通信に失敗しました/)
+      expect(a_request(:post, endpoint)).to have_been_made.times(described_class::MAX_RETRIES + 1)
+    end
+
+    it "接続を拒否された場合、ApiError に変換する" do
+      stub_request(:post, endpoint).to_raise(Errno::ECONNREFUSED)
+
+      expect {
+        client.generate(prompt: prompt, images: images, response_schema: response_schema)
+      }.to raise_error(described_class::ApiError, /通信に失敗しました/)
+    end
+
+    it "SSLのエラー時に、ApiError に変換する" do
+      stub_request(:post, endpoint).to_raise(OpenSSL::SSL::SSLError)
+
+      expect {
+        client.generate(prompt: prompt, images: images, response_schema: response_schema)
+      }.to raise_error(described_class::ApiError, /通信に失敗しました/)
+    end
+  end
+
   describe "使用するモデル" do
     it "指定したモデルのエンドポイントへ送る" do
       stub = stub_request(:post, %r{/v1beta/models/#{Regexp.escape(model)}:generateContent})
@@ -262,6 +289,14 @@ RSpec.describe LabelExtraction::GeminiClient do
 
     it "本命が失敗したら退避モデルの結果を返す" do
       stub_request(:post, endpoint_for(primary)).to_return(status: 500)
+      stub_request(:post, endpoint_for(fallback)).to_return(status: 200, body: success_body)
+
+      expect(described_class.generate_with_fallback(**args)).to eq(extraction)
+      expect(a_request(:post, endpoint_for(fallback))).to have_been_made
+    end
+
+    it "本命が通信エラーになっても退避モデルを試す" do
+      stub_request(:post, endpoint_for(primary)).to_raise(SocketError)
       stub_request(:post, endpoint_for(fallback)).to_return(status: 200, body: success_body)
 
       expect(described_class.generate_with_fallback(**args)).to eq(extraction)

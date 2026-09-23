@@ -44,6 +44,19 @@ module LabelExtraction
     # リトライ対象のHTTPステータス（レート制限・サーバー側の一時エラー）
     RETRYABLE_STATUSES = [ 429, 500, 502, 503 ].freeze
 
+    # リトライ対象として扱う通信エラー
+    #
+    # いずれも「今は繋がらない」だけで、少し待てば回復する可能性がある。
+    # タイムアウト（Net::OpenTimeout / Net::ReadTimeout）は待ち時間の扱いが
+    # 違うため、ここには含めず別の rescue 節で捕まえる。
+    CONNECTION_ERRORS = [
+      SocketError,          # DNS解決に失敗した
+      SystemCallError,      # 接続拒否・接続リセットなど（Errno::*）
+      IOError,              # 応答の途中で切断された（EOFError など）
+      OpenSSL::SSL::SSLError, # TLSのハンドシェイクに失敗した
+      Net::HTTPBadResponse  # HTTPとして解釈できない応答が返った
+    ].freeze
+
     # 直近のAPI呼び出しのトークン使用量
     # （自分でクライアントを作って generate を呼んだ場合に参照できる）
     # @return [Hash, nil] 例: { "promptTokenCount" => 2375, "candidatesTokenCount" => 71 }
@@ -166,6 +179,7 @@ module LabelExtraction
     # 失敗の種類でリトライ有無を変更
     # - 4xx/5xx が即座に返る場合: サーバーが応答しているので、待ってから再送する
     # - 無応答（タイムアウト）の場合: 既に長く待っているので、追加の待機はせず次の試行へ進む
+    # - 接続に失敗した場合: すぐに返ってくるので、4xx/5xx と同じく待ってから再送する
     #
     # @param body [Hash] リクエストボディ
     # @return [Net::HTTPSuccess] 成功レスポンス
@@ -185,6 +199,11 @@ module LabelExtraction
         rescue Net::OpenTimeout, Net::ReadTimeout
           # 既に read_timeout ぶん待っているため、追加の待機はせず次の試行へ
           last_error_message = "Gemini API がタイムアウトしました"
+          next
+        rescue *CONNECTION_ERRORS => e
+          # タイムアウトと違ってすぐに返ってくるので、待ってから再送する
+          last_error_message = "Gemini API との通信に失敗しました（#{e.class}）"
+          sleep(RETRY_WAIT_SECONDS[attempt]) if attempt < MAX_RETRIES
           next
         end
 
