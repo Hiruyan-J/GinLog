@@ -3,7 +3,7 @@
 #   EVAL_DIR=/path/to/images docker compose exec web bin/rails label_extraction:eval
 #   （EVAL_DIR には画像と eval_expected.csv を置く。CSVの列:
 #     front_image, back_image, brand_name, product_name, brewery_name, prefecture
-#     正解が複数ある場合は「赤武/AKABU」のように / 区切りで書ける）
+#     正解が複数ある場合は「飛鸞/HIRAN」のように / 区切りで書ける）
 #
 # モデルを切り替えて比較する場合:
 #   GEMINI_MODEL=gemini-3.5-flash-lite EVAL_DIR=... bin/rails label_extraction:eval
@@ -22,13 +22,27 @@ module LabelExtractionEval
   end
 
   # 期待値と実際の値を比較する（期待値は「/」区切りで複数指定できる）
-  # @param expected [String, nil] 正解（例: "赤武/AKABU"）
+  #
+  # 比較の前に期待値（CSV側）を正規化する理由
+  # 突き合わせる相手（actuals）は、Geminiの回答を Extractor が正規化した値か、
+  # マスタから引いた値（Brand/Brewery が normalizes_text で正規化）のどちらかで、
+  # いずれも正規化済み。CSVの期待値だけが生の文字列なので、ここで同じルールに揃える。
+  # そうしないと、全角英数字や全角スペースが混ざったときに、
+  # 内容が合っていても不一致と判定されてしまう。
+  #
+  # presence で空を落としているのは、「AKABU/」のように区切りだけが
+  # 残ってしまったときに、空文字で一致してしまうのを防ぐため。
+  #
+  # @param expected [String, nil] 正解（例: "飛鸞/HIRAN"）
   # @param actuals [Array<String, nil>] 実際の値の候補
   # @return [Boolean]
   def match?(expected, actuals)
     return false if expected.blank?
 
-    expected.split("/").intersect?(actuals.compact)
+    expected_values = expected.split("/")
+                              .filter_map { |value| Normalizable.normalize_text(value).presence }
+
+    expected_values.intersect?(actuals.compact)
   end
 
   # 1件分の読み取り結果を採点する
