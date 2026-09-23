@@ -10,6 +10,9 @@ RSpec.describe LabelExtraction::GeminiClient do
   let(:extraction) { { brand_name: "屋守", product_name: "純米中取り 無調整生" } }
 
   before do
+    # MODELの環境変数に値が入ったままだと「環境変数が無ければ既定」のテストが落ちる
+    ENV.delete("GEMINI_MODEL")
+    ENV.delete("GEMINI_FALLBACK_MODEL")
     ENV["GEMINI_API_KEY"] = "test-api-key"
     # テストではリトライの待ち時間をゼロにする
     stub_const("#{described_class}::RETRY_WAIT_SECONDS", [ 0, 0 ])
