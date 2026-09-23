@@ -1,6 +1,6 @@
 # 銘柄オートコンプリート検索用APIコントローラ
 class Api::BrandsController < ApplicationController
-  # GET /api/brands/search?q=赤武
+  # GET /api/brands/search?q=AKABU
   # 銘柄名で部分一致検索し、蔵元・都道府県情報を含むJSONを返す
   # @return [void] JSON形式で銘柄候補を返す
   def search
@@ -22,7 +22,7 @@ class Api::BrandsController < ApplicationController
           brewery_name: brand.brewery.name,
           area_id: brand.brewery.area.id,
           area_name: brand.brewery.area.name,
-          # 重複銘柄を区別するためのラベル（例: 「赤武 - 赤武酒造（岩手県）」）
+          # 重複銘柄を区別するためのラベル（例: 「AKABU - 赤武酒造（岩手県）」）
           label: "#{brand.name} - #{brand.brewery.name} (#{brand.brewery.area.name})"
         }
       }
