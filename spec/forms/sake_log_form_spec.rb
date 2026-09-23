@@ -320,6 +320,27 @@ RSpec.describe SakeLogForm, type: :model do
       end
     end
 
+    context "商品名の空白ゆれによる重複防止" do
+      it "空白の有無だけが違う商品名は同じ Sake に紐づく" do
+        build_form(product_name: "純米中取り無調整生").save
+
+        expect {
+          build_form(product_name: "純米中取り 無調整生").save
+      }.to change(SakeLog, :count).by(1)
+       .and change(Sake, :count).by(0)
+      end
+
+      # 「久保田 千寿」と「久保田 千寿 秋あがり」のように、部分一致でも
+      # 別商品であるケースが実在するため、語が増減する場合は寄せない
+      it "語が増える場合は別商品として新しい Sake を作る" do
+        build_form(product_name: "千寿").save
+
+        expect {
+          build_form(product_name: "千寿 吟醸生原酒").save
+      }.to change(Sake, :count).by(1)
+      end
+    end
+
     # 並行リクエストで別プロセスが先に同一 Sake を作成済みのとき、
     # sake.save! が RecordNotUnique を出し、rescue 内で既存レコードを再取得する。
     context "別リクエストが先に同一 Sake を作成済み（複合ユニーク制約違反）" do
