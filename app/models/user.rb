@@ -30,6 +30,7 @@ class User < ApplicationRecord
 
   validates :name, presence: true
   has_many :sake_logs, dependent: :destroy
+  has_many :label_extraction_logs, dependent: :destroy
 
   def own?(object)
     id == object&.user_id

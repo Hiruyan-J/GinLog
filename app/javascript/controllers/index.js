@@ -22,6 +22,9 @@ application.register("image-modal", ImageModalController)
 import ImagePreviewController from "./image_preview_controller"
 application.register("image-preview", ImagePreviewController)
 
+import LabelExtractionController from "./label_extraction_controller"
+application.register("label-extraction", LabelExtractionController)
+
 import ProductNameAutocompleteController from "./product_name_autocomplete_controller"
 application.register("product-name-autocomplete", ProductNameAutocompleteController)
 

@@ -89,6 +89,68 @@ RSpec.describe Sake, type: :model do
     end
   end
 
+  describe ".spaceless_key" do
+    it "半角スペースを取り除く" do
+      expect(Sake.spaceless_key("純米中取り 無調整生")).to eq "純米中取り無調整生"
+    end
+
+    it "全角スペースも取り除く(NFKCで半角に揃えてから消すため)" do
+      expect(Sake.spaceless_key("純米中取り　無調整生")).to eq "純米中取り無調整生"
+    end
+
+    it "nil は空文字を返す" do
+      expect(Sake.spaceless_key(nil)).to eq ""
+    end
+  end
+
+  describe ".find_or_initialize_by_product_name" do
+    let(:brand) { create(:brand) }
+    let!(:existing) { create(:sake, brand: brand, product_name: "純米中取り無調整生") }
+
+    it "完全一致なら既存レコードを返す" do
+      result = Sake.find_or_initialize_by_product_name(brand.id, "純米中取り無調整生")
+
+      expect(result).to eq existing
+    end
+
+    it "空白の有無だけが違う商品名でも既存レコードを返す" do
+      result = Sake.find_or_initialize_by_product_name(brand.id, "純米中取り 無調整生")
+
+      expect(result).to eq existing
+    end
+
+    it "全角スペースでも既存レコードを返す" do
+      result = Sake.find_or_initialize_by_product_name(brand.id, "純米中取り　無調整生")
+
+      expect(result).to eq existing
+    end
+
+    # 「久保田 千寿」と「久保田 千寿 秋あがり」のように、部分一致でも
+    # 別商品であるケースが実在するため、部分一致では寄せない
+    it "単語が多い場合は、別商品として新規作成の Sake を返す" do
+      result = Sake.find_or_initialize_by_product_name(brand.id, "純米中取り無調整生 ひやおろし")
+
+      expect(result).not_to be_persisted
+      expect(result.product_name).to eq "純米中取り無調整生 ひやおろし"
+    end
+
+    it "単語が少ない場合も別商品として新規の Sake を返す" do
+      result = Sake.find_or_initialize_by_product_name(brand.id, "純米中取り")
+
+      expect(result).not_to be_persisted
+      expect(result.product_name).to eq "純米中取り"
+    end
+
+    it "別の銘柄には紐づかない" do
+      other_brand = create(:brand)
+
+      result = Sake.find_or_initialize_by_product_name(other_brand.id, "純米中取り無調整生")
+
+      expect(result).not_to be_persisted
+      expect(result.brand_id).to eq other_brand.id
+    end
+  end
+
   describe "#refresh_aggregation!" do
     let(:sake) { create(:sake) }
 

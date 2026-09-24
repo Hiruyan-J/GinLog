@@ -161,7 +161,7 @@ class SakeLogForm
   end
 
   # 銘柄名（通常モード: Brand.name、手入力モード: manual_brand_name）
-  # @return [String, nil] 銘柄名（例: 「赤武」）
+  # @return [String, nil] 銘柄名（例: 「AKABU」）
   def brand_display_name
     return Brand.find_by(id: brand_id)&.name if brand_id.present?
 
@@ -275,10 +275,7 @@ class SakeLogForm
       Sake.find_by!(id: sake_id, brand_id: brand_id)
     else
       # 新規のSakeレコードを検索または作成
-      Sake.find_or_initialize_by(
-        product_name: product_name,
-        brand_id: brand_id
-      )
+      Sake.find_or_initialize_by_product_name(brand_id, product_name)
     end
   end
 

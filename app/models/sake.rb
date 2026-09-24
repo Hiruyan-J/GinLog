@@ -46,6 +46,52 @@ class Sake < ApplicationRecord
       .where("product_name LIKE ?", "%#{sanitize_sql_like(query)}%")
   }
 
+  # 商品名の照合キー（空白をすべて取り除いた形）
+  #
+  # normalizes_text は連続する空白を1つに縮めるだけで、空白そのものは残す。
+  # そのため「純米中取り無調整生」と「純米中取り 無調整生」は別の値として扱われ、
+  # 同じ商品なのに2レコードに割れてしまう。
+  # 保存する値は入力どおりのままにしたいので、照合するときだけ空白を取り除く。
+  #
+  # @param product_name [String, nil] 商品名
+  # @return [String] 空白を除いた商品名（nil は空文字になる）
+  def self.spaceless_key(product_name)
+    Normalizable.normalize_text(product_name).to_s.delete(" ")
+  end
+
+  # 銘柄と商品名から既存レコードを探し、無ければ新規に組み立てる
+  #
+  # 空白の有無だけが違う商品名は同じ商品とみなす。
+  # 一方で「恵乃智」と「純米吟醸 恵乃智」のような部分一致では寄せない。
+  # 「久保田 千寿」と「久保田 千寿 秋あがり」のように、部分一致でも
+  # 別商品であるケースが実在し、文字列だけでは区別できないため。
+  # 部分一致の救済は、画面で候補を見せてユーザーに選ばせる側で行う。
+  #
+  # @param brand_id [Integer] 銘柄ID
+  # @param product_name [String] 商品名
+  # @return [Sake] 既存または新規の Sake
+  def self.find_or_initialize_by_product_name(brand_id, product_name)
+    find_by(brand_id: brand_id, product_name: product_name) ||
+      find_by_spaceless_product_name(brand_id, product_name) ||
+      new(brand_id: brand_id, product_name: product_name)
+  end
+
+  # 空白の有無だけが違う商品名で既存レコードを探す
+  #
+  # DBの product_name は normalizes_text 済み（全角スペースは半角に変換済み）なので、
+  # 比較対象は半角スペースだけを取り除けばよい。
+  # brand_id で絞ってから比較するため、走査対象は1銘柄ぶんの数件で済む。
+  #
+  # @param brand_id [Integer] 銘柄ID
+  # @param product_name [String] 商品名
+  # @return [Sake, nil] 見つかった既存レコード（無ければ nil）
+  def self.find_by_spaceless_product_name(brand_id, product_name)
+    key = spaceless_key(product_name)
+    return nil if key.blank?
+
+    where(brand_id: brand_id).find_by("replace(product_name, ' ', '') = ?", key)
+  end
+
   # sake_logs の平均値と件数を再計算して保存する
   # SakeAggregationJobとrakeタスク(sakes:aggregate_all)から呼ばれる
   #
