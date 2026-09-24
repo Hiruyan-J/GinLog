@@ -184,6 +184,15 @@ RSpec.describe LabelExtraction::GeminiClient do
       expect(a_request(:post, endpoint)).to have_been_made.times(described_class::MAX_RETRIES + 1)
     end
 
+    it "送信がタイムアウトした場合もタイムアウトとして扱う" do
+      stub_request(:post, endpoint).to_raise(Net::WriteTimeout)
+
+      expect {
+        client.generate(prompt: prompt, images: images, response_schema: response_schema)
+      }.to raise_error(described_class::ApiError, /タイムアウト/)
+      expect(a_request(:post, endpoint)).to have_been_made.times(described_class::MAX_RETRIES + 1)
+    end
+
     it "全体の制限時間を使い切っていたら、リクエストせずに諦める" do
       stub_const("#{described_class}::TOTAL_TIMEOUT", 0)
       stub = stub_request(:post, endpoint).to_return(status: 200, body: success_body)

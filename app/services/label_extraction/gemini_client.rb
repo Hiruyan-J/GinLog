@@ -27,7 +27,7 @@ module LabelExtraction
 
     # 接続確立を待つ時間（秒）
     OPEN_TIMEOUT = 5
-    # 1回のリクエストでレスポンスを待つ時間（秒）
+    # 1回のリクエストで、送信・応答のそれぞれを待つ時間（秒）
     READ_TIMEOUT = 30
     # リトライを含めた、このクライアント1つあたりの制限時間（秒）。
     #
@@ -47,8 +47,7 @@ module LabelExtraction
     # リトライ対象として扱う通信エラー
     #
     # いずれも「今は繋がらない」だけで、少し待てば回復する可能性がある。
-    # タイムアウト（Net::OpenTimeout / Net::ReadTimeout）は待ち時間の扱いが
-    # 違うため、ここには含めず別の rescue 節で捕まえる。
+    # タイムアウト（Net::*Timeout）は待ち時間の扱いが違うため、別の rescue 節で捕まえる。
     CONNECTION_ERRORS = [
       SocketError,          # DNS解決に失敗した
       SystemCallError,      # 接続拒否・接続リセットなど（Errno::*）
@@ -195,9 +194,9 @@ module LabelExtraction
 
         begin
           # 残り時間が READ_TIMEOUT より短ければ、そちらに合わせて切り詰める
-          response = post_request(body, read_timeout: [ READ_TIMEOUT, remaining ].min)
-        rescue Net::OpenTimeout, Net::ReadTimeout
-          # 既に read_timeout ぶん待っているため、追加の待機はせず次の試行へ
+          response = post_request(body, timeout: [ READ_TIMEOUT, remaining ].min)
+        rescue Net::OpenTimeout, Net::ReadTimeout, Net::WriteTimeout
+          # 既にタイムアウトぶん待っているため、追加の待機はせず次の試行へ
           last_error_message = "Gemini API がタイムアウトしました"
           next
         rescue *CONNECTION_ERRORS => e
@@ -225,15 +224,16 @@ module LabelExtraction
 
     # generateContent へPOSTする
     # @param body [Hash] リクエストボディ
-    # @param read_timeout [Numeric] レスポンスを待つ秒数
+    # @param timeout [Numeric] 送信・応答のそれぞれを待つ秒数
     # @return [Net::HTTPResponse]
-    def post_request(body, read_timeout:)
+    def post_request(body, timeout:)
       url = URI.parse("#{BASE_URL}/v1beta/models/#{@model}:generateContent")
 
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
       http.open_timeout = OPEN_TIMEOUT
-      http.read_timeout = read_timeout
+      http.read_timeout = timeout
+      http.write_timeout = timeout
 
       request = Net::HTTP::Post.new(url.request_uri)
       request["x-goog-api-key"] = api_key
