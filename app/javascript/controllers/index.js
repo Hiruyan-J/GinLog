@@ -30,3 +30,6 @@ application.register("product-name-autocomplete", ProductNameAutocompleteControl
 
 import RatingController from "./rating_controller"
 application.register("rating", RatingController)
+
+import ShareController from "./share_controller"
+application.register("share", ShareController)

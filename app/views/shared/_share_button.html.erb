@@ -1,0 +1,50 @@
+<%# シェアボタンの共通パーシャル
+  locals:
+    text:           … 投稿文（ShareHelper で組み立てる）
+    url:            … シェアするページの絶対 URL（sake_log_url など *_url を使う）
+    label:          … アイコンの横に出す文字。省略するとアイコンだけになる
+    class:          … share アイコン（summary）の見た目
+    dropdown_class: … 予備メニューの位置など（省略時は右寄せで下に開く）
+%>
+<% label = local_assigns[:label] %>
+<% summary_class = local_assigns[:class] %>
+<% dropdown_class = local_assigns.fetch(:dropdown_class, "dropdown-end") %>
+
+<%# click@window … メニューの外をクリックしたら閉じる
+  turbo:before-cache … 開いたままのメニューが Turbo のキャッシュに残らないよう閉じる %>
+<details class="dropdown <%= dropdown_class %>"
+         data-controller="share"
+         data-share-url-value="<%= url %>"
+         data-share-text-value="<%= text %>"
+         data-share-title-value="吟ログ"
+         data-action="click@window->share#closeOnOutsideClick turbo:before-cache@document->share#close">
+  <summary class="<%= summary_class %>" data-action="click->share#toggle">
+    <span class="material-symbols-rounded ms-size-24">share</span>
+    <% if label.present? %>
+      <span><%= label %></span>
+    <% end %>
+  </summary>
+
+  <%# 予備メニュー（Web Share API が使えないブラウザでだけ開く） %>
+  <ul class="z-30 p-2 w-48 shadow menu dropdown-content bg-base-300 text-base-content rounded-box">
+    <li>
+      <%# Xへシェア(別タブで画面を開く) %>
+      <%= link_to x_share_url(text: text, url: url),
+            target: "_blank", rel: "noopener noreferrer",
+            data: { action: "share#close" } do %>
+        <%# X のロゴ %>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+        Xでシェア
+      <% end %>
+    </li>
+    <li>
+      <button type="button" data-action="share#copy">
+        <span class="material-symbols-rounded ms-size-20">content_copy</span>
+        <span data-share-target="copyLabel">URLをコピー</span>
+      </button>
+    </li>
+  </ul>
+</details>
+
