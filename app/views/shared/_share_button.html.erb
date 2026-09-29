@@ -2,6 +2,7 @@
   locals:
     text:           … 投稿文（ShareHelper で組み立てる）
     url:            … シェアするページの絶対 URL（sake_log_url など *_url を使う）
+    hashtags:       … X に付けるハッシュタグの配列（share_hashtags で組み立てる。省略時は #吟ログ #日本酒）
     label:          … アイコンの横に出す文字。省略するとアイコンだけになる
     class:          … share アイコン（summary）の見た目
     dropdown_class: … シェアメニューの位置など（省略時は右寄せで下に開く）
@@ -9,6 +10,7 @@
 <% label = local_assigns[:label] %>
 <% summary_class = local_assigns[:class] %>
 <% dropdown_class = local_assigns.fetch(:dropdown_class, "dropdown-end") %>
+<% hashtags = local_assigns.fetch(:hashtags, ShareHelper::SHARE_HASHTAGS) %>
 
 <%# click@window … メニューの外をクリックしたら閉じる
   turbo:before-cache … 開いたままのメニューが Turbo のキャッシュに残らないよう閉じる %>
@@ -29,7 +31,7 @@
   <ul class="z-30 p-2 w-52 shadow menu dropdown-content bg-base-300 text-base-content rounded-box">
     <li>
       <%# Xへシェア(別タブで画面を開く) %>
-      <%= link_to x_share_url(text: text, url: url),
+      <%= link_to x_share_url(text: text, url: url, hashtags: hashtags),
             target: "_blank", rel: "noopener noreferrer",
             data: { action: "share#close" } do %>
         <%# X のロゴ %>

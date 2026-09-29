@@ -89,6 +89,7 @@
       <%= render "shared/share_button",
             text: sake_log_share_text(@sake_log, owned: current_user&.own?(@sake_log)),
             url: sake_log_url(@sake_log),
+            hashtags: share_hashtags(@sake_log.sake),
             class: "flex items-center list-none cursor-pointer text-primary",
             dropdown_class: "dropdown-top dropdown-end" %>
     </footer>
