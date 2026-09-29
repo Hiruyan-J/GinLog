@@ -4,7 +4,7 @@
     url:            … シェアするページの絶対 URL（sake_log_url など *_url を使う）
     label:          … アイコンの横に出す文字。省略するとアイコンだけになる
     class:          … share アイコン（summary）の見た目
-    dropdown_class: … 予備メニューの位置など（省略時は右寄せで下に開く）
+    dropdown_class: … シェアメニューの位置など（省略時は右寄せで下に開く）
 %>
 <% label = local_assigns[:label] %>
 <% summary_class = local_assigns[:class] %>
@@ -18,15 +18,15 @@
          data-share-text-value="<%= text %>"
          data-share-title-value="吟ログ"
          data-action="click@window->share#closeOnOutsideClick turbo:before-cache@document->share#close">
-  <summary class="<%= summary_class %>" data-action="click->share#toggle">
+  <summary class="<%= summary_class %>">
     <span class="material-symbols-rounded ms-size-24">share</span>
     <% if label.present? %>
       <span><%= label %></span>
     <% end %>
   </summary>
 
-  <%# 予備メニュー（Web Share API が使えないブラウザでだけ開く） %>
-  <ul class="z-30 p-2 w-48 shadow menu dropdown-content bg-base-300 text-base-content rounded-box">
+  <%# シェアメニュー %>
+  <ul class="z-30 p-2 w-52 shadow menu dropdown-content bg-base-300 text-base-content rounded-box">
     <li>
       <%# Xへシェア(別タブで画面を開く) %>
       <%= link_to x_share_url(text: text, url: url),
@@ -43,6 +43,12 @@
       <button type="button" data-action="share#copy">
         <span class="material-symbols-rounded ms-size-20">content_copy</span>
         <span data-share-target="copyLabel">URLをコピー</span>
+      </button>
+    </li>
+    <li hidden data-share-target="nativeShareItem">
+      <button type="button" data-action="share#nativeShare">
+        <span class="material-symbols-rounded ms-size-20">more_horiz</span>
+        その他のアプリで共有
       </button>
     </li>
   </ul>

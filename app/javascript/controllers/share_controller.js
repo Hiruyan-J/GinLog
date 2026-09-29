@@ -12,20 +12,19 @@ export default class extends Controller {
     title: String // title … 共有メニューに渡すタイトル
   }
   // copyLabel … 「URLをコピー」の文言を入れている span 要素
-  static targets = ["copyLabel"]
+  // nativeShareItem … 「その他のアプリで共有」の li 要素
+  static targets = ["copyLabel", "nativeShareItem"]
 
   connect() {
     // 元の文言（「URLをコピー」）を覚えておく。copy の中で読むと、連打したときに「コピーしました」を覚えてしまうため
     this.defaultCopyLabel = this.copyLabelTarget.textContent
+    // OS の共有メニューが使える環境の場合、「その他のアプリで共有」を出す
+    if (navigator.share) this.nativeShareItemTarget.hidden = false
   }
 
-  // share アイコン（<summary>）のクリック
-  // navigator.share が使える場合は、<details> の標準の開閉動作を止め、共有メニューを表示する。
-  // 使えない場合は標準動作に任せ、<details> を開閉して予備メニューを表示する。
-  async toggle(event) {
-    if (!navigator.share) return
-
-    event.preventDefault()
+  // 「その他のアプリで共有」のクリック。OS の共有メニュー（LINE・メッセージなど）を開く
+  async nativeShare() {
+    this.close()
     try {
       await navigator.share({ title: this.titleValue, text: this.textValue, url: this.urlValue })
     } catch (error) {
