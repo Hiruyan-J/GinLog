@@ -54,7 +54,7 @@ module SakeLogImagesHelper
   # 記録詳細の OGP 画像（X のカードに出る画像）の URL を返す
   #
   # 画像は保存せず、Cloudinary の URL 変換でその都度作る。
-  # 銘柄名・商品名が URL に含まれるので、記録を編集すると URL も変わり、最新の画像になる。
+  # 銘柄名・商品名・蔵元名・好み度が URL に含まれるので、記録を編集すると URL も変わり、最新の画像になる。
   # X のクローラーは WebP / AVIF を読めないことがあるため、f_auto ではなく jpg で固定する。
   #
   # @param sake_log [SakeLog] OGP 画像を作る記録
@@ -92,9 +92,25 @@ module SakeLogImagesHelper
       ogp_text_layer("吟ログ", size: 36, color: "#5B8C6F", y: 56, bold: true),
       # 銘柄名は1行に収めるため8文字で切る（72px × 8文字 ≒ 580px）
       ogp_text_layer(sake_log.sake.brand.name.truncate(8, omission: "…"), size: 72, color: "#333333", y: 200, bold: true),
-      # 商品名は折り返して最大3行程度に収める
-      ogp_text_layer(sake_log.sake.product_name.truncate(45, omission: "…"), size: 36, color: "#555555", y: 310)
+      # 商品名は折り返して2行までに収める（36px × 16文字 ≒ 580px で1行）
+      ogp_text_layer(sake_log.sake.product_name.truncate(30, omission: "…"), size: 36, color: "#555555", y: 310),
+      ogp_text_layer(ogp_brewery_label(sake_log.sake.brand.brewery), size: 28, color: "#777777", y: 420),
+      # 好み度は左下に置く（下端から 64px）
+      ogp_text_layer("★" * sake_log.rating + "☆" * (SakeLog::RATING_MAX - sake_log.rating),
+                     size: 48, color: "#E0A800", y: 64, gravity: :south_west)
     ]
+  end
+
+  # OGP 画像に載せる「(蔵元名 - 都道府県名)」を返す
+  #
+  # 蔵元名が「(名称不明)」のようにカッコ書きだけのときは、蔵元名を省いて「(都道府県名)」にする。
+  # 閉じカッコまで切れないよう、長い蔵元名は蔵元名だけを20文字で切る。
+  #
+  # @param brewery [Brewery] 銘柄の蔵元
+  # @return [String] 例: "(浜川商店 - 高知県)"
+  def ogp_brewery_label(brewery)
+    brewery_name = brewery.name.match?(/\A[(（].*[)）]\z/) ? nil : brewery.name.truncate(20, omission: "…")
+    "(#{[ brewery_name, brewery.area.name ].compact.join(' - ')})"
   end
 
   # 文字を重ねる変換（Cloudinary のテキストレイヤー）を1つ返す
