@@ -5,6 +5,14 @@
 # そのため image_processing gem と libvips が不要で、
 # 元が2MBのスマホ写真でも数十KBで配信でき、無料枠の転送量を節約できる。
 module SakeLogImagesHelper
+  # ラベル写真が無い記録で使う土台画像
+  OGP_BASE_PUBLIC_ID = "ginlog_ogp_base".freeze
+  OGP_FONT_FAMILY = "Sawarabi Gothic".freeze
+  # 静的OGP画像に合わせたクリーム色（写真の余白を埋める）
+  OGP_BACKGROUND_COLOR = "#F7F3EA".freeze
+  OGP_TEXT_X = 64
+  OGP_TEXT_WIDTH = 580
+
   # ラベル画像の img タグを返す
   #
   # @param attachment [ActiveStorage::Attached::One, nil] 表示対象の添付
@@ -43,6 +51,27 @@ module SakeLogImagesHelper
     end
   end
 
+  # 記録詳細の OGP 画像（X のカードに出る画像）の URL を返す
+  #
+  # 画像は保存せず、Cloudinary の URL 変換でその都度作る。
+  # 銘柄名・商品名が URL に含まれるので、記録を編集すると URL も変わり、最新の画像になる。
+  # X のクローラーは WebP / AVIF を読めないことがあるため、f_auto ではなく jpg で固定する。
+  #
+  # @param sake_log [SakeLog] OGP 画像を作る記録
+  # @return [String] OGP 画像の絶対 URL
+  def sake_log_ogp_image_url(sake_log)
+    return image_url("ginlog_ogp.png") unless cloudinary_storage?
+
+    # 表ラベル → 裏ラベル → サブ画像の順で、最初に見つかった画像を使う
+    _attachment_name, attachment = sake_log.attached_images.first
+    public_id = attachment ? attachment.blob.key : OGP_BASE_PUBLIC_ID
+
+    url = cloudinary_url(public_id, secure: true, format: "jpg",
+                                    transformation: sake_log_ogp_transformation(sake_log))
+    # フォント名の空白（Sawarabi Gothic）がそのまま URL に入ってしまうため、空白を %20 に置き換える
+    url.gsub(" ", "%20")
+  end
+
   private
 
   # Active Storage の保存先が Cloudinary かどうか
@@ -50,5 +79,41 @@ module SakeLogImagesHelper
   def cloudinary_storage?
     defined?(ActiveStorage::Service::CloudinaryService) &&
       ActiveStorage::Blob.service.is_a?(ActiveStorage::Service::CloudinaryService)
+  end
+
+  # OGP 画像の変換内容を返す
+  #
+  # @param sake_log [SakeLog] OGP 画像を作る記録
+  # @return [Array<Hash>] cloudinary_url の transformation に渡す配列
+  def sake_log_ogp_transformation(sake_log)
+    [
+      { width: 520, height: 630, crop: :pad, background: OGP_BACKGROUND_COLOR },
+      { width: 1200, height: 630, crop: :pad, gravity: :east, background: OGP_BACKGROUND_COLOR },
+      ogp_text_layer("吟ログ", size: 36, color: "#5B8C6F", y: 56, bold: true),
+      # 銘柄名は1行に収めるため8文字で切る（72px × 8文字 ≒ 580px）
+      ogp_text_layer(sake_log.sake.brand.name.truncate(8, omission: "…"), size: 72, color: "#333333", y: 200, bold: true),
+      # 商品名は折り返して最大3行程度に収める
+      ogp_text_layer(sake_log.sake.product_name.truncate(45, omission: "…"), size: 36, color: "#555555", y: 310)
+    ]
+  end
+
+  # 文字を重ねる変換（Cloudinary のテキストレイヤー）を1つ返す
+  #
+  # カンマ・スラッシュなど URL で特別な意味を持つ文字は、cloudinary gem がエスケープしてくれる。
+  #
+  # @param text [String] 重ねる文字
+  # @param size [Integer] 文字の大きさ(px)
+  # @param color [String] 文字色（"#RRGGBB"）
+  # @param y [Integer] gravity の基準位置からの縦のずれ(px)
+  # @param gravity [Symbol] 配置の基準（:north_west = 左上 / :south_west = 左下）
+  # @param bold [Boolean] 太字にするか
+  # @return [Hash] transformation の1要素
+  def ogp_text_layer(text, size:, color:, y:, gravity: :north_west, bold: false)
+    {
+      overlay: { font_family: OGP_FONT_FAMILY, font_size: size, font_weight: (bold ? :bold : nil), text: text }.compact,
+      color: color, gravity: gravity, x: OGP_TEXT_X, y: y,
+      # 幅を超えたら折り返す
+      width: OGP_TEXT_WIDTH, crop: :fit
+    }
   end
 end

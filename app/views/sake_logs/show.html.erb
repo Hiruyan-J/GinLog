@@ -1,4 +1,8 @@
 <% content_for :title,  t('.title') %>
+<% sake_name = "#{@sake_log.sake.brand.name} #{@sake_log.sake.product_name}" %>
+<% set_meta_tags description: "#{@sake_log.user.name}さんの日本酒の記録「#{sake_name}」",
+                 og: { title: "#{sake_name}｜#{@sake_log.user.name}さんの記録",
+                       image: sake_log_ogp_image_url(@sake_log) } %>
 
 <%# data-action は「Turbo がこのページをキャッシュする直前に close を呼ぶ」指定 %>
 <div class="w-full" data-controller="image-modal"
@@ -81,8 +85,12 @@
         <span class="material-symbols-rounded ms-size-24">chat_bubble</span>
         <span class="text-xs">0</span>
       </span>
-      <%# シェア（未実装） %>
-      <span class="material-symbols-rounded ms-size-24">share</span>
+      <%# シェア %>
+      <%= render "shared/share_button",
+            text: sake_log_share_text(@sake_log, owned: current_user&.own?(@sake_log)),
+            url: sake_log_url(@sake_log),
+            class: "flex items-center list-none cursor-pointer text-primary",
+            dropdown_class: "dropdown-top dropdown-end" %>
     </footer>
 
     <%# コメント欄 %>
