@@ -7,6 +7,9 @@
 module SakeLogImagesHelper
   # ラベル写真が無い記録で使う土台画像
   OGP_BASE_PUBLIC_ID = "ginlog_ogp_base".freeze
+  # OGP画像に重ねるファビコン
+  OGP_ICON_PUBLIC_ID = "ginlog_ogp_icon".freeze
+  OGP_ICON_SIZE = 56
   OGP_FONT_FAMILY = "Sawarabi Gothic".freeze
   # 静的OGP画像に合わせたクリーム色（写真の余白を埋める）
   OGP_BACKGROUND_COLOR = "#F7F3EA".freeze
@@ -89,16 +92,18 @@ module SakeLogImagesHelper
     [
       { width: 520, height: 630, crop: :pad, background: OGP_BACKGROUND_COLOR },
       { width: 1200, height: 630, crop: :pad, gravity: :east, background: OGP_BACKGROUND_COLOR },
-      ogp_text_layer("吟ログ", size: 36, color: "#5B8C6F", y: 56, bold: true),
+      { overlay: OGP_ICON_PUBLIC_ID, width: OGP_ICON_SIZE, height: OGP_ICON_SIZE, crop: :fit,
+        gravity: :north_west, x: OGP_TEXT_X, y: 44 },
+      ogp_text_layer("吟ログ", size: 48, color: "#5B8C6F", x: OGP_TEXT_X + OGP_ICON_SIZE + 12, y: 48, bold: true),
       # 銘柄名は1行に収めるため8文字で切る（72px × 8文字 ≒ 580px）
-      ogp_text_layer(sake_log.sake.brand.name.truncate(8, omission: "…"), size: 72, color: "#333333", y: 200, bold: true),
+      ogp_text_layer(sake_log.sake.brand.name.truncate(8, omission: "…"), size: 72, color: "#333333", y: 140, bold: true),
       # 商品名は折り返して2行までに収める（48px × 12文字 ≒ 580px で1行）
-      ogp_text_layer(sake_log.sake.product_name.truncate(24, omission: "…"), size: 48, color: "#555555", y: 310),
+      ogp_text_layer(sake_log.sake.product_name.truncate(24, omission: "…"), size: 48, color: "#555555", y: 240),
       # 蔵元名は1行に収める（商品名2行の下。36px × 16文字 ≒ 580px で1行）
-      ogp_text_layer(ogp_brewery_label(sake_log.sake.brand.brewery), size: 36, color: "#777777", y: 450),
-      # 好み度は左下に置く（下端から 64px）
+      ogp_text_layer(ogp_brewery_label(sake_log.sake.brand.brewery), size: 36, color: "#777777", y: 380),
+      # 好み度は蔵元名の下に置く（X はカードの左下にタイトルを重ねて表示するため、下端付近は空けておく）
       ogp_text_layer("★" * sake_log.rating + "☆" * (SakeLog::RATING_MAX - sake_log.rating),
-                     size: 48, color: "#E0A800", y: 64, gravity: :south_west)
+                     size: 48, color: "#E0A800", y: 440)
     ]
   end
 
@@ -121,14 +126,15 @@ module SakeLogImagesHelper
   # @param text [String] 重ねる文字
   # @param size [Integer] 文字の大きさ(px)
   # @param color [String] 文字色（"#RRGGBB"）
+  # @param x [Integer] gravity の基準位置からの横のずれ(px)。省略時は他の文字と同じ左端
   # @param y [Integer] gravity の基準位置からの縦のずれ(px)
   # @param gravity [Symbol] 配置の基準（:north_west = 左上 / :south_west = 左下）
   # @param bold [Boolean] 太字にするか
   # @return [Hash] transformation の1要素
-  def ogp_text_layer(text, size:, color:, y:, gravity: :north_west, bold: false)
+  def ogp_text_layer(text, size:, color:, y:, x: OGP_TEXT_X, gravity: :north_west, bold: false)
     {
       overlay: { font_family: OGP_FONT_FAMILY, font_size: size, font_weight: (bold ? :bold : nil), text: text }.compact,
-      color: color, gravity: gravity, x: OGP_TEXT_X, y: y,
+      color: color, gravity: gravity, x: x, y: y,
       # 幅を超えたら折り返す
       width: OGP_TEXT_WIDTH, crop: :fit
     }
