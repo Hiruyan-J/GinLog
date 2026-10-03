@@ -183,6 +183,12 @@
   --ms-wght: 700;
 }
 
+/* 文字リンク用の色。
+    プライマリ色のままだと小さな文字には明るすぎるため、文字色を混ぜて読みやすくする。 */
+@utility link-text {
+  color: color-mix(in oklab, var(--color-primary) 60%, var(--color-base-content));
+}
+
 /* 明るい背景に黒としてアイコンを使用する際のルール。
     濃さの変数だけを設定する。base の既定値を上書きするため components レイヤーに置く。 */
 @layer components {

@@ -40,7 +40,7 @@
       <div class="flex flex-wrap gap-x-2 items-baseline">
         <h2 class="text-2xl font-bold"><%= @sake_log.sake.brand.name %></h2>
         <p class="text-base">
-          <%= link_to @sake_log.sake.product_name, sake_path(@sake_log.sake_id), class: "link link-hover" %>
+          <%= link_to @sake_log.sake.product_name, sake_path(@sake_log.sake_id), class: "link link-hover link-text" %>
         </p>
       </div>
       <p class="mt-1 badge badge-ghost badge-sm">
