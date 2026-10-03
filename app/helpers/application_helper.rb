@@ -36,7 +36,7 @@ module ApplicationHelper
         description: :description,
         type: "website",
         url: request.original_url,
-        image: image_url("ginlog_app-icon.png"),
+        image: image_url("ginlog_ogp.png"),
         locale: "ja_JP"
       },
       twitter: {

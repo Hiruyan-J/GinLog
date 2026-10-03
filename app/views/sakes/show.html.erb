@@ -1,17 +1,28 @@
-<%# ブラウザタブ・OGP 用のタイトル（<title> は application_helper の default_meta_tags が組み立てる） %>
+<%# ブラウザタブ・OGP 用のタイトル %>
 <% content_for :title, "#{@sake.brand.name} #{@sake.product_name}" %>
+<%# X などでシェアされたときのカードの説明文 %>
+<% set_meta_tags description: "#{@sake.brand.name} #{@sake.product_name}（#{@sake.brand.brewery.name}／#{@sake.brand.brewery.area.name}）の、みんなのテイスティング記録と味・香りの傾向をチェックできます。" %>
 
 <div class="w-full">
   <article class="p-2">
-    <%# ---------- ヘッダ: 銘柄名・商品名・蔵元（都道府県） ---------- %>
-    <section class="mt-1">
-      <div class="flex flex-wrap gap-x-2 items-baseline">
-        <h1 class="text-2xl font-bold"><%= @sake.brand.name %></h1>
-        <p class="text-base"><%= @sake.product_name %></p>
+    <%# ---------- ヘッダ: 銘柄名・商品名・蔵元（都道府県）・シェアボタン ---------- %>
+    <section class="flex gap-2 justify-between items-start mt-1">
+      <div>
+        <div class="flex flex-wrap gap-x-2 items-baseline">
+          <h1 class="text-2xl font-bold"><%= @sake.brand.name %></h1>
+          <p class="text-base"><%= @sake.product_name %></p>
+        </div>
+        <p class="mt-1 badge badge-ghost badge-sm">
+          <%= @sake.brand.brewery.name %>（<%= @sake.brand.brewery.area.name %>）
+        </p>
       </div>
-      <p class="mt-1 badge badge-ghost badge-sm">
-        <%= @sake.brand.brewery.name %>（<%= @sake.brand.brewery.area.name %>）
-      </p>
+
+      <%= render "shared/share_button",
+            text: sake_share_text(@sake),
+            url: sake_url(@sake),
+            class: "flex items-center list-none cursor-pointer text-primary",
+            hashtags: share_hashtags(@sake),
+            dropdown_class: "dropdown-end shrink-0" %>
     </section>
 
     <% if @sake.aggregated? %>

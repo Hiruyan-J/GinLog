@@ -129,9 +129,10 @@ class SakeLogForm
     end
 
     # 画像の削除はトランザクションの外（＝コミット後）で行う。
-    # ジョブは別コネクションで動くため、トランザクション内で呼ぶと
-    # 「添付行の削除がまだ見えない」状態で実行され、外部キー違反を
-    # 握りつぶして何も削除せずに完了してしまう（孤児ファイルが残る）。
+    # 削除ジョブは別コネクションで動くため、コミット前に呼ぶと
+    # active_storage_attachments の削除が未確定のまま active_storage_blobs の削除が走り、
+    # 外部キー違反になる。Rails はこれを rescue して正常終了するので、
+    # Cloudinary 上の画像が消されずに残る（孤児ファイル）。
     purge_removed_images if saved
 
     saved

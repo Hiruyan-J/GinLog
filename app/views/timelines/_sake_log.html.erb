@@ -87,7 +87,12 @@
       <span class="material-symbols-rounded ms-size-24">chat_bubble</span>
       <span class="text-xs">0</span>
     </span>
-    <%# シェア（未実装） %>
-    <span class="material-symbols-rounded ms-size-24">share</span>
+    <%# シェア %>
+    <%= render "shared/share_button",
+          text: sake_log_share_text(sake_log, owned: current_user&.own?(sake_log)),
+          url: sake_log_url(sake_log),
+          hashtags: share_hashtags(sake_log.sake),
+          class: "flex items-center list-none cursor-pointer text-primary",
+          dropdown_class: "z-20 dropdown-top dropdown-end" %>
   </footer>
 </article>
