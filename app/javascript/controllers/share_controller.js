@@ -22,6 +22,11 @@ export default class extends Controller {
     if (navigator.share) this.nativeShareItemTarget.hidden = false
   }
 
+  // 要素がページ（DOM）から取り除かれるとき（ページ移動・カードの削除など）に、残っているタイマーを消す
+  disconnect() {
+    clearTimeout(this.copiedTimer)
+  }
+
   // 「その他のアプリで共有」のクリック。OS の共有メニュー（LINE・メッセージなど）を開く
   async nativeShare() {
     this.close()
@@ -43,10 +48,8 @@ export default class extends Controller {
     }
 
     this.copyLabelTarget.textContent = "コピーしました"
-    setTimeout(() => {
-      this.copyLabelTarget.textContent = this.defaultCopyLabel
-      this.close()
-    }, COPIED_MESSAGE_DURATION)
+    clearTimeout(this.copiedTimer)
+    this.copiedTimer = setTimeout(() => this.close(), COPIED_MESSAGE_DURATION)
   }
 
   // メニューの外がクリックされたら閉じる（data-action の click@window から呼ぶ）
@@ -56,6 +59,8 @@ export default class extends Controller {
 
   // メニューを閉じる（this.element は <details>。open 属性を外すと閉じる）
   close() {
+    clearTimeout(this.copiedTimer)
+    this.copyLabelTarget.textContent = this.defaultCopyLabel
     this.element.removeAttribute("open")
   }
 }
