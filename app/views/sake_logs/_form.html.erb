@@ -245,7 +245,7 @@
 
     <div class="flex gap-2 justify-center">
       <%= link_to "一覧に戻る", sake_logs_path, class: "btn btn-outline btn-primary md:btn-wide" %>
-      <%= f.submit nil, class: "btn btn-primary md:btn-wide" %>
+      <%= f.submit nil, class: "btn btn-primary md:btn-wide", data: { turbo_submits_with: "送信中…" } %>
     </div>
 
     <%# さけのわデータ帰属表示 %>
