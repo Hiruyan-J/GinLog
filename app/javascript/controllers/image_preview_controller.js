@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { resizeImage } from "../utils/image_resizer"
 
 export default class extends Controller {
   // input       … 実際の <input type="file">（画面上は非表示）
@@ -8,6 +9,9 @@ export default class extends Controller {
   // clearButton … 「選択を取り消す」ボタン（画像を選んだときだけ表示する）
   static targets = ["input", "preview", "placeholder", "removeField", "clearButton"]
 
+  // 登録する画像の長辺の上限(px)。アップロード時間と保存容量を抑えるため
+  static MAX_DIMENSION = 1600
+
   // 編集画面で「選択を取り消す」を押した場合、元画像に戻すために
   // 最初の src を保存。
   connect() {
@@ -15,7 +19,7 @@ export default class extends Controller {
   }
 
   // ファイルが選択されたときに呼ばれる
-  select(event) {
+  async select(event) {
     const file = event.target.files[0]
     if (!file) return
 
@@ -34,6 +38,9 @@ export default class extends Controller {
     }
 
     this.clearButtonTarget.classList.remove("hidden")
+
+    // 送信するファイルを縮小版に差し替える
+    await this.replaceWithResizedFile(event.target, file)
   }
 
   // 選んだ画像を取り消す
@@ -64,6 +71,26 @@ export default class extends Controller {
     if (this.previewUrl) {
       URL.revokeObjectURL(this.previewUrl)
       this.previewUrl = null
+    }
+  }
+
+  // 入力欄の中身を縮小後のファイルに差し替える
+  // 差し替えに失敗した場合は元ファイルのまま送る
+  async replaceWithResizedFile(input, file) {
+    const resized = await resizeImage(file, this.constructor.MAX_DIMENSION)
+    // 縮小が不要・失敗のときは元ファイルが返ってくるので何もしない
+    if (resized === file) return
+    // 縮小中に別の画像を選び直した・取り消した場合は差し替えない
+    if (input.files[0] !== file) return
+
+    try {
+      // input.files の中身は直接変更できないため、
+      // DataTransfer で新しい FileList を作って丸ごと差し替える
+      const dataTransfer = new DataTransfer()
+      dataTransfer.items.add(resized)
+      input.files = dataTransfer.files  // DataTransferからFileListを取得し、入力欄のファイル一覧を差し替える
+    } catch (error) {
+      console.error("画像の差し替えに失敗しました:", error)
     }
   }
 }

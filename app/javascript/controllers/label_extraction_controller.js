@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { resizeImage } from "../utils/image_resizer"
 
 // Connects to data-controller="label-extraction"
 export default class extends Controller {
@@ -68,10 +69,10 @@ export default class extends Controller {
     try {
       const formData = new FormData()
       if (frontFile) {
-        formData.append("front_label_image", await this.resizeImage(frontFile), "front_label.jpg")
+        formData.append("front_label_image", await resizeImage(frontFile, this.constructor.MAX_DIMENSION))
       }
       if (backFile) {
-        formData.append("back_label_image", await this.resizeImage(backFile), "back_label.jpg")
+        formData.append("back_label_image", await resizeImage(backFile, this.constructor.MAX_DIMENSION))
       }
 
       const response = await fetch(this.urlValue, {
@@ -440,29 +441,6 @@ export default class extends Controller {
       .closest("form")
       .querySelector(`input[type="file"][name="sake_log[${attachmentName}]"]`)
     return input?.files[0] || null
-  }
-
-  // 画像を長辺 MAX_DIMENSION px 以下に縮小してJPEGに変換する
-  // API送信量とトークン数を抑えるため。縮小に失敗した場合
-  // （HEICなどブラウザが描画できない形式）は元ファイルのまま返す
-  async resizeImage(file) {
-    try {
-      // EXIFの回転情報を反映してデコードする（スマホ写真の向き対策）
-      const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" })
-      const maxDimension = this.constructor.MAX_DIMENSION
-      const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height))
-      if (scale >= 1) return file
-
-      const canvas = document.createElement("canvas")
-      canvas.width = Math.round(bitmap.width * scale)
-      canvas.height = Math.round(bitmap.height * scale)
-      canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height)
-
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.85))
-      return blob || file
-    } catch {
-      return file
-    }
   }
 
   // Railsのform_withが生成するID（sake_log_brand_id など）で入力欄に値をセットする
