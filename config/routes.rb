@@ -37,6 +37,7 @@ Rails.application.routes.draw do
   resources :sakes, only: %i[show]
   get "timeline", to: "timelines#index", as: :timeline
   get "mypage", to: "users#show", as: :mypage
+  get "contact", to: "static_pages#contact", as: :contact
 
   # Defines the root path route ("/")
   root "timelines#index"

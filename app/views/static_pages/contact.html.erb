@@ -1,0 +1,12 @@
+<% content_for :title, t('.title') %>
+<%= page_heading %>
+
+<div class="flex flex-col gap-6 items-center py-2">
+  <p class="w-full md:w-8/12"><%= t('.lead') %></p>
+
+  <%= link_to t('.open_form'), @contact_form_url,
+        target: "_blank", rel: "noopener noreferrer",
+        class: "btn btn-primary" %>
+
+  <p class="w-full text-sm md:w-8/12"><%= t('.new_tab_notice') %></p>
+</div>

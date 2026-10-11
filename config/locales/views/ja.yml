@@ -26,6 +26,8 @@ ja:
     account_menu_title: アカウント
     data_menu_title: データについて
     sakenowa_attribution: さけのわデータを利用しています
+    about_menu_title: 吟ログについて
+    contact: お問い合わせ
   footer:
     home: ホーム
     search: 検索
@@ -34,6 +36,12 @@ ja:
   users:
     show:
       title: マイアカウント
+  static_pages:
+    contact:
+      title: お問い合わせ
+      lead: ご不明点やご要望がございましたら、下記フォームよりお気軽にお問い合わせください。
+      open_form: お問い合わせフォームを開く
+      new_tab_notice: Google フォームが別のタブで開きます。
   sake_logs:
     new:
       title: 日本酒記録
