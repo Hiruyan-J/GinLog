@@ -88,6 +88,83 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe ".from_omniauth" do
+    # Google から届く認証情報を作る
+    def google_auth(email:, uid: "12345", name: "山田太郎")
+      OmniAuth::AuthHash.new(provider: "google_oauth2", uid: uid, info: { email: email, name: name })
+    end
+
+    context "未登録の Google アカウントの場合" do
+      it "Google の名前で、確認済みのユーザーが作られる" do
+        user = User.from_omniauth(google_auth(email: "new@example.com"))
+
+        expect(user).to be_persisted
+        expect(user).to have_attributes(name: "山田太郎", email: "new@example.com", uid: "12345")
+        expect(user).to be_confirmed
+      end
+
+      it "確認メールは送られない" do
+        expect { User.from_omniauth(google_auth(email: "new@example.com")) }
+          .not_to change { ActionMailer::Base.deliveries.size }
+      end
+    end
+
+    context "登録済みの Google アカウントの場合" do
+      it "Google 側のメールアドレスが変わっていても、uid で同じユーザーを返す" do
+        user = create(:user, :google, uid: "12345")
+
+        expect(User.from_omniauth(google_auth(email: "changed@example.com"))).to eq user
+      end
+    end
+
+    context "同じメールアドレスで、メール確認済みのユーザーがいる場合" do
+      let!(:user) { create(:user, email: "taro@example.com", name: "ぎんたろう") }
+
+      it "新しいユーザーは作らず、既存のユーザーにひも付ける" do
+        expect { User.from_omniauth(google_auth(email: "taro@example.com")) }.not_to change(User, :count)
+        expect(user.reload).to be_google_account
+      end
+
+      it "ユーザー名とパスワードは変わらない" do
+        User.from_omniauth(google_auth(email: "taro@example.com"))
+
+        expect(user.reload.name).to eq "ぎんたろう"
+        expect(user.valid_password?("password")).to be true
+      end
+    end
+
+    # 他人が先にそのメールアドレスで仮登録していた場合に備える
+    context "同じメールアドレスで、メール未確認のユーザーがいる場合" do
+      let!(:user) { create(:user, :unconfirmed, email: "taro@example.com") }
+
+      it "確認済みになり、元のパスワードではログインできなくなる" do
+        User.from_omniauth(google_auth(email: "taro@example.com"))
+
+        expect(user.reload).to be_confirmed
+        expect(user.valid_password?("password")).to be false
+      end
+    end
+
+    # Google 側でメールアドレスが未確認だと、メールアドレスが空で届く
+    context "メールアドレスが届かなかった場合" do
+      it "ユーザーは保存されない" do
+        user = User.from_omniauth(google_auth(email: nil))
+
+        expect(user).not_to be_persisted
+      end
+    end
+  end
+
+  describe "#google_account?" do
+    it "Google 登録ユーザーなら true を返す" do
+      expect(build(:user, :google).google_account?).to be true
+    end
+
+    it "メール登録だけのユーザーなら false を返す" do
+      expect(build(:user).google_account?).to be false
+    end
+  end
+
   describe "#own?" do
     let(:user) { create(:user) }
 

@@ -35,5 +35,10 @@ FactoryBot.define do
     trait :unconfirmed do
       confirmed_at { nil }
     end
+
+    trait :google do
+      provider { "google_oauth2" }
+      sequence(:uid) { |n| "google-uid-#{n}" }
+    end
   end
 end
