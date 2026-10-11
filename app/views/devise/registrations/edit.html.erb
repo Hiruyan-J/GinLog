@@ -11,7 +11,7 @@
 
   <div class="w-full md:w-8/12 field">
     <%= f.label :email %><br />
-    <%= f.email_field :email, autocomplete: "email", class: "w-full input input-primary" %>
+    <%= f.email_field :email, autocomplete: "email", disabled: resource.google_account?, class: "w-full input input-primary" %>
   </div>
 
   <%# メールアドレスを変更したあと、新しいアドレスの確認が済むまで表示される %>
@@ -21,25 +21,29 @@
     </div>
   <% end %>
 
-  <div class="w-full md:w-8/12 field">
-    <%= f.label :password %>
-    <em class="text-sm"><%= t('.leave_blank_if_you_don_t_want_to_change_it') %></em>
-    <% if @minimum_password_length %>
-      <em class="text-sm"><%= t('devise.shared.minimum_password_length', count: @minimum_password_length) %></em>
-    <% end %><br />
-    <%= f.password_field :password, autocomplete: "new-password", class: "w-full input input-primary" %>
-  </div>
+  <% if resource.google_account? %>
+    <p class="w-full text-sm md:w-8/12"><%= t('.google_account_notice') %></p>
+  <% else %>
+    <div class="w-full md:w-8/12 field">
+      <%= f.label :password %>
+      <em class="text-sm"><%= t('.leave_blank_if_you_don_t_want_to_change_it') %></em>
+      <% if @minimum_password_length %>
+        <em class="text-sm"><%= t('devise.shared.minimum_password_length', count: @minimum_password_length) %></em>
+      <% end %><br />
+      <%= f.password_field :password, autocomplete: "new-password", class: "w-full input input-primary" %>
+    </div>
 
-  <div class="w-full md:w-8/12 field">
-    <%= f.label :password_confirmation %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full input input-primary" %>
-  </div>
+    <div class="w-full md:w-8/12 field">
+      <%= f.label :password_confirmation %><br />
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full input input-primary" %>
+    </div>
 
-  <div class="w-full md:w-8/12 field">
-    <%= f.label :current_password %>
-    <em class="text-sm"><%= t('.we_need_your_current_password_to_confirm_your_changes') %></em><br />
-    <%= f.password_field :current_password, autocomplete: "current-password", class: "w-full input input-primary" %>
-  </div>
+    <div class="w-full md:w-8/12 field">
+      <%= f.label :current_password %>
+      <em class="text-sm"><%= t('.we_need_your_current_password_to_confirm_your_changes') %></em><br />
+      <%= f.password_field :current_password, autocomplete: "current-password", class: "w-full input input-primary" %>
+    </div>
+  <% end %>
 
   <div class="flex justify-center pt-2 actions">
     <%= f.submit t('.update'), class: "btn btn-primary" %>
