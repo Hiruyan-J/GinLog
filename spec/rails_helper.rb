@@ -91,6 +91,9 @@ RSpec.configure do |config|
 
   # テスト中の外部HTTP通信をブロック（localhost は capybara 等のため許可）
   WebMock.disable_net_connect!(allow_localhost: true)
+
+  # Google ログインのテストで Google に接続せず、用意した認証情報を返す
+  OmniAuth.config.test_mode = true
 end
 
 # shoulda-matchers を RSpec + Rails で使えるように連携設定

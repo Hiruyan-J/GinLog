@@ -2,8 +2,12 @@
 #
 
 Rails.application.routes.draw do
-  # 確認リンク（/users/confirmation）だけ独自コントローラで処理する。
-  devise_for :users, controllers: { confirmations: "users/confirmations" }
+  # 確認リンク・Google ログイン・アカウント更新だけ独自コントローラで処理する。
+  devise_for :users, controllers: {
+    confirmations: "users/confirmations",
+    omniauth_callbacks: "users/omniauth_callbacks",
+    registrations: "users/registrations"
+  }
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
