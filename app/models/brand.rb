@@ -46,4 +46,18 @@ class Brand < ApplicationRecord
 
   belongs_to :brewery
   has_many :sakes
+
+  # Ransack で検索を許可するカラム
+  # @param _auth_object [Object, nil] 権限の出し分け用（未使用）
+  # @return [Array<String>]
+  def self.ransackable_attributes(_auth_object = nil)
+    %w[name]
+  end
+
+  # Ransack で検索を許可する関連
+  # @param _auth_object [Object, nil] 権限の出し分け用（未使用）
+  # @return [Array<String>]
+  def self.ransackable_associations(_auth_object = nil)
+    %w[brewery]
+  end
 end
