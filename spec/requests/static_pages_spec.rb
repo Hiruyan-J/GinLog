@@ -21,6 +21,21 @@ RSpec.describe "静的ページ", type: :request do
     end
   end
 
+  describe "GET /privacy" do
+    it "未ログインでも 200 が返る" do
+      get privacy_path
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    # 開示・削除の依頼を受け付ける窓口として、お問い合わせページを案内している
+    it "本文にお問い合わせページへのリンクがある" do
+      get privacy_path
+
+      expect(html.at_css(%(main a[href="#{contact_path}"]))).to be_present
+    end
+  end
+
   describe "ヘッダーのメニュー" do
     it "未ログインでも、お問い合わせへのリンクが表示される" do
       get root_path
@@ -33,6 +48,12 @@ RSpec.describe "静的ページ", type: :request do
       get root_path
 
       expect(html.at_css(%(header a[href="#{contact_path}"]))).to be_present
+    end
+
+    it "未ログインでも、プライバシーポリシーへのリンクが表示される" do
+      get root_path
+
+      expect(html.at_css(%(header a[href="#{privacy_path}"]))).to be_present
     end
   end
 end

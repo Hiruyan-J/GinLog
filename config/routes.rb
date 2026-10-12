@@ -38,6 +38,7 @@ Rails.application.routes.draw do
   get "timeline", to: "timelines#index", as: :timeline
   get "mypage", to: "users#show", as: :mypage
   get "contact", to: "static_pages#contact", as: :contact
+  get "privacy", to: "static_pages#privacy", as: :privacy
 
   # Defines the root path route ("/")
   root "timelines#index"
