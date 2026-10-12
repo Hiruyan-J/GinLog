@@ -36,6 +36,14 @@ RSpec.describe "静的ページ", type: :request do
     end
   end
 
+  describe "GET /terms" do
+    it "未ログインでも 200 が返る" do
+      get terms_path
+
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
   describe "ヘッダーのメニュー" do
     it "未ログインでも、お問い合わせへのリンクが表示される" do
       get root_path
@@ -54,6 +62,12 @@ RSpec.describe "静的ページ", type: :request do
       get root_path
 
       expect(html.at_css(%(header a[href="#{privacy_path}"]))).to be_present
+    end
+
+    it "未ログインでも、利用規約へのリンクが表示される" do
+      get root_path
+
+      expect(html.at_css(%(header a[href="#{terms_path}"]))).to be_present
     end
   end
 end
