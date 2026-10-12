@@ -28,6 +28,7 @@ ja:
     sakenowa_attribution: さけのわデータを利用しています
     about_menu_title: 吟ログについて
     contact: お問い合わせ
+    terms: 利用規約
     privacy: プライバシーポリシー
   footer:
     home: ホーム
@@ -45,6 +46,8 @@ ja:
       new_tab_notice: Google フォームが別のタブで開きます。
     privacy:
       title: プライバシーポリシー
+    terms:
+      title: 利用規約
   sake_logs:
     new:
       title: 日本酒記録
