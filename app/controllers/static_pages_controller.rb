@@ -8,4 +8,6 @@ class StaticPagesController < ApplicationController
   def contact
     @contact_form_url = CONTACT_FORM_URL
   end
+
+  def privacy; end
 end
