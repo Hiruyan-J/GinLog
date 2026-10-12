@@ -105,6 +105,7 @@ ja:
         update: 更新
         we_need_your_current_password_to_confirm_your_changes: 変更を反映するには現在のパスワードを入力してください
       new:
+        agreement_html: "%{terms}と%{privacy}に同意のうえ、登録してください。"
         sign_up: アカウント登録
       signed_up: アカウント登録が完了しました。
       signed_up_but_inactive: ログインするためには、アカウントを有効化してください。

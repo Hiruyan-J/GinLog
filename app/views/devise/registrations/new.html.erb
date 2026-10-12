@@ -27,6 +27,13 @@
     <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full input input-primary" %>
   </div>
 
+  <%# 利用規約・プライバシーポリシーへの同意（入力が消えないよう、別タブで開く） %>
+  <p class="w-full text-sm md:w-8/12">
+    <%= t('.agreement_html',
+          terms: link_to(t('header.terms'), terms_path, target: "_blank", rel: "noopener", class: "link link-info"),
+          privacy: link_to(t('header.privacy'), privacy_path, target: "_blank", rel: "noopener", class: "link link-info")) %>
+  </p>
+
   <div class="flex justify-center pt-2 actions">
     <%= f.submit t('.sign_up'), class: "btn btn-primary" %>
   </div>
