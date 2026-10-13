@@ -1,0 +1,6 @@
+<%# 検索結果の2ページ目以降を返すテンプレート（リクエスト元の Frame と同じ id で包む） %>
+<%= turbo_frame_tag "sakes_page_#{@sakes.current_page}",
+      class: "flex flex-col gap-0 divide-y" do %>
+  <%= render @sakes %>
+  <%= render "next_search_page_frame", sakes: @sakes, keyword: @keyword %>
+<% end %>

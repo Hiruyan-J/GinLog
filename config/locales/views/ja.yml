@@ -58,6 +58,12 @@ ja:
     show:
       title: 記録の詳細
     sakenowa_attribution_html: "%{link}を利用しています"
+  sakes:
+    index:
+      title: 日本酒検索
+      placeholder: 銘柄・蔵元・都道府県など
+      prompt: 銘柄名・商品名・蔵元名・都道府県名で検索できます
+      not_found: "「%{keyword}」に一致する日本酒は見つかりませんでした"
   timelines:
     index:
       title: タイムライン

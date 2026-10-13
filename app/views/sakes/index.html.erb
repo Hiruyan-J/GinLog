@@ -1,0 +1,26 @@
+<% content_for :title, t('.title') %>
+
+<div class="w-full">
+  <%= page_heading %>
+
+  <%# 検索フォーム（GET なので検索条件が URL に残る） %>
+  <%= form_with url: sakes_path, method: :get, class: "flex px-2 w-full join" do |f| %>
+    <%= f.search_field :keyword, value: @keyword, placeholder: t('.placeholder'), class: "w-full input join-item" %>
+    <button type="submit" class="btn btn-primary join-item">
+      <span class="material-symbols-rounded">search</span>
+    </button>
+  <% end %>
+
+  <% if @keyword.blank? %>
+    <p class="my-10 text-sm text-center text-neutral-500"><%= t('.prompt') %></p>
+  <% elsif @sakes.any? %>
+    <div id="sakes" class="flex flex-col gap-0 mt-2 divide-y">
+      <%# render @sakes は、1件ごとに sakes/_sake.html.erb を描画する %>
+      <%= render @sakes %>
+      <%# 2ページ目以降を遅延読み込みする Turbo Frame %>
+      <%= render "next_search_page_frame", sakes: @sakes, keyword: @keyword %>
+    </div>
+  <% else %>
+    <p class="my-10 text-center"><%= t('.not_found', keyword: @keyword) %></p>
+  <% end %>
+</div>

@@ -1,0 +1,40 @@
+<%# 検索結果の1行
+  locals:
+    sake: 表示する日本酒（brand → brewery → area を読み込み済みのもの）
+%>
+<article id="<%= dom_id sake %>" class="relative py-3 px-2">
+  <%# 行全体を覆う、日本酒詳細へのリンク %>
+  <%= link_to "", sake_path(sake),
+        class: "absolute inset-0 z-10",
+        data: { turbo_frame: "_top" } %>
+
+  <div class="flex gap-2 items-center">
+
+    <%# ---------- 左: 銘柄名・商品名・都道府県名・蔵元名 ---------- %>
+    <div class="flex flex-col flex-1 gap-1 min-w-0">
+      <h2 class="text-lg font-bold truncate"><%= sake.brand.name %></h2>
+      <p class="text-sm truncate"><%= sake.product_name %></p>
+      <p class="text-xs truncate text-neutral-500">
+        <%= sake.brand.brewery.area.name %> <%= sake.brand.brewery.name %>
+      </p>
+    </div>
+
+    <%# ---------- 右: 4象限マップ ＋ 好み度の平均 ---------- %>
+    <div class="flex flex-col gap-1 items-center shrink-0">
+      <% if sake.aggregated? %>
+        <%# 味 × 香りの4象限マップ（みんなの記録の平均値） %>
+        <%= render "shared/taste_aroma_map", taste: sake.average_taste_strength, aroma: sake.average_aroma_strength, variant: :quadrant, size: :sm, labels: :responsive %>
+
+        <%# 好み度の平均（四捨五入した個数だけ点灯） %>
+        <div class="flex gap-0 items-center">
+          <% SakeLog::RATING_MAX.times do |rate| %>
+            <span class="inline-block w-3 h-3 md:w-4 md:h-4 mask mask-star-2 <%= star_rating_class(rate, sake.average_rating.round) %>"></span>
+          <% end %>
+        </div>
+      <% else %>
+        <%# 投稿直後はジョブ実行前で集計値が入っていないことがある %>
+        <p class="text-xs text-neutral-500">集計中</p>
+      <% end %>
+    </div>
+  </div>
+</article>
