@@ -1,0 +1,13 @@
+<%# 好み度を表す星（0.5 刻み）
+  locals:
+    rating: 好み度（SakeLog#rating や Sake#average_rating。nil は渡さないこと）
+    size:   星の大きさ（:sm = 一覧 / :lg = 詳細画面）
+%>
+<% lit_count = lit_half_star_count(rating) %>
+
+<div class="flex gap-0 items-center">
+  <%# 星1個を左半分・右半分の2つに分けて並べる（偶数番目が左半分、奇数番目が右半分） %>
+  <% (SakeLog::RATING_MAX * 2).times do |index| %>
+    <span class="inline-block mask mask-star-2 <%= half_star_class(index, lit_count, size) %>"></span>
+  <% end %>
+</div>
