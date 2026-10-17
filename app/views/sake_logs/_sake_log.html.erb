@@ -15,7 +15,8 @@
 
       <%# 1段目: 銘柄名 商品名 %>
       <div class="flex gap-2 items-baseline">
-        <h2 class="text-lg font-bold truncate"><%= brand_link sake_log.sake.brand %></h2>
+        <%# 銘柄名は縮ませず、長すぎるときだけ幅の 2/3 で「…」にする。残りの幅に商品名を入れる %>
+        <h2 class="text-lg font-bold max-w-2/3 truncate shrink-0"><%= brand_link sake_log.sake.brand %></h2>
         <p class="text-sm truncate"><%= product_name_link sake_log.sake %></p>
       </div>
 
