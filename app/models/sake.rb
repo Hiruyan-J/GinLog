@@ -65,6 +65,20 @@ class Sake < ApplicationRecord
       .order(brand_name_match_order([ normalized_keyword, *words ]))
   }
 
+  # 銘柄・蔵元・都道府県の ID で絞り込むスコープ（nil の条件は使わない）
+  # @param brand_id [Integer, nil] 銘柄ID
+  # @param brewery_id [Integer, nil] 蔵元ID
+  # @param area_id [Integer, nil] 都道府県ID
+  # @return [ActiveRecord::Relation<Sake>] 条件がすべて nil なら全件
+  scope :filter_by_ids, ->(brand_id: nil, brewery_id: nil, area_id: nil) {
+    sakes = all
+    sakes = sakes.where(brand_id: brand_id) if brand_id
+    # 蔵元・都道府県は、該当する銘柄の ID をサブクエリで集めて絞り込む
+    sakes = sakes.where(brand_id: Brand.where(brewery_id: brewery_id).select(:id)) if brewery_id
+    sakes = sakes.where(brand_id: Brand.joins(:brewery).where(breweries: { area_id: area_id }).select(:id)) if area_id
+    sakes
+  }
+
   # 銘柄名が候補のどれかと完全一致する行を先にする並び順（大文字小文字は区別しない）
   # brands テーブルが JOIN 済みの検索で使うこと（search_by_keyword では Ransack が JOIN する）
   # @param candidates [Array<String>] 銘柄名と比べる文字列（検索文字列の全体と、各単語）
