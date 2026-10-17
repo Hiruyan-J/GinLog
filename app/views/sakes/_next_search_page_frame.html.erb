@@ -1,11 +1,12 @@
 <%# 検索結果の次ページ読み込み用の Turbo Frame
   locals:
-    sakes:   kaminari でページングされた日本酒（next_page を持つ）
-    keyword: 検索文字列（次ページの URL に引き継ぐ）
+    sakes:         kaminari でページングされた日本酒（next_page を持つ）
+    keyword:       検索文字列（次ページの URL に引き継ぐ）
+    filter_params: 絞り込み条件（{ brand_id: 1 } など。次ページの URL に引き継ぐ）
 %>
 <% if sakes.next_page %>
   <%= turbo_frame_tag "sakes_page_#{sakes.next_page}",
-        src: sakes_path(keyword: keyword, page: sakes.next_page),
+        src: sakes_path(keyword: keyword, page: sakes.next_page, **filter_params),
         loading: :lazy,
         class: "flex flex-col gap-0 divide-y" do %>
     <%# 読み込み中に表示される中身。読み込みが終わると、次ページの内容ごと置き換わる %>

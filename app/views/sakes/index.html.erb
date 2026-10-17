@@ -5,21 +5,29 @@
 
   <%# 検索フォーム（GET なので検索条件が URL に残る） %>
   <%= form_with url: sakes_path, method: :get, class: "flex px-2 w-full join" do |f| %>
+    <% @filter_params.each do |key, id| %>
+      <%= f.hidden_field key, value: id %>
+    <% end %>
     <%= f.search_field :keyword, value: @keyword, placeholder: t('.placeholder'), class: "w-full input input-primary join-item" %>
     <button type="submit" class="btn btn-primary join-item">
       <span class="material-symbols-rounded">search</span>
     </button>
   <% end %>
 
+  <%# 絞り込み条件と「解除」リンク（条件がなければ何も出ない） %>
+  <%= render "filter_conditions", filters: @filters, filter_params: @filter_params, keyword: @keyword %>
+
   <% if @sakes.any? %>
     <div id="sakes" class="flex flex-col gap-0 mt-2 divide-y">
       <%# render @sakes は、1件ごとに sakes/_sake.html.erb を描画する %>
       <%= render @sakes %>
       <%# 2ページ目以降を遅延読み込みする Turbo Frame %>
-      <%= render "next_search_page_frame", sakes: @sakes, keyword: @keyword %>
+      <%= render "next_search_page_frame", sakes: @sakes, keyword: @keyword, filter_params: @filter_params %>
     </div>
   <% elsif @keyword.present? %>
     <p class="my-10 text-center"><%= t('.not_found', keyword: @keyword) %></p>
+  <% elsif @filters.any? %>
+    <p class="my-10 text-center"><%= t('.filtered_not_found') %></p>
   <% else %>
     <p class="my-10 text-center"><%= t('.no_sakes') %></p>
   <% end %>
