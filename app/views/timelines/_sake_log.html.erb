@@ -44,13 +44,13 @@
     </div>
   </header>
 
-  <%# 銘柄名・商品名・都道府県 %>
-  <section class="flex flex-wrap gap-x-2 items-baseline mt-1">
-    <h2 class="text-xl font-bold"><%= sake_log.sake.brand.name %></h2>
-    <%= link_to sake_log.sake.product_name, sake_path(sake_log.sake_id),
-          class: "relative z-20 text-sm link link-hover link-text",
-          data: { turbo_frame: "_top" } %>
-    <span class="badge badge-ghost badge-sm"><%= sake_log.sake.brand.brewery.area.name %></span>
+  <%# 銘柄名・商品名・蔵元名・都道府県名 %>
+  <section class="mt-1">
+    <div class="flex flex-wrap gap-x-2 items-baseline">
+      <h2 class="text-xl font-bold"><%= brand_link sake_log.sake.brand %></h2>
+      <p class="text-sm"><%= product_name_link sake_log.sake %></p>
+    </div>
+    <p class="text-xs text-neutral-500"><%= brewery_and_area_links sake_log.sake.brand.brewery %></p>
   </section>
 
   <%# ラベル画像（先頭2枚のみ。3枚目以降があれば最後のマスに +N バッジを重ねる） %>
