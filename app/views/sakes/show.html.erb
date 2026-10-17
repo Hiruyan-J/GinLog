@@ -28,12 +28,7 @@
     <% if @sake.aggregated? %>
       <%# ---------- 好み度の平均（星 ＋ 数値 ＋ 件数） ---------- %>
       <section class="flex gap-2 items-center mt-2">
-        <div class="flex gap-0 items-center">
-          <%# 星は平均値を四捨五入した個数だけ点灯させる %>
-          <% SakeLog::RATING_MAX.times do |rate| %>
-            <span class="inline-block w-5 h-5 mask mask-star-2 <%= star_rating_class(rate, @sake.average_rating.round) %>"></span>
-          <% end %>
-        </div>
+        <%= render "shared/rating_stars", rating: @sake.average_rating, size: :lg %>
         <p class="text-sm text-neutral-500">
           <%= @sake.average_rating.round(1) %>（<%= @sake.sake_logs_count %>件の平均）
         </p>

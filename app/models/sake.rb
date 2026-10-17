@@ -25,6 +25,8 @@ class Sake < ApplicationRecord
   include Normalizable
 
   PRODUCT_NAME_MAX_LENGTH = 255
+  # フリーワード検索で使う単語数の上限（超えた分は無視する）
+  KEYWORD_MAX_WORDS = 5
 
   normalizes_text :product_name
 
@@ -45,6 +47,46 @@ class Sake < ApplicationRecord
     where(brand_id: brand_id)
       .where("product_name LIKE ?", "%#{sanitize_sql_like(query)}%")
   }
+
+  # フリーワード検索の対象（商品名・銘柄名・蔵元名・都道府県名）をまとめた別名
+  ransack_alias :keyword, :product_name_or_brand_name_or_brand_brewery_name_or_brand_brewery_area_name
+
+  # フリーワード検索用のスコープ（空白区切りは AND 検索）
+  # 銘柄名が検索語と完全一致する日本酒を先頭に並べる
+  # @param keyword [String, nil] 検索文字列
+  # @return [ActiveRecord::Relation<Sake>] キーワードが空なら全件
+  scope :search_by_keyword, ->(keyword) {
+    normalized_keyword = Normalizable.normalize_text(keyword.to_s)
+    words = normalized_keyword.split(" ").first(KEYWORD_MAX_WORDS)
+    next all if words.empty?
+
+    # 単語ごとに条件のグループ（g）を作り、グループ同士を AND（m）でつなぐ
+    ransack(m: "and", g: words.map { |word| { keyword_cont: word } }).result
+      .order(brand_name_match_order([ normalized_keyword, *words ]))
+  }
+
+  # 銘柄名が候補のどれかと完全一致する行を先にする並び順（大文字小文字は区別しない）
+  # brands テーブルが JOIN 済みの検索で使うこと（search_by_keyword では Ransack が JOIN する）
+  # @param candidates [Array<String>] 銘柄名と比べる文字列（検索文字列の全体と、各単語）
+  # @return [Arel::Nodes::Case] 完全一致なら 0、それ以外は 1 になる CASE 式
+  def self.brand_name_match_order(candidates)
+    exact_match = Brand.arel_table[:name].lower.in(candidates.map(&:downcase).uniq)
+    Arel::Nodes::Case.new.when(exact_match).then(0).else(1)
+  end
+
+  # Ransack で検索を許可するカラム
+  # @param _auth_object [Object, nil] 権限の出し分け用（未使用）
+  # @return [Array<String>]
+  def self.ransackable_attributes(_auth_object = nil)
+    %w[product_name]
+  end
+
+  # Ransack で検索を許可する関連
+  # @param _auth_object [Object, nil] 権限の出し分け用（未使用）
+  # @return [Array<String>]
+  def self.ransackable_associations(_auth_object = nil)
+    %w[brand]
+  end
 
   # 商品名の照合キー（空白をすべて取り除いた形）
   #

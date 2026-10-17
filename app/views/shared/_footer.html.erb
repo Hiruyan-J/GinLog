@@ -7,10 +7,9 @@
     <% end %>
 
     <%# 検索ボタン %>
-    <%= link_to "#", class: "flex flex-col justify-center items-center leading-none" do %>
+    <%= link_to sakes_path, class: class_names("flex flex-col items-center justify-center leading-none", ("dock-active" if current_page?(sakes_path))) do %>
       <span class="material-symbols-rounded">search</span>
       <span class="dock-label"><%= t('footer.search') %></span>
-      <span class="dock-label">(実装中)</span>
     <% end %>
 
     <%# 投稿ボタン %>

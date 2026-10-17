@@ -8,6 +8,12 @@ module SakeLogsHelper
   #   「まだ続きがある」とユーザーが気づける
   DETAIL_CAROUSEL_ITEM_WIDTH = "w-[45%]".freeze
 
+  # 好み度の星（0.5 刻み）で使う、半分の星1個あたりの大きさ（幅は高さの半分）
+  HALF_STAR_SIZES = {
+    sm: "w-1.5 h-3 md:w-2 md:h-4", # 一覧（検索結果）
+    lg: "w-2.5 h-5"                # 詳細画面
+  }.freeze
+
   # 好み度の星色を返すヘルパー
   # RustyWind(Tailwind くらすソーター)がERBの三項演算子 `?` を壊すバグ (Issue #124) を回避するため、
   # ビュー内のインライン三項演算子をヘルパーメソッドに切り出している
@@ -17,6 +23,25 @@ module SakeLogsHelper
   # @return [String] Tailwind CSS の背景色クラス
   def star_rating_class(rate, rating)
     rate < rating ? "bg-yellow-300" : "bg-stone-400"
+  end
+
+  # 好み度で点灯させる「半分の星」の個数を返す（0.5 刻みに四捨五入）
+  #
+  # @param rating [Numeric] 好み度（記録の値、または平均。例: 3.4）
+  # @return [Integer] 点灯させる半分の星の個数（例: 3.4 → 7 = 星 3 個半）
+  def lit_half_star_count(rating)
+    (rating * 2).round
+  end
+
+  # 半分の星1個分の CSS クラス（左右どちらの半分か・大きさ・色）を返す
+  #
+  # @param index [Integer] 半分の星のインデックス（0始まり。偶数が左半分、奇数が右半分）
+  # @param lit_count [Integer] 点灯させる半分の星の個数（lit_half_star_count の戻り値）
+  # @param size [Symbol] 星の大きさ（:sm = 一覧 / :lg = 詳細画面）
+  # @return [String] Tailwind CSS / daisyUI のクラス文字列
+  def half_star_class(index, lit_count, size)
+    half_class = index.even? ? "mask-half-1" : "mask-half-2"
+    "#{half_class} #{HALF_STAR_SIZES.fetch(size)} #{star_rating_class(index, lit_count)}"
   end
 
   # 記録詳細のラベル画像を横スクロールで見せるかどうか

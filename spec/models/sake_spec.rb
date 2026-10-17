@@ -186,6 +186,99 @@ RSpec.describe Sake, type: :model do
     end
   end
 
+  describe ".search_by_keyword" do
+    let(:akabu_brewery) { create(:brewery, name: "赤武酒造", area: create(:area, name: "岩手県")) }
+    let(:denshu_brewery) { create(:brewery, name: "西田酒造店", area: create(:area, name: "青森県")) }
+    let!(:akabu) { create(:sake, product_name: "純米吟醸", brand: create(:brand, name: "AKABU", brewery: akabu_brewery)) }
+    let!(:denshu) { create(:sake, product_name: "特別純米酒", brand: create(:brand, name: "田酒", brewery: denshu_brewery)) }
+
+    it "商品名に部分一致する日本酒を返す" do
+      expect(Sake.search_by_keyword("吟醸")).to contain_exactly(akabu)
+    end
+
+    it "銘柄名に部分一致する日本酒を返す" do
+      expect(Sake.search_by_keyword("田酒")).to contain_exactly(denshu)
+    end
+
+    it "蔵元名に部分一致する日本酒を返す" do
+      expect(Sake.search_by_keyword("赤武")).to contain_exactly(akabu)
+    end
+
+    it "都道府県名に部分一致する日本酒を返す" do
+      expect(Sake.search_by_keyword("青森")).to contain_exactly(denshu)
+    end
+
+    it "英字の大文字・小文字を区別しない" do
+      expect(Sake.search_by_keyword("akabu")).to contain_exactly(akabu)
+    end
+
+    it "全角の英字でもヒットする" do
+      expect(Sake.search_by_keyword("ＡＫＡＢＵ")).to contain_exactly(akabu)
+    end
+
+    context "空白で区切って複数の単語を渡したとき" do
+      it "単語が別々のカラムにあっても、すべてを含む日本酒を返す" do
+        expect(Sake.search_by_keyword("田酒 特別純米")).to contain_exactly(denshu)
+      end
+
+      it "1つでも含まない単語があればヒットしない" do
+        expect(Sake.search_by_keyword("田酒 吟醸")).to be_empty
+      end
+
+      it "全角スペースで区切っても同じ結果になる" do
+        expect(Sake.search_by_keyword("田酒　特別純米")).to contain_exactly(denshu)
+      end
+
+      it "上限を超えた分の単語は無視する" do
+        words = [ "田酒" ] * Sake::KEYWORD_MAX_WORDS + [ "存在しない単語" ]
+
+        expect(Sake.search_by_keyword(words.join(" "))).to contain_exactly(denshu)
+      end
+    end
+
+    # エスケープされていないと、% は「何でも一致」になり全件が返ってしまう
+    it "% と _ は文字そのものとして検索する" do
+      expect(Sake.search_by_keyword("%")).to be_empty
+      expect(Sake.search_by_keyword("_")).to be_empty
+    end
+
+    context "並び順" do
+      # 記録が多い順より、銘柄名の完全一致を優先することを確かめるため、
+      # 部分一致しただけの日本酒のほうを記録の多い状態にしておく
+      it "銘柄名が検索語と完全一致する日本酒を、部分一致だけの日本酒より先にする" do
+        # 蔵元名「西田酒造店」が「田酒」に部分一致する別銘柄
+        partial_match = create(:sake, sake_logs_count: 10, brand: create(:brand, name: "喜久泉", brewery: denshu_brewery))
+
+        result = Sake.search_by_keyword("田酒").order(sake_logs_count: :desc)
+
+        expect(result).to eq [ denshu, partial_match ]
+      end
+
+      it "大文字・小文字が違っても完全一致として扱う" do
+        partial_match = create(:sake, product_name: "AKABU 風", sake_logs_count: 10)
+
+        result = Sake.search_by_keyword("akabu").order(sake_logs_count: :desc)
+
+        expect(result).to eq [ akabu, partial_match ]
+      end
+
+      it "複数の単語のうち、どれか1つが銘柄名と完全一致すれば先にする" do
+        partial_match = create(:sake, product_name: "特別純米酒", sake_logs_count: 10,
+                                      brand: create(:brand, name: "喜久泉", brewery: denshu_brewery))
+
+        result = Sake.search_by_keyword("田酒 特別純米").order(sake_logs_count: :desc)
+
+        expect(result).to eq [ denshu, partial_match ]
+      end
+    end
+
+    it "キーワードが空なら、絞り込まずに全件を返す" do
+      expect(Sake.search_by_keyword(nil)).to contain_exactly(akabu, denshu)
+      expect(Sake.search_by_keyword("")).to contain_exactly(akabu, denshu)
+      expect(Sake.search_by_keyword("　")).to contain_exactly(akabu, denshu)
+    end
+  end
+
   describe "#aggregated?" do
     it "集計済み（average_rating あり）なら true" do
       sake = build(:sake, average_rating: 3.5)
