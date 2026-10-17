@@ -279,6 +279,44 @@ RSpec.describe Sake, type: :model do
     end
   end
 
+  describe ".filter_by_ids" do
+    let(:iwate) { create(:area, name: "岩手県") }
+    let(:akabu_brewery) { create(:brewery, name: "赤武酒造", area: iwate) }
+    let(:akabu_brand) { create(:brand, name: "AKABU", brewery: akabu_brewery) }
+    let!(:akabu) { create(:sake, product_name: "純米吟醸", brand: akabu_brand) }
+    # 同じ蔵元の別銘柄
+    let!(:hamamusume) { create(:sake, product_name: "純米酒", brand: create(:brand, name: "浜娘", brewery: akabu_brewery)) }
+    # 同じ都道府県の別の蔵元
+    let!(:nanbu_bijin) { create(:sake, product_name: "大吟醸", brand: create(:brand, name: "南部美人", brewery: create(:brewery, area: iwate))) }
+    # 別の都道府県
+    let!(:denshu) { create(:sake, brand: create(:brand, name: "田酒")) }
+
+    it "銘柄で絞り込むと、その銘柄の日本酒だけを返す" do
+      expect(Sake.filter_by_ids(brand_id: akabu_brand.id)).to contain_exactly(akabu)
+    end
+
+    it "蔵元で絞り込むと、その蔵元の全銘柄の日本酒を返す" do
+      expect(Sake.filter_by_ids(brewery_id: akabu_brewery.id)).to contain_exactly(akabu, hamamusume)
+    end
+
+    it "都道府県で絞り込むと、その都道府県の全蔵元の日本酒を返す" do
+      expect(Sake.filter_by_ids(area_id: iwate.id)).to contain_exactly(akabu, hamamusume, nanbu_bijin)
+    end
+
+    it "複数の条件を渡すと、すべてに当てはまる日本酒だけを返す" do
+      expect(Sake.filter_by_ids(brewery_id: akabu_brewery.id, area_id: denshu.brand.brewery.area_id)).to be_empty
+    end
+
+    it "条件がなければ、絞り込まずに全件を返す" do
+      expect(Sake.filter_by_ids).to contain_exactly(akabu, hamamusume, nanbu_bijin, denshu)
+    end
+
+    # Ransack の JOIN とサブクエリが衝突しないことを確かめる
+    it "フリーワード検索と組み合わせられる" do
+      expect(Sake.search_by_keyword("純米").filter_by_ids(area_id: iwate.id)).to contain_exactly(akabu, hamamusume)
+    end
+  end
+
   describe "#aggregated?" do
     it "集計済み（average_rating あり）なら true" do
       sake = build(:sake, average_rating: 3.5)
