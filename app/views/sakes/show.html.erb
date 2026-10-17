@@ -5,16 +5,15 @@
 
 <div class="w-full">
   <article class="p-2">
-    <%# ---------- ヘッダ: 銘柄名・商品名・蔵元（都道府県）・シェアボタン ---------- %>
+    <%# ---------- ヘッダ: 銘柄名・商品名・蔵元名・都道府県名・シェアボタン ---------- %>
     <section class="flex gap-2 justify-between items-start mt-1">
       <div>
         <div class="flex flex-wrap gap-x-2 items-baseline">
-          <h1 class="text-2xl font-bold"><%= @sake.brand.name %></h1>
+          <h1 class="text-2xl font-bold"><%= brand_link @sake.brand %></h1>
+          <%# 商品名は、この画面そのものなのでリンクにしない %>
           <p class="text-base"><%= @sake.product_name %></p>
         </div>
-        <p class="mt-1 badge badge-ghost badge-sm">
-          <%= @sake.brand.brewery.name %>（<%= @sake.brand.brewery.area.name %>）
-        </p>
+        <p class="mt-1 text-sm text-neutral-500"><%= brewery_and_area_links @sake.brand.brewery %></p>
       </div>
 
       <%= render "shared/share_button",

@@ -2,13 +2,24 @@ class SakesController < ApplicationController
   skip_before_action :authenticate_user!, only: %i[index show]
 
   # GET /sakes?keyword=xxx
-  # フリーワードで日本酒を検索する。未入力なら全件を表示する
+  # GET /sakes?brand_id=1（brewery_id / area_id も同じ。keyword と組み合わせ可）
+  # フリーワードと銘柄・蔵元・都道府県で日本酒を検索する。未入力なら全件を表示する
   # @return [void]
   def index
     @keyword = params[:keyword].to_s
+    # 絞り込み条件（キー => レコード）。存在しない ID は条件ごと無視する
+    @filters = {
+      brand_id: find_filter(Brand, :brand_id),
+      brewery_id: find_filter(Brewery, :brewery_id),
+      area_id: find_filter(Area, :area_id)
+    }.compact
+    # URL やフォームに引き継ぐ形（キー => ID）
+    @filter_params = @filters.transform_values(&:id)
+
     # 1ページ 10件。2ページ目以降は末尾の Turbo Frame から読み込まれる（無限スクロール）
     # 銘柄名が完全一致するものが先頭。その中で記録が多い順に並べる
     @sakes = Sake.search_by_keyword(@keyword)
+                 .filter_by_ids(**@filter_params)
                  .includes(brand: { brewery: :area })
                  .order(sake_logs_count: :desc, id: :desc)
                  .page(params[:page])
@@ -27,5 +38,15 @@ class SakesController < ApplicationController
                       .page(params[:page])
 
     render :page if turbo_frame_request?
+  end
+
+  private
+
+  # 絞り込み条件の ID からレコードを探す
+  # @param model [Class] 探すモデル（Brand / Brewery / Area）
+  # @param key [Symbol] パラメータ名（:brand_id など）
+  # @return [ApplicationRecord, nil] 未指定・存在しない ID なら nil
+  def find_filter(model, key)
+    model.find_by(id: params[key]) if params[key].present?
   end
 end

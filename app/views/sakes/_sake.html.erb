@@ -10,13 +10,11 @@
 
   <div class="flex gap-2 items-center">
 
-    <%# ---------- 左: 銘柄名・商品名・都道府県名・蔵元名 ---------- %>
+    <%# ---------- 左: 銘柄名・商品名・蔵元名・都道府県名 ---------- %>
     <div class="flex flex-col flex-1 gap-1 min-w-0">
-      <h2 class="text-lg font-bold truncate"><%= sake.brand.name %></h2>
-      <p class="text-sm truncate"><%= sake.product_name %></p>
-      <p class="text-xs truncate text-neutral-500">
-        <%= sake.brand.brewery.area.name %> <%= sake.brand.brewery.name %>
-      </p>
+      <h2 class="text-lg font-bold truncate"><%= brand_link sake.brand %></h2>
+      <p class="text-sm truncate"><%= product_name_link sake %></p>
+      <p class="text-xs truncate text-neutral-500"><%= brewery_and_area_links sake.brand.brewery %></p>
     </div>
 
     <%# ---------- 右: 4象限マップ ＋ 好み度の平均 ---------- %>

@@ -64,6 +64,13 @@ ja:
       placeholder: 銘柄・蔵元・都道府県など
       no_sakes: まだ日本酒が登録されていません
       not_found: "「%{keyword}」に一致する日本酒は見つかりませんでした"
+      filtered_not_found: 条件に一致する日本酒は見つかりませんでした
+    filter_conditions:
+      heading: 絞り込み条件
+      brand_id: 銘柄
+      brewery_id: 蔵元
+      area_id: 都道府県
+      clear: 解除
   timelines:
     index:
       title: タイムライン

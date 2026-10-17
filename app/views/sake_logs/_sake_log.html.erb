@@ -10,25 +10,22 @@
 
   <div class="flex gap-2 px-2">
 
-    <%# ---------- 左: 銘柄名・商品名 ＋（都道府県・好み度・記録日 ＋ 4象限マップ） ---------- %>
+    <%# ---------- 左: 銘柄名・商品名 ＋（蔵元名・都道府県名・好み度・記録日 ＋ 4象限マップ） ---------- %>
     <div class="flex flex-col flex-1 gap-1 min-w-0">
 
       <%# 1段目: 銘柄名 商品名 %>
       <div class="flex gap-2 items-baseline">
-        <h2 class="text-lg font-bold truncate"><%= sake_log.sake.brand.name %></h2>
-        <p class="text-sm truncate">
-          <%= link_to sake_log.sake.product_name, sake_path(sake_log.sake_id),
-                class: "relative z-20 link link-hover link-text",
-                data: { turbo_frame: "_top" } %>
-        </p>
+        <%# 銘柄名は縮ませず、長すぎるときだけ幅の 2/3 で「…」にする。残りの幅に商品名を入れる %>
+        <h2 class="text-lg font-bold max-w-2/3 truncate shrink-0"><%= brand_link sake_log.sake.brand %></h2>
+        <p class="text-sm truncate"><%= product_name_link sake_log.sake %></p>
       </div>
 
       <%# 2段目: 左に文字情報、右に4象限マップ %>
       <div class="flex gap-2 items-end">
 
         <div class="flex flex-col flex-1 gap-1 min-w-0">
-          <%# 都道府県 %>
-          <p class="text-xs text-neutral-500"><%= sake_log.sake.brand.brewery.area.name %></p>
+          <%# 蔵元名・都道府県名 %>
+          <p class="text-xs truncate text-neutral-500"><%= brewery_and_area_links sake_log.sake.brand.brewery %></p>
 
           <%# 好み度 %>
           <div class="flex gap-0 items-center">

@@ -1,0 +1,19 @@
+<%# 絞り込み条件の表示
+  locals:
+    filters:       絞り込み中の条件（{ brand_id: Brand, area_id: Area } のような キー => レコード）
+    filter_params: URL に引き継ぐ形の条件（{ brand_id: 1, area_id: 3 } のような キー => ID）
+    keyword:       検索文字列（解除しても引き継ぐ）
+%>
+<% if filters.any? %>
+  <div class="flex flex-wrap gap-y-1 gap-x-4 items-center px-2 mt-2 text-sm">
+    <span class="text-xs text-neutral-500"><%= t(".heading") %></span>
+    <% filters.each do |key, record| %>
+      <span>
+        <%= t(".#{key}") %>：<%= record.name %>
+        <%# 解除: この条件だけを外し、キーワードと残りの条件は引き継ぐ %>
+        <%= link_to t(".clear"), sakes_path(keyword: keyword.presence, **filter_params.except(key)),
+              class: "ml-1 btn btn-outline btn-primary btn-xs" %>
+      </span>
+    <% end %>
+  </div>
+<% end %>
