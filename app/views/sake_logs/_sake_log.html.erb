@@ -55,8 +55,8 @@
         この一覧は current_user.sake_logs だけを描画するので、
         タイムラインカードのような own? の判定は入れていない %>
       <div class="flex relative z-20 gap-1 justify-end">
-        <%# 削除ボタン
-          Turbo Stream で応答するため frame と無関係に動く。turbo_frame: "_top" は付けない %>
+        <%# 編集ボタン
+          2ページ目以降のカードは turbo_frame の中にあるため、_top でページ全体を遷移させる %>
         <%= link_to edit_sake_log_path(sake_log),
               id: "button-edit-#{sake_log.id}",
               data: { turbo_frame: "_top" } do %>
