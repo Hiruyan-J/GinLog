@@ -1,7 +1,8 @@
 # 日本酒の銘柄・商品名・蔵元・都道府県をリンクで表示するヘルパー
 module SakesHelper
   # 文字リンクのクラス（カード全体のリンク z-10 より手前に出すため relative z-20 を付ける）
-  TEXT_LINK_CLASS = "relative z-20 link link-hover".freeze
+  # スマホでもリンクと分かるよう、薄い下線を常に表示する
+  TEXT_LINK_CLASS = "relative z-20 link underline-offset-2 decoration-neutral-300 active:opacity-60".freeze
 
   # 銘柄名を、その銘柄で絞り込んだ検索結果へのリンクにする
   # @param brand [Brand] 銘柄
