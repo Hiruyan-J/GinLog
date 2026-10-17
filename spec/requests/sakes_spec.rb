@@ -126,7 +126,9 @@ RSpec.describe "Sakes", type: :request do
       it "絞り込み条件が、検索フォームの hidden フィールドに入る（フリーワード検索で引き継ぐ）" do
         get sakes_path(brand_id: sake.brand_id)
 
-        expect(response.body).to include %(value="#{sake.brand_id}" type="hidden" name="brand_id")
+        # 属性の並び順に左右されないよう、HTML を解析して値を取り出す
+        hidden_field = Nokogiri::HTML(response.body).at_css('form input[type="hidden"][name="brand_id"]')
+        expect(hidden_field["value"]).to eq sake.brand_id.to_s
       end
 
       it "次ページの Turbo Frame に、絞り込み条件を引き継ぐ" do
@@ -151,6 +153,14 @@ RSpec.describe "Sakes", type: :request do
         get sakes_path(brand_id: brand_without_sakes.id)
 
         expect(response.body).to include I18n.t("sakes.index.filtered_not_found")
+      end
+
+      # 「AKABU」だけならヒットするので、キーワードの文言を出すと誤解させてしまう
+      it "キーワードと絞り込みの組み合わせで1件もなければ、絞り込みの文言を出す" do
+        get sakes_path(keyword: "AKABU", brand_id: other_sake.brand_id)
+
+        expect(response.body).to include I18n.t("sakes.index.filtered_not_found")
+        expect(response.body).not_to include I18n.t("sakes.index.not_found", keyword: "AKABU")
       end
     end
   end

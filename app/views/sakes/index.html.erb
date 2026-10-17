@@ -24,10 +24,12 @@
       <%# 2ページ目以降を遅延読み込みする Turbo Frame %>
       <%= render "next_search_page_frame", sakes: @sakes, keyword: @keyword, filter_params: @filter_params %>
     </div>
+  <% elsif @filters.any? %>
+      <%# 絞り込み中で検索結果0件の場合は、キーワードがあっても「条件に一致する…」にする
+        （キーワードだけなら見つかるのに「キーワードに一致しない」と誤解させないため） %>
+    <p class="my-10 text-center"><%= t('.filtered_not_found') %></p>
   <% elsif @keyword.present? %>
     <p class="my-10 text-center"><%= t('.not_found', keyword: @keyword) %></p>
-  <% elsif @filters.any? %>
-    <p class="my-10 text-center"><%= t('.filtered_not_found') %></p>
   <% else %>
     <p class="my-10 text-center"><%= t('.no_sakes') %></p>
   <% end %>
