@@ -5,7 +5,7 @@
 
   <%# 検索フォーム（GET なので検索条件が URL に残る） %>
   <%= form_with url: sakes_path, method: :get, class: "flex px-2 w-full join" do |f| %>
-    <%= f.search_field :keyword, value: @keyword, placeholder: t('.placeholder'), class: "w-full input join-item" %>
+    <%= f.search_field :keyword, value: @keyword, placeholder: t('.placeholder'), class: "w-full input input-primary join-item" %>
     <button type="submit" class="btn btn-primary join-item">
       <span class="material-symbols-rounded">search</span>
     </button>
