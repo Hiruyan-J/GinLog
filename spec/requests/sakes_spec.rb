@@ -13,17 +13,26 @@ RSpec.describe "Sakes", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it "キーワード未入力なら、一覧を出さずに入力を促す" do
+    it "キーワード未入力なら、全件を表示する" do
+      other_sake = create(:sake)
+
       get sakes_path
 
-      expect(response.body).to include I18n.t("sakes.index.prompt")
-      expect(response.body).not_to include sake_path(sake)
+      expect(response.body).to include sake_path(sake), sake_path(other_sake)
     end
 
     it "空白だけのキーワードは未入力として扱う" do
       get sakes_path(keyword: "　")
 
-      expect(response.body).to include I18n.t("sakes.index.prompt")
+      expect(response.body).to include sake_path(sake)
+    end
+
+    it "日本酒が1件もなければ、その旨を出す" do
+      sake.destroy!
+
+      get sakes_path
+
+      expect(response.body).to include I18n.t("sakes.index.no_sakes")
     end
 
     it "ヒットした日本酒の情報と、詳細へのリンクが出る" do

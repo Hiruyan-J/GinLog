@@ -54,11 +54,11 @@ class Sake < ApplicationRecord
   # フリーワード検索用のスコープ（空白区切りは AND 検索）
   # 銘柄名が検索語と完全一致する日本酒を先頭に並べる
   # @param keyword [String, nil] 検索文字列
-  # @return [ActiveRecord::Relation<Sake>] キーワードが空なら 0 件
+  # @return [ActiveRecord::Relation<Sake>] キーワードが空なら全件
   scope :search_by_keyword, ->(keyword) {
     normalized_keyword = Normalizable.normalize_text(keyword.to_s)
     words = normalized_keyword.split(" ").first(KEYWORD_MAX_WORDS)
-    next none if words.empty?
+    next all if words.empty?
 
     # 単語ごとに条件のグループ（g）を作り、グループ同士を AND（m）でつなぐ
     ransack(m: "and", g: words.map { |word| { keyword_cont: word } }).result

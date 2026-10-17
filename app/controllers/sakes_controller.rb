@@ -2,7 +2,7 @@ class SakesController < ApplicationController
   skip_before_action :authenticate_user!, only: %i[index show]
 
   # GET /sakes?keyword=xxx
-  # フリーワードで日本酒を検索する。未入力なら検索せず、入力を促す画面を出す
+  # フリーワードで日本酒を検索する。未入力なら全件を表示する
   # @return [void]
   def index
     @keyword = params[:keyword].to_s

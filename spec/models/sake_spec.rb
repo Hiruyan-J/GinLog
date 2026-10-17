@@ -272,10 +272,10 @@ RSpec.describe Sake, type: :model do
       end
     end
 
-    it "キーワードが空なら 0 件を返す" do
-      expect(Sake.search_by_keyword(nil)).to be_empty
-      expect(Sake.search_by_keyword("")).to be_empty
-      expect(Sake.search_by_keyword("　")).to be_empty
+    it "キーワードが空なら、絞り込まずに全件を返す" do
+      expect(Sake.search_by_keyword(nil)).to contain_exactly(akabu, denshu)
+      expect(Sake.search_by_keyword("")).to contain_exactly(akabu, denshu)
+      expect(Sake.search_by_keyword("　")).to contain_exactly(akabu, denshu)
     end
   end
 
