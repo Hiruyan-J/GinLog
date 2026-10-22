@@ -20,6 +20,16 @@ module TasteAromaMapHelper
     aroma_low_taste_strong: { active: "bg-amber-200 border-amber-400 border-solid", inactive: "bg-amber-50 border-amber-200 border-dashed" }
   }.freeze
 
+  # 日本酒検索の4象限で、チェックが入った象限に付けるクラス（active と同じ見た目）
+  # has-checked: は「中にチェック済みの要素があるとき」に効く。
+  # Tailwind はソースを文字列として読み取って CSS を作るため、クラス名は組み立てずにそのまま書く
+  QUADRANT_CHECKED_STYLES = {
+    aroma_high_taste_light: "has-checked:bg-green-200 has-checked:border-green-400 has-checked:border-solid",
+    aroma_high_taste_strong: "has-checked:bg-red-200 has-checked:border-red-400 has-checked:border-solid",
+    aroma_low_taste_light: "has-checked:bg-sky-300 has-checked:border-sky-400 has-checked:border-solid",
+    aroma_low_taste_strong: "has-checked:bg-amber-200 has-checked:border-amber-400 has-checked:border-solid"
+  }.freeze
+
   # 4象限マップの外枠サイズ(幅)のプリセット
   QUADRANT_MAP_SIZES = {
     sm: "w-16 md:w-24",  # 一覧カード（マイログ / タイムライン）
@@ -49,6 +59,16 @@ module TasteAromaMapHelper
   def quadrant_cell_class(quadrant, active_quadrant)
     state = quadrant == active_quadrant ? :active : :inactive
     QUADRANT_STYLES.fetch(quadrant).fetch(state)
+  end
+
+  # 日本酒検索の4象限（チェックボックス）の1象限分のクラスを返す
+  # ふだんは inactive の見た目で、チェックが入ると active の見た目に切り替わる
+  #
+  # @param quadrant [String, Symbol] 象限キー（Sake::QUADRANTS のどれか）
+  # @return [String] Tailwind CSS クラス文字列
+  def quadrant_filter_cell_class(quadrant)
+    key = quadrant.to_sym
+    "#{QUADRANT_STYLES.fetch(key).fetch(:inactive)} #{QUADRANT_CHECKED_STYLES.fetch(key)}"
   end
 
   # 4象限マップの軸ラベルに付ける表示クラスを返す
