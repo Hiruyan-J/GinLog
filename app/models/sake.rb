@@ -72,7 +72,7 @@ class Sake < ApplicationRecord
     next all if words.empty?
 
     # 単語ごとに条件のグループ（g）を作り、グループ同士を AND（m）でつなぐ
-    ransack(m: "and", g: words.map { |word| { keyword_cont: word } }).result
+    ransack(m: "and", g: words.map { |word| { keyword_i_cont: word } }).result
       .order(brand_name_match_order([ normalized_keyword, *words ]))
   }
 
