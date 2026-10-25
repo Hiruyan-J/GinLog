@@ -338,7 +338,7 @@ RSpec.describe Sake, type: :model do
     end
 
     it "4つとも選んでも、平均が nil の日本酒は含まない" do
-      expect(Sake.filter_by_quadrants(Sake::QUADRANTS)).not_to include(not_aggregated)
+      expect(Sake.filter_by_quadrants(TasteAromaQuadrant::KEYS)).not_to include(not_aggregated)
     end
 
     it "象限がなければ、絞り込まずに全件を返す" do

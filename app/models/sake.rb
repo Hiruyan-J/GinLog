@@ -28,17 +28,6 @@ class Sake < ApplicationRecord
   # フリーワード検索で使う単語数の上限（超えた分は無視する）
   KEYWORD_MAX_WORDS = 5
 
-  # 象限キー => 平均の香り・味を境界値と比べる方法（gteq = 以上 / lt = 未満）
-  # キーは4象限マップ（TasteAromaMapHelper::QUADRANT_STYLES）と同じ名前にする
-  QUADRANT_CONDITIONS = {
-    "aroma_high_taste_light" => { aroma: :gteq, taste: :lt },
-    "aroma_high_taste_strong" => { aroma: :gteq, taste: :gteq },
-    "aroma_low_taste_light" => { aroma: :lt, taste: :lt },
-    "aroma_low_taste_strong" => { aroma: :lt, taste: :gteq }
-  }.freeze
-  # 絞り込みで受け付ける象限キー
-  QUADRANTS = QUADRANT_CONDITIONS.keys.freeze
-
   normalizes_text :product_name
 
   validates :product_name, presence: true, length: { maximum: PRODUCT_NAME_MAX_LENGTH }
@@ -92,11 +81,11 @@ class Sake < ApplicationRecord
 
   # 4象限（味・香りの平均値）で絞り込むスコープ。複数の象限は、どれかに当てはまれば残す（OR）
   # 平均値が nil の日本酒は、SQL の比較が成り立たないため結果に含まれない
-  # @param quadrants [Array<String>] 象限キー（QUADRANTS にない値は無視する）
+  # @param quadrants [Array<String>] 象限キー（TasteAromaQuadrant::KEYS にない値は無視する）
   # @return [ActiveRecord::Relation<Sake>] 有効な象限がなければ全件
   scope :filter_by_quadrants, ->(quadrants) {
     # 有効な象限キーだけを残す
-    valid_quadrants = Array(quadrants) & QUADRANTS
+    valid_quadrants = Array(quadrants) & TasteAromaQuadrant::KEYS
     # 各象限キーを検索条件に変換する
     conditions = valid_quadrants.map { |quadrant| quadrant_condition(quadrant) }
     next all if conditions.empty?
@@ -114,15 +103,14 @@ class Sake < ApplicationRecord
   end
 
   # 1象限分の条件式（例: 平均の香り >= 5.0 AND 平均の味 < 5.0）を作る
-  # 境界値は4象限マップの表示と共通にする（境界値以上なら上・右に分類）
-  # @param quadrant [String] 象限キー（QUADRANTS のどれか）
+  # @param quadrant [String] 象限キー（TasteAromaQuadrant::KEYS のどれか）
   # @return [Arel::Nodes::And] 「香りの条件 AND 味の条件」の式
   def self.quadrant_condition(quadrant)
-    boundary = TasteAromaMapHelper::QUADRANT_BOUNDARY
-    operators = QUADRANT_CONDITIONS.fetch(quadrant)
-    aroma_condition = arel_table[:average_aroma_strength].public_send(operators[:aroma], boundary)
-    taste_condition = arel_table[:average_taste_strength].public_send(operators[:taste], boundary)
-    aroma_condition.and(taste_condition)
+    TasteAromaQuadrant.condition(
+      quadrant,
+      aroma_column: arel_table[:average_aroma_strength],
+      taste_column: arel_table[:average_taste_strength]
+    )
   end
 
   # Ransack で検索を許可するカラム

@@ -4,9 +4,6 @@
 # SakeLog（taste_strength / aroma_strength）と
 # Sake（average_taste_strength / average_aroma_strength）で同じ判定を使用
 module TasteAromaMapHelper
-  # 象限判定の境界値。この値以上なら右側（味が濃い）・上側（香りが華やか）に分類する
-  QUADRANT_BOUNDARY = 5.0
-
   # 各象限に適用する Tailwind CSS クラス
   # active（活性象限）: 濃い背景 + 実線枠 / inactive（非活性象限）: 薄い背景 + 破線枠
   QUADRANT_STYLES = {
@@ -45,9 +42,7 @@ module TasteAromaMapHelper
   # @param aroma_strength [Float] 香りの濃淡（SakeLog#aroma_strength / Sake#average_aroma_strength）
   # @return [Symbol] 象限のキー
   def taste_aroma_quadrant(taste_strength, aroma_strength)
-    aroma_level = aroma_strength >= QUADRANT_BOUNDARY ? "high" : "low"
-    taste_level = taste_strength >= QUADRANT_BOUNDARY ? "strong" : "light"
-    :"aroma_#{aroma_level}_taste_#{taste_level}"
+    TasteAromaQuadrant.key_for(aroma_strength: aroma_strength, taste_strength: taste_strength).to_sym
   end
 
   # 4象限マップの1象限分の Tailwind CSS クラスを返す
@@ -64,7 +59,7 @@ module TasteAromaMapHelper
   # 日本酒検索の4象限（チェックボックス）の1象限分のクラスを返す
   # ふだんは inactive の見た目で、チェックが入ると active の見た目に切り替わる
   #
-  # @param quadrant [String, Symbol] 象限キー（Sake::QUADRANTS のどれか）
+  # @param quadrant [String, Symbol] 象限キー（TasteAromaQuadrant::KEYS のどれか）
   # @return [String] Tailwind CSS クラス文字列
   def quadrant_filter_cell_class(quadrant)
     key = quadrant.to_sym

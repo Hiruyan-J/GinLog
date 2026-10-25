@@ -13,9 +13,9 @@
       <p class="col-start-2 row-start-1">香りが華やか</p>
       <p class="col-start-1 row-start-2 [writing-mode:vertical-rl]">味がスッキリ</p>
 
-      <%# 2×2 の象限グリッド（Sake::QUADRANTS の並びは 左上 → 右上 → 左下 → 右下） %>
+      <%# 2×2 の象限グリッド（TasteAromaQuadrant::KEYS の並びは 左上 → 右上 → 左下 → 右下） %>
       <div class="grid relative grid-cols-2 col-start-2 grid-rows-2 row-start-2 gap-1 w-full aspect-[3/2]">
-        <% Sake::QUADRANTS.each do |quadrant| %>
+        <% TasteAromaQuadrant::KEYS.each do |quadrant| %>
           <%# label をクリックすると、中の（非表示の）チェックボックスが切り替わる %>
           <label class="rounded-md border transition-colors cursor-pointer <%= quadrant_filter_cell_class(quadrant) %>">
             <%= check_box_tag "quadrants[]", quadrant, selected_quadrants.include?(quadrant),
