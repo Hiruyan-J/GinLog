@@ -19,17 +19,21 @@
 
     <div class="flex flex-col gap-1 items-end ml-auto">
       <%# 編集・削除ボタン %>
-      <div class="flex relative z-20 gap-2">
+      <div class="flex relative z-20 gap-1">
         <% if current_user&.own?(sake_log) %>
           <%# 編集ボタン %>
           <%= link_to edit_sake_log_path(sake_log),
                 id: "button-edit-#{sake_log.id}",
+                class: "btn btn-ghost btn-circle btn-sm",
                 data: { turbo_frame: "_top" } do %>
             <span class="material-symbols-rounded text-primary ms-size-24">edit_square</span>
           <% end %>
           <%# 削除ボタン
             Turbo Stream で応答するため frame と無関係に動く。turbo_frame: "_top" は付けない %>
-          <%= link_to sake_log_path(sake_log, from: origin), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
+          <%= link_to sake_log_path(sake_log, from: origin),
+                id: "button-delete-#{sake_log.id}",
+                class: "btn btn-ghost btn-circle btn-sm",
+                data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
             <span class="material-symbols-rounded text-primary ms-size-24">delete</span>
           <% end %>
         <% end %>
@@ -79,20 +83,26 @@
   <% end %>
 
   <%# いいね・コメント・シェア %>
-  <footer class="flex justify-around items-center pt-2 mt-2 text-neutral-300">
+  <footer class="flex justify-around items-center pt-2 mt-2">
+    <%# 非活性ボタンはタップを素通りさせるため、z-20 の span で受け止めてカードのリンクへ抜けないようにする %>
     <%# いいね（未実装） %>
-    <span class="material-symbols-rounded ms-size-24">favorite</span>
+    <span class="relative z-20">
+      <button type="button" class="btn btn-ghost btn-circle btn-sm" disabled>
+        <span class="material-symbols-rounded ms-size-24">favorite</span>
+      </button>
+    </span>
     <%# コメント（未実装） %>
-    <span class="flex gap-1 items-center">
-      <span class="material-symbols-rounded ms-size-24">chat_bubble</span>
-      <span class="text-xs">0</span>
+    <span class="relative z-20">
+      <button type="button" class="btn btn-ghost btn-sm" disabled>
+        <span class="material-symbols-rounded ms-size-24">chat_bubble</span>
+        <span class="text-xs">0</span>
+      </button>
     </span>
     <%# シェア %>
     <%= render "shared/share_button",
           text: sake_log_share_text(sake_log, owned: current_user&.own?(sake_log)),
           url: sake_log_url(sake_log),
           hashtags: share_hashtags(sake_log.sake),
-          class: "flex items-center list-none cursor-pointer text-primary",
           dropdown_class: "z-20 dropdown-top dropdown-end" %>
   </footer>
 </article>
