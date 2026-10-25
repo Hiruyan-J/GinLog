@@ -15,8 +15,8 @@ class SakesController < ApplicationController
       area_id: find_filter(Area, :area_id)
     }.compact
 
-    # 選んだ象限。決まったキー以外の値は無視する（Array.wrap は1つだけ渡されても配列にする）
-    @quadrants = Array.wrap(params[:quadrants]) & Sake::QUADRANTS # 決まったキー以外は捨てる
+    # 選んだ象限。決まったキー以外の値は無視する（Array.wrap は nil（象限なし）を [] に、1つの値を配列にする）
+    @quadrants = Array.wrap(params[:quadrants]) & Sake::QUADRANTS
     @filter_params = @filters.transform_values(&:id)  # URL やフォームに引き継ぐ形（キー => ID）
     @filter_params[:quadrants] = @quadrants if @quadrants.any?  # 象限も引き継ぐ（quadrants: ["aroma_high_taste_light", ...] の形）
 
