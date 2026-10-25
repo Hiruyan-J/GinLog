@@ -56,13 +56,17 @@
           2ページ目以降のカードは turbo_frame の中にあるため、_top でページ全体を遷移させる %>
         <%= link_to edit_sake_log_path(sake_log),
               id: "button-edit-#{sake_log.id}",
+              class: "btn btn-ghost btn-circle btn-sm",
               data: { turbo_frame: "_top" } do %>
           <span class="material-symbols-rounded text-primary ms-size-24">edit_square</span>
         <% end %>
         <%# 削除ボタン
           from: "mylog" を付けると、コントローラが Turbo Stream で
           このカードだけを消してくれる（ページ遷移しない） %>
-        <%= link_to sake_log_path(sake_log, from: "mylog"), id: "button-delete-#{sake_log.id}", data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
+        <%= link_to sake_log_path(sake_log, from: "mylog"),
+              id: "button-delete-#{sake_log.id}",
+              class: "btn btn-ghost btn-circle btn-sm",
+              data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
           <span class="material-symbols-rounded text-primary ms-size-24">delete</span>
         <% end %>
       </div>
