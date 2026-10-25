@@ -7,6 +7,9 @@ import { application } from "./application"
 import AreaDisplayController from "./area_display_controller"
 application.register("area-display", AreaDisplayController)
 
+import AutoSubmitController from "./auto_submit_controller"
+application.register("auto-submit", AutoSubmitController)
+
 import BrandAutocompleteController from "./brand_autocomplete_controller"
 application.register("brand-autocomplete", BrandAutocompleteController)
 

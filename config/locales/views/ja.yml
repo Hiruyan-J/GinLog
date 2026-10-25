@@ -71,6 +71,8 @@ ja:
       brewery_id: 蔵元
       area_id: 都道府県
       clear: 解除
+    quadrant_filter:
+      title: フレーバーで絞り込む
   timelines:
     index:
       title: タイムライン

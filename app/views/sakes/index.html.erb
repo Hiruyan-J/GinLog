@@ -4,14 +4,19 @@
   <%= page_heading %>
 
   <%# 検索フォーム（GET なので検索条件が URL に残る） %>
-  <%= form_with url: sakes_path, method: :get, class: "flex px-2 w-full join" do |f| %>
-    <% @filter_params.each do |key, id| %>
+  <%= form_with url: sakes_path, method: :get, class: "px-2 w-full", data: { controller: "auto-submit" } do |f| %>
+    <% @filter_params.except(:quadrants).each do |key, id| %>
       <%= f.hidden_field key, value: id %>
     <% end %>
-    <%= f.search_field :keyword, value: @keyword, placeholder: t('.placeholder'), class: "w-full input input-primary join-item" %>
-    <button type="submit" class="btn btn-primary join-item">
-      <span class="material-symbols-rounded">search</span>
-    </button>
+    <div class="flex w-full join">
+      <%= f.search_field :keyword, value: @keyword, placeholder: t('.placeholder'), class: "w-full input input-primary join-item" %>
+      <button type="submit" class="btn btn-primary join-item">
+        <span class="material-symbols-rounded">search</span>
+      </button>
+    </div>
+
+    <%# 4象限での絞り込み（最初は閉じている。象限を選んでいるときは開く） %>
+    <%= render "quadrant_filter", selected_quadrants: @quadrants %>
   <% end %>
 
   <%# 絞り込み条件と「解除」リンク（条件がなければ何も出ない） %>
@@ -24,7 +29,7 @@
       <%# 2ページ目以降を遅延読み込みする Turbo Frame %>
       <%= render "next_search_page_frame", sakes: @sakes, keyword: @keyword, filter_params: @filter_params %>
     </div>
-  <% elsif @filters.any? %>
+  <% elsif @filter_params.any? %>
       <%# 絞り込み中で検索結果0件の場合は、キーワードがあっても「条件に一致する…」にする
         （キーワードだけなら見つかるのに「キーワードに一致しない」と誤解させないため） %>
     <p class="my-10 text-center"><%= t('.filtered_not_found') %></p>

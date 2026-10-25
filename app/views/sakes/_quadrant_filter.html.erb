@@ -1,0 +1,42 @@
+<%# 4象限での絞り込み（日本酒検索フォームの中に置く）
+  locals:
+    selected_quadrants: 選んでいる象限キーの配列（["aroma_high_taste_light"] など）
+  各象限は label で包んだチェックボックス。切り替えると auto-submit コントローラがフォームを送信する
+%>
+<%# open: true のときだけ open 属性が付き、開いた状態で表示される %>
+<%= tag.details class: "mt-2 border collapse collapse-plus border-base-300", open: selected_quadrants.any? do %>
+  <summary class="text-sm font-medium collapse-title"><%= t(".title") %></summary>
+
+  <div class="collapse-content">
+    <%# 軸ラベルと 2×2 の配置(shared/_taste_aroma_map と同じ) %>
+    <div class="<%= quadrant_map_size_class(:lg) %> mx-auto grid grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr_auto] items-center justify-items-center gap-1 text-xs leading-none text-neutral-500">
+      <p class="col-start-2 row-start-1">香りが華やか</p>
+      <p class="col-start-1 row-start-2 [writing-mode:vertical-rl]">味がスッキリ</p>
+
+      <%# 2×2 の象限グリッド（Sake::QUADRANTS の並びは 左上 → 右上 → 左下 → 右下） %>
+      <div class="grid relative grid-cols-2 col-start-2 grid-rows-2 row-start-2 gap-1 w-full aspect-[3/2]">
+        <% Sake::QUADRANTS.each do |quadrant| %>
+          <%# label をクリックすると、中の（非表示の）チェックボックスが切り替わる %>
+          <label class="rounded-md border transition-colors cursor-pointer <%= quadrant_filter_cell_class(quadrant) %>">
+            <%= check_box_tag "quadrants[]", quadrant, selected_quadrants.include?(quadrant),
+                  id: "quadrant_#{quadrant}", class: "hidden",
+                  data: { action: "change->auto-submit#submit" } %>
+          </label>
+        <% end %>
+
+        <%# 座標軸。クリックを下の象限に通すため pointer-events-none %>
+        <svg class="absolute inset-0 w-full h-full pointer-events-none text-neutral-400" viewBox="0 0 300 200" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="6" y1="100" x2="294" y2="100" />
+          <line x1="150" y1="6" x2="150" y2="194" />
+          <polyline points="286,94 294,100 286,106" />
+          <polyline points="14,94 6,100 14,106" />
+          <polyline points="144,14 150,6 156,14" />
+          <polyline points="144,186 150,194 156,186" />
+        </svg>
+      </div>
+
+      <p class="col-start-3 row-start-2 [writing-mode:vertical-rl]">味が濃い</p>
+      <p class="col-start-2 row-start-3">香りが穏やか</p>
+    </div>
+  </div>
+<% end %>

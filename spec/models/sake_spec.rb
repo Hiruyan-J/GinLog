@@ -317,6 +317,49 @@ RSpec.describe Sake, type: :model do
     end
   end
 
+  describe ".filter_by_quadrants" do
+    # 境界値ちょうど（5.0）は上・右に入ることも、ここで確かめる
+    let!(:high_light) { create(:sake, average_aroma_strength: 5.0, average_taste_strength: 4.9) }
+    let!(:high_strong) { create(:sake, average_aroma_strength: 8.0, average_taste_strength: 5.0) }
+    let!(:low_light) { create(:sake, average_aroma_strength: 2.0, average_taste_strength: 3.0) }
+    let!(:low_strong) { create(:sake, average_aroma_strength: 4.9, average_taste_strength: 9.0) }
+    # 未集計（平均が nil）
+    let!(:not_aggregated) { create(:sake) }
+
+    it "象限を1つ選ぶと、その象限の日本酒だけを返す" do
+      expect(Sake.filter_by_quadrants([ "aroma_high_taste_light" ])).to contain_exactly(high_light)
+      expect(Sake.filter_by_quadrants([ "aroma_high_taste_strong" ])).to contain_exactly(high_strong)
+      expect(Sake.filter_by_quadrants([ "aroma_low_taste_light" ])).to contain_exactly(low_light)
+      expect(Sake.filter_by_quadrants([ "aroma_low_taste_strong" ])).to contain_exactly(low_strong)
+    end
+
+    it "象限を複数選ぶと、どれかの象限に当てはまる日本酒を返す" do
+      expect(Sake.filter_by_quadrants(%w[aroma_high_taste_light aroma_low_taste_strong])).to contain_exactly(high_light, low_strong)
+    end
+
+    it "4つとも選んでも、平均が nil の日本酒は含まない" do
+      expect(Sake.filter_by_quadrants(Sake::QUADRANTS)).not_to include(not_aggregated)
+    end
+
+    it "象限がなければ、絞り込まずに全件を返す" do
+      expect(Sake.filter_by_quadrants([])).to contain_exactly(high_light, high_strong, low_light, low_strong, not_aggregated)
+    end
+
+    it "決まったキー以外の値は無視する" do
+      expect(Sake.filter_by_quadrants([ "unknown", "aroma_low_taste_light" ])).to contain_exactly(low_light)
+    end
+
+    # Ransack の JOIN と、象限の条件（sakes テーブルのカラム）がぶつからないことを確かめる
+    it "フリーワード検索・ID での絞り込みと組み合わせられる" do
+      high_light.update!(product_name: "純米吟醸")
+      low_light.update!(product_name: "純米酒")
+
+      sakes = Sake.search_by_keyword("純米").filter_by_ids(brand_id: high_light.brand_id).filter_by_quadrants([ "aroma_high_taste_light", "aroma_low_taste_light" ])
+
+      expect(sakes).to contain_exactly(high_light)
+    end
+  end
+
   describe "#aggregated?" do
     it "集計済み（average_rating あり）なら true" do
       sake = build(:sake, average_rating: 3.5)
