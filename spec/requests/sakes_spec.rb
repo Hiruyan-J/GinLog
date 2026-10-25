@@ -163,6 +163,71 @@ RSpec.describe "Sakes", type: :request do
         expect(response.body).not_to include I18n.t("sakes.index.not_found", keyword: "AKABU")
       end
     end
+
+    # どの日本酒が残るかの細かい条件は spec/models/sake_spec.rb（.filter_by_quadrants）で検証する
+    context "4象限で絞り込んだとき" do
+      let!(:low_light) { create(:sake, average_aroma_strength: 2.0, average_taste_strength: 3.0) }
+      let!(:high_strong) { create(:sake, average_aroma_strength: 8.0, average_taste_strength: 8.0) }
+
+      # 属性の並び順に左右されないよう、HTML を解析してチェックボックスを取り出す
+      def quadrant_checkbox(quadrant)
+        Nokogiri::HTML(response.body).at_css("input[type='checkbox'][name='quadrants[]'][value='#{quadrant}']")
+      end
+
+      it "選んだ象限の日本酒だけが出る" do
+        get sakes_path(quadrants: [ "aroma_low_taste_light" ])
+
+        expect(response.body).to include sake_path(low_light)
+        expect(response.body).not_to include sake_path(high_strong)
+      end
+
+      it "選んだ象限のチェックボックスにチェックが入り、象限の欄が開いた状態になる" do
+        get sakes_path(quadrants: [ "aroma_low_taste_light" ])
+
+        expect(quadrant_checkbox("aroma_low_taste_light")["checked"]).to be_present
+        expect(quadrant_checkbox("aroma_high_taste_strong")["checked"]).to be_nil
+        expect(Nokogiri::HTML(response.body).at_css("details")["open"]).to be_present
+      end
+
+      it "象限を選んでいなければ、象限の欄は閉じている" do
+        get sakes_path
+
+        expect(Nokogiri::HTML(response.body).at_css("details")["open"]).to be_nil
+      end
+
+      it "不正な値は無視して、絞り込まずに表示する" do
+        get sakes_path(quadrants: [ "unknown" ])
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include sake_path(low_light), sake_path(high_strong)
+      end
+
+      it "銘柄の「解除」リンクに、象限を引き継ぐ" do
+        get sakes_path(brand_id: low_light.brand_id, quadrants: [ "aroma_low_taste_light" ])
+
+        expect(response.body).to include ERB::Util.html_escape(sakes_path(quadrants: [ "aroma_low_taste_light" ]))
+      end
+
+      it "象限は hidden フィールドに入れない（チェックボックスで送るため）" do
+        get sakes_path(quadrants: [ "aroma_low_taste_light" ])
+
+        expect(Nokogiri::HTML(response.body).at_css("form input[type='hidden'][name^='quadrants']")).to be_nil
+      end
+
+      it "次ページの Turbo Frame に、象限を引き継ぐ" do
+        create_list(:sake, 10, average_aroma_strength: 2.0, average_taste_strength: 3.0)
+
+        get sakes_path(quadrants: [ "aroma_low_taste_light" ])
+
+        expect(response.body).to include ERB::Util.html_escape(sakes_path(keyword: "", page: 2, quadrants: [ "aroma_low_taste_light" ]))
+      end
+
+      it "象限だけで1件もなければ、絞り込みの文言を出す" do
+        get sakes_path(quadrants: [ "aroma_high_taste_light" ])
+
+        expect(response.body).to include I18n.t("sakes.index.filtered_not_found")
+      end
+    end
   end
 
   describe "GET /sakes/:id" do
