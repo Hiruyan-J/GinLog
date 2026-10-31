@@ -52,7 +52,6 @@ gem "omniauth-rails_csrf_protection"
 
 # SEO
 gem "meta-tags"
-gem "sitemap_generator"
 
 # ページネーション
 gem "kaminari"
