@@ -13,7 +13,8 @@ module ShareHelper
   # @param hashtags [Array<String>] 付けるハッシュタグ（# は付けない）
   # @return [String] X の Web Intent の URL
   def x_share_url(text:, url:, hashtags: SHARE_HASHTAGS)
-    query = URI.encode_www_form(text: text, url: url, hashtags: hashtags.join(","))
+    hashtag_text = hashtags.map { |hashtag| "##{hashtag}" }.join(" ")
+    query = URI.encode_www_form(text: "#{text}\n#{hashtag_text}", url: url)
     "#{X_INTENT_URL}?#{query}"
   end
 
