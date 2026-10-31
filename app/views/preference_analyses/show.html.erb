@@ -1,0 +1,15 @@
+<% content_for :title, t('.title') %>
+<%= page_heading %>
+
+<% if @analysis.any_logs? %>
+  <div class="flex flex-col gap-10 py-2 mx-auto w-full max-w-md">
+    <%= render "quadrant_section", analysis: @analysis %>
+    <%= render "area_section", analysis: @analysis, prefectures: @prefectures %>
+  </div>
+<% else %>
+  <%# 記録が1件もないとき %>
+  <div class="flex flex-col gap-4 items-center my-10 text-center">
+    <p><%= t('.no_logs') %></p>
+    <%= link_to t('.new_sake_log'), new_sake_log_path, class: "btn btn-primary" %>
+  </div>
+<% end %>

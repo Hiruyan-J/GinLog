@@ -26,4 +26,15 @@ RSpec.describe Area, type: :model do
   describe "アソシエーション" do
     it { is_expected.to have_many(:breweries).dependent(:restrict_with_exception) }
   end
+
+  describe ".prefectures" do
+    it "「その他」を除き、さけのわの ID 順（北から順）に返す" do
+      # 作成順（id 順）とは逆になるよう、新潟県を先に作る
+      niigata = create(:area, name: "新潟県", sakenowa_id: 15)
+      hokkaido = create(:area, name: "北海道", sakenowa_id: 1)
+      create(:area, name: "その他", sakenowa_id: Area::OTHER_SAKENOWA_ID)
+
+      expect(Area.prefectures).to eq [ hokkaido, niigata ]
+    end
+  end
 end

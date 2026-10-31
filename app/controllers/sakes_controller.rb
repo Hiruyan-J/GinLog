@@ -16,7 +16,7 @@ class SakesController < ApplicationController
     }.compact
 
     # 選んだ象限。決まったキー以外の値は無視する（Array.wrap は nil（象限なし）を [] に、1つの値を配列にする）
-    @quadrants = Array.wrap(params[:quadrants]) & Sake::QUADRANTS
+    @quadrants = Array.wrap(params[:quadrants]) & TasteAromaQuadrant::KEYS
     @filter_params = @filters.transform_values(&:id)  # URL やフォームに引き継ぐ形（キー => ID）
     @filter_params[:quadrants] = @quadrants if @quadrants.any?  # 象限も引き継ぐ（quadrants: ["aroma_high_taste_light", ...] の形）
 

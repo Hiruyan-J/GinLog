@@ -20,8 +20,14 @@ ja:
       update: 更新
     label:
   header:
+    main_menu_title: メニュー
+    home: ホーム
+    sake_search: 日本酒検索
+    my_log: マイログ
+    analyze_preferences: 好み分析
     login: ログイン
     logout: ログアウト
+    sign_up: 新規登録
     my_account: マイアカウント
     account_menu_title: アカウント
     data_menu_title: データについて
@@ -73,6 +79,24 @@ ja:
       clear: 解除
     quadrant_filter:
       title: フレーバーで絞り込む
+  preference_analyses:
+    show:
+      title: 好み分析
+      no_logs: まだ記録がありません。日本酒を記録すると、あなたの好みがここに表示されます。
+      new_sake_log: 日本酒を記録する
+    quadrant_section:
+      title: フレーバー別分析
+      count: "%{count}件"
+      no_record: 未記録
+      message_html: "あなたは、%{quadrant}のお酒が好きな傾向が強いです。"
+      search: 同じ分類のお酒を探す
+    area_section:
+      title: 産地別分析
+      rating_note: ★好み度の平均 (記録の件数)
+      no_record: 未記録
+      message_html: "あなたは、%{area}のお酒が好きな傾向があります。"
+      no_area: 都道府県がわかる記録はまだありません。
+      search: "%{area}のお酒を探す"
   timelines:
     index:
       title: タイムライン

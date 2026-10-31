@@ -4,9 +4,6 @@
 # SakeLog（taste_strength / aroma_strength）と
 # Sake（average_taste_strength / average_aroma_strength）で同じ判定を使用
 module TasteAromaMapHelper
-  # 象限判定の境界値。この値以上なら右側（味が濃い）・上側（香りが華やか）に分類する
-  QUADRANT_BOUNDARY = 5.0
-
   # 各象限に適用する Tailwind CSS クラス
   # active（活性象限）: 濃い背景 + 実線枠 / inactive（非活性象限）: 薄い背景 + 破線枠
   QUADRANT_STYLES = {
@@ -37,6 +34,14 @@ module TasteAromaMapHelper
     lg: "w-64 md:w-80"  # 詳細画面など広い画面
   }.freeze
 
+  # 象限の名前（好み分析の「あなたは、〇〇のお酒が…」で使う）
+  QUADRANT_NAMES = {
+    aroma_high_taste_light: "味がスッキリ・香りが華やか",
+    aroma_high_taste_strong: "味が濃い・香りが華やか",
+    aroma_low_taste_light: "味がスッキリ・香りが穏やか",
+    aroma_low_taste_strong: "味が濃い・香りが穏やか"
+  }.freeze
+
   # 味・香りの値から4象限マップのどの象限に属するかを判定する
   # 味（横軸）: 5.0 未満は light（スッキリ）/ 5.0 以上は strong（濃い）
   # 香り（縦軸）: 5.0 未満は low（穏やか）/ 5.0 以上は high（華やか）
@@ -45,9 +50,21 @@ module TasteAromaMapHelper
   # @param aroma_strength [Float] 香りの濃淡（SakeLog#aroma_strength / Sake#average_aroma_strength）
   # @return [Symbol] 象限のキー
   def taste_aroma_quadrant(taste_strength, aroma_strength)
-    aroma_level = aroma_strength >= QUADRANT_BOUNDARY ? "high" : "low"
-    taste_level = taste_strength >= QUADRANT_BOUNDARY ? "strong" : "light"
-    :"aroma_#{aroma_level}_taste_#{taste_level}"
+    TasteAromaQuadrant.key_for(aroma_strength: aroma_strength, taste_strength: taste_strength).to_sym
+  end
+
+  # 象限の名前を返す
+  # @param quadrant [String, Symbol] 象限キー（TasteAromaQuadrant::KEYS のどれか）
+  # @return [String] 例: "味がスッキリ・香りが華やか"
+  def quadrant_name(quadrant)
+    QUADRANT_NAMES.fetch(quadrant.to_sym)
+  end
+
+  # 象限の色見本（文中に置く小さな四角）のクラスを返す。色は活性象限と同じ
+  # @param quadrant [String, Symbol] 象限キー（TasteAromaQuadrant::KEYS のどれか）
+  # @return [String] Tailwind CSS クラス文字列
+  def quadrant_color_chip_class(quadrant)
+    QUADRANT_STYLES.fetch(quadrant.to_sym).fetch(:active)
   end
 
   # 4象限マップの1象限分の Tailwind CSS クラスを返す
@@ -64,7 +81,7 @@ module TasteAromaMapHelper
   # 日本酒検索の4象限（チェックボックス）の1象限分のクラスを返す
   # ふだんは inactive の見た目で、チェックが入ると active の見た目に切り替わる
   #
-  # @param quadrant [String, Symbol] 象限キー（Sake::QUADRANTS のどれか）
+  # @param quadrant [String, Symbol] 象限キー（TasteAromaQuadrant::KEYS のどれか）
   # @return [String] Tailwind CSS クラス文字列
   def quadrant_filter_cell_class(quadrant)
     key = quadrant.to_sym

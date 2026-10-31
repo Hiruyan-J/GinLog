@@ -23,11 +23,10 @@
       <span class="dock-label"><%= t('footer.my_log') %></span>
     <% end %>
 
-    <%# 好み度解析ボタン %>
-    <%= link_to "#", class: "flex flex-col justify-center items-center leading-none" do %>
+    <%# 好み分析ボタン %>
+    <%= link_to preference_analysis_path, class: class_names("flex flex-col items-center justify-center leading-none", ("dock-active" if current_page?(preference_analysis_path))) do %>
       <span class="material-symbols-rounded">star</span>
       <span class="dock-label"><%= t('footer.analyze_preferences') %></span>
-      <span class="dock-label">(実装中)</span>
     <% end %>
   </div>
 </footer>

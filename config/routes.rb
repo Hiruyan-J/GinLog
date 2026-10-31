@@ -41,6 +41,7 @@ Rails.application.routes.draw do
   resources :sakes, only: %i[index show]
   get "timeline", to: "timelines#index", as: :timeline
   get "mypage", to: "users#show", as: :mypage
+  get "preference_analysis", to: "preference_analyses#show", as: :preference_analysis
   get "contact", to: "static_pages#contact", as: :contact
   get "privacy", to: "static_pages#privacy", as: :privacy
   get "terms", to: "static_pages#terms", as: :terms

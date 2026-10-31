@@ -15,11 +15,17 @@
 # さけのわAPIから取得するエリア(都道府県)マスターデータ
 class Area < ApplicationRecord
   NAME_MAX_LENGTH = 10
+  # 「その他」（都道府県ではないエリア）の さけのわID
+  OTHER_SAKENOWA_ID = 0
 
   validates :name, presence: true, length: { maximum: NAME_MAX_LENGTH }
 
   # マスターデータのため削除不可。誤って destroy が呼ばれた場合に例外で知らせる
   has_many :breweries, dependent: :restrict_with_exception
+
+  # 「その他」を除いた47都道府県（北から順）
+  # @return [ActiveRecord::Relation<Area>]
+  scope :prefectures, -> { where.not(sakenowa_id: OTHER_SAKENOWA_ID).order(:sakenowa_id) }
 
   # Ransack で検索を許可するカラム
   # @param _auth_object [Object, nil] 権限の出し分け用（未使用）
