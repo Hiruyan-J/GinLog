@@ -45,7 +45,12 @@ RSpec.describe "シェア", type: :request do
     # 画面側で hashtags: を渡し忘れると #吟ログ #日本酒 だけになるため、画面ごとに確かめる
     it "Xでシェアのハッシュタグに、銘柄名・蔵元名が入る" do
       expect(x_share_queries).to be_present
-      expect(x_share_queries.map { |query| query[:hashtags] }).to all(eq "吟ログ,日本酒,#{sake.brand.name},#{sake.brand.brewery.name}")
+      hashtag_text = "#吟ログ #日本酒 ##{sake.brand.name} ##{sake.brand.brewery.name}"
+      expect(x_share_queries.map { |query| query[:text] }).to all(end_with hashtag_text)
+    end
+
+    it "「その他のアプリで共有」の投稿文には、ハッシュタグが入らない" do
+      expect(share_buttons.map { |button| button[:text] }).not_to include(a_string_including("#吟ログ"))
     end
   end
 
