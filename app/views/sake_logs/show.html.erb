@@ -1,7 +1,9 @@
 <% content_for :title,  t('.title') %>
 <% sake_name = "#{@sake_log.sake.brand.name} #{@sake_log.sake.product_name}" %>
 <% set_meta_tags description: "#{@sake_log.user.name}さんの日本酒の記録「#{sake_name}」",
+                 canonical: sake_log_url(@sake_log),
                  og: { title: "#{sake_name}｜#{@sake_log.user.name}さんの記録",
+                       url: sake_log_url(@sake_log),
                        image: sake_log_ogp_image_url(@sake_log) } %>
 
 <%# data-action は「Turbo がこのページをキャッシュする直前に close を呼ぶ」指定 %>

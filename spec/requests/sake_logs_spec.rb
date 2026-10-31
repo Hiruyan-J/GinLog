@@ -5,6 +5,18 @@ RSpec.describe "SakeLogs", type: :request do
 
   before { sign_in user }
 
+  describe "GET /sake_logs/:id" do
+    it "from 付きでアクセスしても、canonical と og:url は from なしの URL になる" do
+      sake_log = create(:sake_log, user: user)
+
+      get sake_log_path(sake_log, from: "timeline")
+
+      html = Nokogiri::HTML(response.body)
+      expect(html.at_css('link[rel="canonical"]')["href"]).to eq sake_log_url(sake_log)
+      expect(html.at_css('meta[property="og:url"]')["content"]).to eq sake_log_url(sake_log)
+    end
+  end
+
   describe "DELETE /sake_logs/:id" do
     context "一覧画面（タイムライン・マイログ）からの削除のとき" do
       it "Turbo Stream でそのカードだけ削除する" do
