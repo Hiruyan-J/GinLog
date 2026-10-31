@@ -20,8 +20,14 @@ ja:
       update: 更新
     label:
   header:
+    main_menu_title: メニュー
+    home: ホーム
+    sake_search: 日本酒検索
+    my_log: マイログ
+    analyze_preferences: 好み分析
     login: ログイン
     logout: ログアウト
+    sign_up: 新規登録
     my_account: マイアカウント
     account_menu_title: アカウント
     data_menu_title: データについて
