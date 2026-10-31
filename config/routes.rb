@@ -44,6 +44,7 @@ Rails.application.routes.draw do
   get "contact", to: "static_pages#contact", as: :contact
   get "privacy", to: "static_pages#privacy", as: :privacy
   get "terms", to: "static_pages#terms", as: :terms
+  get "sitemap", to: "sitemaps#show", defaults: { format: :xml } # GET /sitemap.xml
 
   # Defines the root path route ("/")
   root "timelines#index"
