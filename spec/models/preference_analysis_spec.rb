@@ -108,8 +108,10 @@ RSpec.describe PreferenceAnalysis do
       expect(analysis.best_area).to eq niigata
     end
 
-    it "平均も件数も同じなら、ID が小さい（北の）都道府県を返す" do
-      north, south = [ niigata, iwate ].sort_by(&:id)
+    it "平均も件数も同じなら、北の都道府県（sakenowa_id が小さい方）を返す" do
+      # 作成順（id 順）とは逆になるよう、新潟県を先に作る
+      south = create(:area, name: "新潟県", sakenowa_id: 15)
+      north = create(:area, name: "北海道", sakenowa_id: 1)
       create_log(rating: 4, area: south)
       create_log(rating: 4, area: north)
 

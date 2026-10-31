@@ -43,11 +43,13 @@ class PreferenceAnalysis
   end
 
   # 平均好み度が一番高い都道府県
-  # 同点なら件数が多い方、それも同じなら ID が小さい方（北の方）
+  # 同点なら件数が多い方、それも同じなら北の方（sakenowa_id が小さい方）
   # @return [Area, nil] 都道府県（記録が0件なら nil）
   def best_area
-    best = area_stats.max_by { |area_id, stat| [ stat.average, stat.count, -area_id ] }
-    Area.find(best.first) if best
+    Area.where(id: area_stats.keys).max_by do |area|
+      stat = area_stats[area.id]
+      [ stat.average, stat.count, -area.sakenowa_id ]
+    end
   end
 
   private
