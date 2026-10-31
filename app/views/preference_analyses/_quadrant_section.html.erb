@@ -1,0 +1,43 @@
+<%# フレーバー別分析
+  locals:
+    analysis: 好み分析（PreferenceAnalysis）。記録が1件以上あること
+%>
+<% best_quadrant = analysis.best_quadrant %>
+
+<section class="flex flex-col gap-4">
+  <h2 class="pl-2 text-lg font-bold border-l-4 border-primary"><%= t('.title') %></h2>
+
+  <%# 軸ラベルと 2×2 の配置（shared/_taste_aroma_map と同じ） %>
+  <div class="grid gap-1 justify-items-center items-center text-xs leading-none grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr_auto] text-neutral-500">
+    <p class="col-start-2 row-start-1">香りが華やか</p>
+    <p class="col-start-1 row-start-2 [writing-mode:vertical-rl]">味がスッキリ</p>
+
+    <%# 2×2 の象限グリッド（TasteAromaQuadrant::KEYS の並びは 左上 → 右上 → 左下 → 右下） %>
+    <div class="grid grid-cols-2 col-start-2 grid-rows-2 row-start-2 gap-2 w-full">
+      <% TasteAromaQuadrant::KEYS.each do |quadrant| %>
+        <% stat = analysis.quadrant_stats[quadrant] %>
+        <div class="flex flex-col gap-1 justify-center items-center h-24 rounded-md border <%= quadrant_cell_class(quadrant.to_sym, best_quadrant&.to_sym) %>">
+          <% if stat %>
+            <%= render "shared/rating_stars", rating: stat.average, size: :sm %>
+            <p class="text-sm font-bold text-base-content"><%= number_with_precision(stat.average, precision: 1) %></p>
+            <p><%= t('.count', count: stat.count) %></p>
+          <% else %>
+            <p class="text-neutral-400"><%= t('.no_record') %></p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <p class="col-start-3 row-start-2 [writing-mode:vertical-rl]">味が濃い</p>
+    <p class="col-start-2 row-start-3">香りが穏やか</p>
+  </div>
+
+  <%# 一番好きな象限（色見本 + 象限名） %>
+  <% quadrant_label = safe_join([
+       tag.span(class: "inline-block mx-1 w-4 h-3 align-middle rounded-sm border #{quadrant_color_chip_class(best_quadrant)}"),
+       tag.span(quadrant_name(best_quadrant), class: "font-bold")
+     ]) %>
+  <p class="text-center"><%= t('.message_html', quadrant: quadrant_label) %></p>
+
+  <%= link_to t('.search'), sakes_path(quadrants: [ best_quadrant ]), class: "self-center btn btn-primary" %>
+</section>

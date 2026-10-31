@@ -34,6 +34,14 @@ module TasteAromaMapHelper
     lg: "w-64 md:w-80"  # 詳細画面など広い画面
   }.freeze
 
+  # 象限の名前（好み分析の「あなたは、〇〇のお酒が…」で使う）
+  QUADRANT_NAMES = {
+    aroma_high_taste_light: "味がスッキリ・香りが華やか",
+    aroma_high_taste_strong: "味が濃い・香りが華やか",
+    aroma_low_taste_light: "味がスッキリ・香りが穏やか",
+    aroma_low_taste_strong: "味が濃い・香りが穏やか"
+  }.freeze
+
   # 味・香りの値から4象限マップのどの象限に属するかを判定する
   # 味（横軸）: 5.0 未満は light（スッキリ）/ 5.0 以上は strong（濃い）
   # 香り（縦軸）: 5.0 未満は low（穏やか）/ 5.0 以上は high（華やか）
@@ -43,6 +51,20 @@ module TasteAromaMapHelper
   # @return [Symbol] 象限のキー
   def taste_aroma_quadrant(taste_strength, aroma_strength)
     TasteAromaQuadrant.key_for(aroma_strength: aroma_strength, taste_strength: taste_strength).to_sym
+  end
+
+  # 象限の名前を返す
+  # @param quadrant [String, Symbol] 象限キー（TasteAromaQuadrant::KEYS のどれか）
+  # @return [String] 例: "味がスッキリ・香りが華やか"
+  def quadrant_name(quadrant)
+    QUADRANT_NAMES.fetch(quadrant.to_sym)
+  end
+
+  # 象限の色見本（文中に置く小さな四角）のクラスを返す。色は活性象限と同じ
+  # @param quadrant [String, Symbol] 象限キー（TasteAromaQuadrant::KEYS のどれか）
+  # @return [String] Tailwind CSS クラス文字列
+  def quadrant_color_chip_class(quadrant)
+    QUADRANT_STYLES.fetch(quadrant.to_sym).fetch(:active)
   end
 
   # 4象限マップの1象限分の Tailwind CSS クラスを返す

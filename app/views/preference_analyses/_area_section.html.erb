@@ -1,0 +1,51 @@
+<%# 産地別分析（都道府県タイルマップ）
+  locals:
+    analysis:    好み分析（PreferenceAnalysis）
+    prefectures: 地図に並べる都道府県（Area.prefectures）
+%>
+<% best_area = analysis.best_area %>
+
+<section class="flex flex-col gap-4">
+  <h2 class="pl-2 text-lg font-bold border-l-4 border-primary"><%= t('.title') %></h2>
+
+  <%# 28列 × 25行のグリッド。各タイルの位置と大きさは style 属性で指定する %>
+  <div class="grid gap-px w-full grid-cols-28 grid-rows-25 aspect-[28/32]">
+    <%# 沖縄を囲む ┘ 形の線（右と下だけ枠線を引く） %>
+    <div class="rounded-br-md border-r border-b border-neutral-400" style="<%= okinawa_frame_style %>"></div>
+
+    <% prefectures.each do |area| %>
+      <% tile_style = prefecture_tile_style(area) %>
+      <% next unless tile_style %>
+      <% stat = analysis.area_stats[area.id] %>
+      <div class="flex flex-col justify-center items-center rounded-sm text-[8px] leading-none min-[360px]:text-[9px] md:text-xs <%= prefecture_tile_class(stat, area == best_area) %>"
+           style="<%= tile_style %>" title="<%= prefecture_tile_title(area, stat) %>">
+        <span><%= prefecture_tile_label(area) %></span>
+        <% if stat %>
+          <span>★<%= number_with_precision(stat.average, precision: 1) %></span>
+          <span>(<%= stat.count %>)</span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <%# 凡例（タイルの数字の読み方 + 平均好み度の5段階 + 未記録） %>
+  <p class="text-xs text-center text-neutral-500"><%= t('.rating_note') %></p>
+  <div class="flex flex-wrap gap-y-1 gap-x-3 justify-center text-xs text-neutral-500">
+    <span class="flex gap-1 items-center">
+      <span class="w-3 h-3 rounded-sm <%= PreferenceAnalysesHelper::NO_RECORD_TILE_CLASS %>"></span><%= t('.no_record') %>
+    </span>
+    <% PreferenceAnalysesHelper::RATING_LEVELS.each do |level| %>
+      <span class="flex gap-1 items-center">
+        <span class="w-3 h-3 rounded-sm <%= level[:tile_class] %>"></span><%= level[:label] %>
+      </span>
+    <% end %>
+  </div>
+
+  <% if best_area %>
+    <p class="text-center"><%= t('.message_html', area: tag.span(best_area.name, class: "font-bold")) %></p>
+    <%= link_to t('.search', area: best_area.name), sakes_path(area_id: best_area.id), class: "self-center btn btn-primary" %>
+  <% else %>
+    <%# 記録が「その他」のエリアの日本酒だけのとき %>
+    <p class="text-center"><%= t('.no_area') %></p>
+  <% end %>
+</section>
