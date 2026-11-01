@@ -17,7 +17,7 @@ RSpec.describe "シェア", type: :request do
     end
   end
 
-  # シェアメニューの「Xでシェア」リンクのクエリを { text: ..., url: ..., hashtags: ... } の配列で返す
+  # シェアメニューの「Xでシェア」リンクのクエリを { text: ..., url: ... } の配列で返す
   def x_share_queries
     html.css('a[href^="https://x.com/intent/post"]').map do |link|
       Rack::Utils.parse_query(URI.parse(link["href"]).query).symbolize_keys
