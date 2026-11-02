@@ -37,7 +37,10 @@ Rails.application.routes.draw do
     resource :label_extraction, only: %i[create] # POST /api/label_extraction
   end
 
-  resources :sake_logs, only: %i[index show new create edit update destroy]
+  resources :sake_logs, only: %i[index show new create edit update destroy] do
+    resources :likes, only: %i[index]
+    resource :like, only: %i[create destroy]
+  end
   resources :sakes, only: %i[index show]
   get "timeline", to: "timelines#index", as: :timeline
   get "mypage", to: "users#show", as: :mypage
