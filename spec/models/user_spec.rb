@@ -37,6 +37,7 @@ RSpec.describe User, type: :model do
 
   describe "アソシエーション" do
     it { is_expected.to have_many(:sake_logs).dependent(:destroy) }
+    it { is_expected.to have_many(:likes).dependent(:destroy) }
   end
 
   describe "メールアドレス確認(confirmable)" do

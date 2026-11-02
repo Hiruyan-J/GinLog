@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_11_030039) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_034138) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -82,6 +82,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_030039) do
     t.index ["user_id", "executed_on"], name: "index_label_extraction_logs_on_user_id_and_executed_on"
   end
 
+  create_table "likes", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "sake_log_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sake_log_id"], name: "index_likes_on_sake_log_id"
+    t.index ["user_id", "sake_log_id"], name: "index_likes_on_user_id_and_sake_log_id", unique: true
+    t.index ["user_id"], name: "index_likes_on_user_id"
+  end
+
   create_table "sake_logs", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "sake_id", null: false
@@ -135,6 +145,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_030039) do
   add_foreign_key "breweries", "areas"
   add_foreign_key "breweries", "breweries", column: "merged_into_id"
   add_foreign_key "label_extraction_logs", "users"
+  add_foreign_key "likes", "sake_logs"
+  add_foreign_key "likes", "users"
   add_foreign_key "sake_logs", "sakes"
   add_foreign_key "sake_logs", "users"
   add_foreign_key "sakes", "brands"
