@@ -84,14 +84,10 @@
 
   <%# いいね・コメント・シェア %>
   <footer class="flex justify-around items-center pt-2 mt-2">
-    <%# 非活性ボタンはタップを素通りさせるため、z-20 の span で受け止めてカードのリンクへ抜けないようにする %>
-    <%# いいね（未実装） %>
-    <span class="relative z-20">
-      <button type="button" class="btn btn-ghost btn-circle btn-sm" disabled>
-        <span class="material-symbols-rounded ms-size-24">favorite</span>
-      </button>
-    </span>
+    <%# いいね %>
+    <%= render "likes/like_button", sake_log: sake_log %>
     <%# コメント（未実装） %>
+    <%# 非活性ボタンはタップを素通りさせるため、z-20 の span で受け止めてカードのリンクへ抜けないようにする %>
     <span class="relative z-20">
       <button type="button" class="btn btn-ghost btn-sm" disabled>
         <span class="material-symbols-rounded ms-size-24">chat_bubble</span>

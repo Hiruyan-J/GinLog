@@ -1,0 +1,20 @@
+<%# いいねした人の一覧モーダル（中身は likes/index を frame に読み込む） %>
+<dialog class="modal"
+        data-controller="likes-modal"
+        data-action="turbo:frame-load->likes-modal#open close->likes-modal#close turbo:before-cache@document->likes-modal#close">
+  <div class="modal-box">
+    <h2 class="text-lg font-bold">いいねした人</h2>
+    <%= turbo_frame_tag "likes_modal_frame", class: "block overflow-y-auto mt-3 max-h-[60vh]" %>
+
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn">閉じる</button>
+      </form>
+    </div>
+  </div>
+
+  <%# 背景をタップしても閉じられるようにする %>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

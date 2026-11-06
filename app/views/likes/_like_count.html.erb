@@ -1,0 +1,21 @@
+<%# いいね数
+  locals:
+    sake_log:   対象の記録
+    show_heart: 件数の左にハートも出すか（省略時 false）
+%>
+<% like_count = sake_log.likes.size %>
+<% count_content = capture do %>
+  <% if local_assigns.fetch(:show_heart, false) %>
+    <% liked = user_signed_in? && sake_log.liked_by?(current_user) %>
+    <span class="material-symbols-rounded ms-size-20 <%= liked ? "ms-fill text-error" : "text-primary" %>">favorite</span>
+  <% end %>
+  <span class="text-xs text-neutral-500"><%= like_count %></span>
+<% end %>
+
+<% if like_count.positive? %>
+  <%= link_to count_content, sake_log_likes_path(sake_log),
+        class: "gap-1 justify-start px-1 min-w-8 btn btn-ghost btn-sm",
+        data: { turbo_frame: "likes_modal_frame" } %>
+<% else %>
+  <%= tag.span count_content, class: "inline-flex gap-1 justify-start items-center px-1 h-8 min-w-8" %>
+<% end %>

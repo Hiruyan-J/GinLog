@@ -1,0 +1,10 @@
+<%= turbo_frame_tag "likes_modal_frame" do %>
+  <ul class="flex flex-col gap-2">
+    <% @likes.each do |like| %>
+      <li class="flex gap-2 items-center">
+        <%= render "shared/user_avatar", user: like.user, size: :sm %>
+        <span class="min-w-0 font-semibold truncate"><%= like.user.name %></span>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

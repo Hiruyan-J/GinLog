@@ -10,7 +10,7 @@ class SakeLogsController < ApplicationController
   #   2ページ目以降は末尾の Turbo Frame から読み込まれる（無限スクロール）
   def index
     @sake_logs = current_user.sake_logs
-                             .includes(sake: { brand: { brewery: :area } })
+                             .includes(:likes, sake: { brand: { brewery: :area } })
                              .with_attached_images
                              .order(created_at: :desc, id: :desc)
                              .page(params[:page])
