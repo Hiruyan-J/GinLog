@@ -26,13 +26,15 @@
 #  index_users_on_reset_password_token  (reset_password_token) UNIQUE
 #
 class User < ApplicationRecord
+  NAME_MAX_LENGTH = 20
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable, :confirmable,
          :omniauthable, omniauth_providers: %i[google_oauth2]
 
-  validates :name, presence: true
+  validates :name, presence: true, length: { maximum: NAME_MAX_LENGTH }
   has_many :sake_logs, dependent: :destroy
   has_many :label_extraction_logs, dependent: :destroy
   has_many :likes, dependent: :destroy
@@ -56,7 +58,7 @@ class User < ApplicationRecord
   def link_omniauth(auth)
     self.provider = auth.provider
     self.uid = auth.uid
-    self.name = auth.info.name if new_record?
+    self.name = auth.info.name.to_s.first(NAME_MAX_LENGTH) if new_record?
     # 新規と、メール未確認の既存アカウントは、パスワードを作り直して確認済みにする
     unless confirmed?
       self.password = Devise.friendly_token[0, 20]

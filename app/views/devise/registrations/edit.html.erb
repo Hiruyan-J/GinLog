@@ -6,7 +6,7 @@
 
   <div class="w-full md:w-8/12 field">
     <%= f.label :name %><br />
-    <%= f.text_field :name, autofocus: true, autocomplete: "name", class: "w-full input input-primary" %>
+    <%= f.text_field :name, autofocus: true, autocomplete: "name", maxlength: User::NAME_MAX_LENGTH, class: "w-full input input-primary" %>
   </div>
 
   <div class="w-full md:w-8/12 field">

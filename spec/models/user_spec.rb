@@ -33,6 +33,7 @@ RSpec.describe User, type: :model do
 
     it { is_expected.to be_valid }
     it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_length_of(:name).is_at_most(User::NAME_MAX_LENGTH) }
   end
 
   describe "アソシエーション" do
@@ -107,6 +108,14 @@ RSpec.describe User, type: :model do
       it "確認メールは送られない" do
         expect { User.from_omniauth(google_auth(email: "new@example.com")) }
           .not_to change { ActionMailer::Base.deliveries.size }
+      end
+
+      it "名前が上限を超えていても、先頭から上限の文字数に切り詰めて作られる" do
+        long_name = "あ" * (User::NAME_MAX_LENGTH + 1)
+        user = User.from_omniauth(google_auth(email: "new@example.com", name: long_name))
+
+        expect(user).to be_persisted
+        expect(user.name).to eq "あ" * User::NAME_MAX_LENGTH
       end
     end
 
