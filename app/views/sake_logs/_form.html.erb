@@ -240,7 +240,7 @@
     <%# 感想 %>
     <div class="flex flex-col w-full md:w-8/12">
       <%= f.label :review, class: "font-semibold" %>
-      <%= f.text_area :review, class: "w-full textarea textarea-primary" %>
+      <%= f.text_area :review, maxlength: SakeLog::REVIEW_MAX_LENGTH, class: "w-full textarea textarea-primary" %>
     </div>
 
     <div class="flex gap-2 justify-center">
