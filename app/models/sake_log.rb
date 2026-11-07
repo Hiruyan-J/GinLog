@@ -31,7 +31,7 @@ class SakeLog < ApplicationRecord
   AROMA_STRENGTH_MIN = 0
   AROMA_STRENGTH_MAX = 10
   AROMA_STRENGTH_DEFAULT = 5.0
-  REVIEW_MAX_LENGTH = 65_535
+  REVIEW_MAX_LENGTH = 2_000
   IMAGE_ATTACHMENT_NAMES = %i[front_label_image back_label_image sub_image1 sub_image2].freeze
   IMAGE_MAX_SIZE = 10.megabytes
   IMAGE_CONTENT_TYPES = %w[image/jpeg image/png image/webp image/heic image/heif].freeze
