@@ -40,6 +40,7 @@ class SakeLog < ApplicationRecord
 
   belongs_to :user
   belongs_to :sake
+  has_many :likes, dependent: :destroy
 
   has_one_attached :front_label_image
   has_one_attached :back_label_image
@@ -72,6 +73,13 @@ class SakeLog < ApplicationRecord
       attachment = public_send(attachment_name)
       [ attachment_name, attachment ] if attachment.attached?
     end
+  end
+
+  # 指定のユーザーがいいね済みか
+  # @param user [User] 判定するユーザー
+  # @return [Boolean] いいね済みなら true
+  def liked_by?(user)
+    likes.any? { |like| like.user_id == user.id }
   end
 
   private

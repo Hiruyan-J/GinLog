@@ -64,6 +64,7 @@ RSpec.describe SakeLog, type: :model do
   describe "アソシエーション" do
     it { is_expected.to belong_to(:user) }
     it { is_expected.to belong_to(:sake) }
+    it { is_expected.to have_many(:likes).dependent(:destroy) }
   end
 
   describe "reviewの正規化" do
@@ -192,6 +193,23 @@ RSpec.describe SakeLog, type: :model do
 
       it "1枚も添付がなければ空配列を返す" do
         expect(sake_log.attached_images).to be_empty
+      end
+    end
+
+    describe "#liked_by?" do
+      let(:sake_log) { create(:sake_log) }
+      let(:user) { create(:user) }
+
+      it "いいね済みなら true" do
+        create(:like, user: user, sake_log: sake_log)
+
+        expect(sake_log.liked_by?(user)).to be true
+      end
+
+      it "他人だけがいいねしていれば false" do
+        create(:like, sake_log: sake_log)
+
+        expect(sake_log.liked_by?(user)).to be false
       end
     end
   end

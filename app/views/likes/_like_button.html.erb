@@ -1,0 +1,22 @@
+<%# いいねボタン（ハート + いいね数）
+  locals:
+    sake_log: 対象の記録
+%>
+<% liked = user_signed_in? && sake_log.liked_by?(current_user) %>
+<div id="<%= dom_id(sake_log, :like_button) %>" class="flex relative z-20 gap-1 items-center">
+  <% if user_signed_in? %>
+    <%= button_to sake_log_like_path(sake_log),
+          method: liked ? :delete : :post,
+          class: "btn btn-ghost btn-circle btn-sm" do %>
+      <span class="material-symbols-rounded ms-size-24 <%= liked ? "ms-fill text-error" : "text-primary" %>">favorite</span>
+    <% end %>
+  <% else %>
+    <%# 未ログインはログイン画面へ %>
+    <%= link_to new_user_session_path,
+          class: "btn btn-ghost btn-circle btn-sm",
+          data: { turbo_frame: "_top" } do %>
+      <span class="material-symbols-rounded text-primary ms-size-24">favorite</span>
+    <% end %>
+  <% end %>
+  <%= render "likes/like_count", sake_log: sake_log %>
+</div>

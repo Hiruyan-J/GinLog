@@ -81,10 +81,8 @@
 
     <%# いいね・コメント・シェア %>
     <footer class="flex justify-around items-center pt-3 mt-6 border-t border-base-300">
-      <%# いいね（未実装） %>
-      <button type="button" class="btn btn-ghost btn-circle btn-sm" disabled>
-        <span class="material-symbols-rounded ms-size-24">favorite</span>
-      </button>
+      <%# いいね %>
+      <%= render "likes/like_button", sake_log: @sake_log %>
       <%# コメント件数（未実装） %>
       <button type="button" class="btn btn-ghost btn-sm" disabled>
         <span class="material-symbols-rounded ms-size-24">chat_bubble</span>
