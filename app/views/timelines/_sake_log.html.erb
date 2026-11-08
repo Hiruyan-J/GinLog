@@ -86,14 +86,9 @@
   <footer class="flex justify-around items-center pt-2 mt-2">
     <%# いいね %>
     <%= render "likes/like_button", sake_log: sake_log %>
-    <%# コメント（未実装） %>
-    <%# 非活性ボタンはタップを素通りさせるため、z-20 の span で受け止めてカードのリンクへ抜けないようにする %>
-    <span class="relative z-20">
-      <button type="button" class="btn btn-ghost btn-sm" disabled>
-        <span class="material-symbols-rounded ms-size-24">chat_bubble</span>
-        <span class="text-xs">0</span>
-      </button>
-    </span>
+    <%# コメント %>
+    <%= render "comments/comment_button", sake_log: sake_log,
+          path: sake_log_path(sake_log, from: origin, anchor: "comments") %>
     <%# シェア %>
     <%= render "shared/share_button",
           text: sake_log_share_text(sake_log, owned: current_user&.own?(sake_log)),
