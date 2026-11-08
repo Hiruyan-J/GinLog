@@ -29,4 +29,11 @@ class Comment < ApplicationRecord
   normalizes :body, with: ->(value) { value.strip }
 
   validates :body, presence: true, length: { maximum: BODY_MAX_LENGTH }
+
+  # 投稿後に本文を編集したか
+  # 投稿時は created_at と updated_at が同じ時刻になり、編集すると updated_at だけが進む
+  # @return [Boolean] 編集済みなら true
+  def edited?
+    updated_at > created_at
+  end
 end
