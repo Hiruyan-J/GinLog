@@ -3,7 +3,7 @@
     sake_log: 対象の記録
 %>
 <%= link_to sake_log_path(sake_log, from: "mylog", anchor: "comments"),
-      class: "gap-0 justify-start px-0 md:gap-1 md:px-1 btn btn-ghost btn-sm md:min-w-8",
+      class: "gap-0 justify-start px-0 ml-1.5 md:gap-1 md:px-1 md:ml-0 btn btn-ghost btn-sm md:min-w-8",
       data: { turbo_frame: "_top" } do %>
   <span class="material-symbols-rounded text-primary ms-size-16 md:ms-size-20">chat_bubble</span>
   <span class="text-xs text-neutral-500"><%= sake_log.comments.size %></span>
