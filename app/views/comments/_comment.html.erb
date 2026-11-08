@@ -1,0 +1,41 @@
+<%# コメント1件
+  locals:
+    comment: 表示するコメント
+%>
+<%= turbo_frame_tag comment, class: "block" do %>
+  <div class="flex gap-2 py-3">
+    <%= render "shared/user_avatar", user: comment.user, size: :sm %>
+
+    <div class="flex-1 min-w-0">
+      <div class="flex gap-2 items-center">
+        <p class="text-sm font-semibold truncate"><%= comment.user.name %></p>
+        <p class="text-xs text-neutral-500 shrink-0"><%= l comment.created_at, format: :long %></p>
+        <%# 本文を書き換えたことが周りの人にもわかるようにする %>
+        <% if comment.edited? %>
+          <p class="text-xs text-neutral-400 shrink-0">編集済み</p>
+        <% end %>
+
+        <% if current_user&.own?(comment) %>
+          <div class="flex gap-1 ml-auto shrink-0">
+            <%# 編集ボタン（この Turbo Frame の中に編集フォームを読み込む） %>
+            <%= link_to edit_comment_path(comment),
+                  id: "button-edit-comment-#{comment.id}",
+                  class: "btn btn-ghost btn-circle btn-xs" do %>
+              <span class="material-symbols-rounded text-primary ms-size-20">edit_square</span>
+            <% end %>
+            <%# 削除ボタン %>
+            <%= link_to comment_path(comment),
+                  id: "button-delete-comment-#{comment.id}",
+                  class: "btn btn-ghost btn-circle btn-xs",
+                  data: { turbo_method: :delete, turbo_confirm: t('defaults.delete_confirm') } do %>
+              <span class="material-symbols-rounded text-primary ms-size-20">delete</span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <%# 本文（改行をそのまま表示する。長い英数字も折り返す） %>
+      <%= simple_format(h(comment.body), class: "mt-1 text-sm break-words") %>
+    </div>
+  </div>
+<% end %>

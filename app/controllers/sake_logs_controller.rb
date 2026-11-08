@@ -10,7 +10,7 @@ class SakeLogsController < ApplicationController
   #   2ページ目以降は末尾の Turbo Frame から読み込まれる（無限スクロール）
   def index
     @sake_logs = current_user.sake_logs
-                             .includes(:likes, sake: { brand: { brewery: :area } })
+                             .includes(:likes, :comments, sake: { brand: { brewery: :area } })
                              .with_attached_images
                              .order(created_at: :desc, id: :desc)
                              .page(params[:page])
@@ -25,6 +25,7 @@ class SakeLogsController < ApplicationController
     # どの画面から来たか（"timeline" / "mylog" / "sake"）。無い場合は nil 。
     #   値の判定はビュー側の sake_log_back_link に任せる（知らない値が来ても既定の戻り先になる）
     @origin = params[:from]
+    @comments = @sake_log.comments.includes(:user).order(created_at: :asc, id: :asc)
   end
 
   def new

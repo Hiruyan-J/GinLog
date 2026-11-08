@@ -40,6 +40,7 @@ Rails.application.routes.draw do
   resources :sake_logs, only: %i[index show new create edit update destroy] do
     resources :likes, only: %i[index]
     resource :like, only: %i[create destroy]
+    resources :comments, only: %i[create edit update destroy], shallow: true
   end
   resources :sakes, only: %i[index show]
   get "timeline", to: "timelines#index", as: :timeline
