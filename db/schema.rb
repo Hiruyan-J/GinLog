@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_034138) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_07_085228) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -72,6 +72,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_034138) do
     t.index ["area_id"], name: "index_breweries_on_area_id"
     t.index ["merged_into_id"], name: "index_breweries_on_merged_into_id"
     t.index ["sakenowa_id"], name: "index_breweries_on_sakenowa_id", unique: true, where: "(sakenowa_id IS NOT NULL)"
+  end
+
+  create_table "comments", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "sake_log_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sake_log_id"], name: "index_comments_on_sake_log_id"
+    t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
   create_table "label_extraction_logs", comment: "AIラベル読み取りの実行履歴。1日あたりの回数制限に使用", force: :cascade do |t|
@@ -144,6 +154,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_034138) do
   add_foreign_key "brands", "breweries"
   add_foreign_key "breweries", "areas"
   add_foreign_key "breweries", "breweries", column: "merged_into_id"
+  add_foreign_key "comments", "sake_logs"
+  add_foreign_key "comments", "users"
   add_foreign_key "label_extraction_logs", "users"
   add_foreign_key "likes", "sake_logs"
   add_foreign_key "likes", "users"

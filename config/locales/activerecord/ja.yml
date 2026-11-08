@@ -4,6 +4,7 @@ ja:
       user: ユーザー
       sake_log: 日本酒記録
       sake: 日本酒
+      comment: コメント
     attributes:
       sake_log:
         rating: 好み度
@@ -17,3 +18,5 @@ ja:
         sub_image2: その他2
       sake:
         product_name: 商品名
+      comment:
+        body: コメント

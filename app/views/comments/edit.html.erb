@@ -1,0 +1,5 @@
+<%= turbo_frame_tag @comment, class: "block" do %>
+  <div class="py-3">
+    <%= render "comments/form", sake_log: @sake_log, comment: @comment %>
+  </div>
+<% end %>

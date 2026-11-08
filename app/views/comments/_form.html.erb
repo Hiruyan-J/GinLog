@@ -1,0 +1,28 @@
+<%# コメントのフォーム
+  locals:
+    sake_log: コメント先の記録
+    comment:  新規なら Comment.new、編集なら保存済みのコメント
+%>
+<%# 送信先（shallow: true）
+  新規: [sake_log, comment] → POST /sake_logs/:sake_log_id/comments
+  編集: comment             → PATCH /comments/:id %>
+<%= form_with model: comment.persisted? ? comment : [sake_log, comment], class: "flex flex-col gap-2" do |f| %>
+  <%= render "shared/error_messages", object: comment %>
+
+  <%= f.text_area :body,
+        rows: 3,
+        maxlength: Comment::BODY_MAX_LENGTH,
+        required: true,
+        placeholder: "コメントを書く（#{Comment::BODY_MAX_LENGTH}文字以内）",
+        class: "w-full textarea textarea-primary" %>
+
+  <div class="flex gap-2 justify-end">
+    <% if comment.persisted? %>
+      <%# キャンセル: 記録詳細を読み込み、この Turbo Frame（コメント1件分）だけを元の表示に戻す %>
+      <%= link_to "キャンセル", sake_log_path(sake_log), class: "btn btn-primary btn-outline btn-sm" %>
+      <%= f.submit "更新する", class: "btn btn-primary btn-sm" %>
+    <% else %>
+      <%= f.submit "コメントする", class: "btn btn-primary btn-sm" %>
+    <% end %>
+  </div>
+<% end %>

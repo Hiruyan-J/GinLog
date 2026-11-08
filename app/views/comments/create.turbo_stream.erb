@@ -1,0 +1,3 @@
+<%= turbo_stream.append "comments_list", partial: "comments/comment", locals: { comment: @comment } %>
+<%= turbo_stream.update "comment_form", partial: "comments/form", locals: { sake_log: @sake_log, comment: Comment.new } %>
+<%= turbo_stream.replace dom_id(@sake_log, :comment_button), partial: "comments/comment_button", locals: { sake_log: @sake_log, path: "#comments" } %>

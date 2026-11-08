@@ -45,15 +45,17 @@
       </div>
     </div>
 
-    <%# ---------- 右: 編集・削除ボタン（上段）＋ ラベル画像（下段） ---------- %>
+    <%# ---------- 右: いいね数・コメント数・編集・削除ボタン（上段）＋ ラベル画像（下段） ---------- %>
     <div class="flex flex-col gap-1 w-32 md:w-56 shrink-0">
 
-      <%# 編集・削除ボタン
+      <%# いいね数・コメント数・編集・削除ボタン
         この一覧は current_user.sake_logs だけを描画するので、
         タイムラインカードのような own? の判定は入れていない %>
-      <div class="flex relative z-20 gap-1 justify-end">
+      <div class="flex relative z-20 gap-0 justify-end md:gap-1">
         <%# いいね数 %>
-        <%= render "likes/like_count", sake_log: sake_log, show_heart: true %>
+        <%= render "likes/like_count", sake_log: sake_log, show_heart: true, compact: true %>
+        <%# コメント数 %>
+        <%= render "comments/comment_count", sake_log: sake_log %>
         <%# 編集ボタン
           2ページ目以降のカードは turbo_frame の中にあるため、_top でページ全体を遷移させる %>
         <%= link_to edit_sake_log_path(sake_log),

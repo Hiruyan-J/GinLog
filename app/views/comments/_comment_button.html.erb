@@ -1,0 +1,15 @@
+<%# コメントボタン
+  locals:
+    sake_log: 対象の記録
+    path:     移動先。カードからは記録詳細の #comments、記録詳細からは "#comments"（同じページ内へスクロール）
+
+  カード全体のリンク（z-10）より手前に出すため z-20 を付ける
+  2ページ目以降のカードは turbo_frame の中にあるため、_top でページ全体を遷移させる
+%>
+<%= link_to path,
+      id: dom_id(sake_log, :comment_button),
+      class: "relative z-20 btn btn-ghost btn-sm",
+      data: { turbo_frame: "_top" } do %>
+  <span class="material-symbols-rounded text-primary ms-size-24">chat_bubble</span>
+  <span class="text-xs text-neutral-500"><%= sake_log.comments.size %></span>
+<% end %>

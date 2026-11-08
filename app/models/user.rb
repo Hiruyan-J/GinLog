@@ -38,6 +38,7 @@ class User < ApplicationRecord
   has_many :sake_logs, dependent: :destroy
   has_many :label_extraction_logs, dependent: :destroy
   has_many :likes, dependent: :destroy
+  has_many :comments, dependent: :destroy
 
   # Google の認証情報に対応するユーザーを返す（いなければ作る）
   # @param auth [OmniAuth::AuthHash] Google から届いた認証情報
