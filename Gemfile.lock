@@ -372,9 +372,9 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.4.2)
-    ransack (6.0.1)
-      activerecord (>= 7.2)
-      activesupport (>= 7.2)
+    ransack (6.1.0)
+      activerecord (>= 8.1)
+      activesupport (>= 8.1)
       i18n
     rbs (4.2.0)
       logger
@@ -549,7 +549,7 @@ DEPENDENCIES
   puma (>= 5.0)
   rails (~> 8.1.4)
   rails-i18n (~> 8.1.0)
-  ransack (~> 6.0.1)
+  ransack (~> 6.1.0)
   rspec-rails
   rubocop-rails-omakase
   selenium-webdriver
