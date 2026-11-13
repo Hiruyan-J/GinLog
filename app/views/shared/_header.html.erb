@@ -58,6 +58,9 @@
         <li class="mt-2">
           <h2 class="menu-title"><%= t('header.about_menu_title') %></h2>
           <ul>
+            <li data-controller="pwa-install">
+              <%= link_to t('header.install_app'), install_path, data: { action: "pwa-install#install" } %>
+            </li>
             <li><%= link_to t('header.terms'), terms_path %></li>
             <li><%= link_to t('header.privacy'), privacy_path %></li>
             <li><%= link_to t('header.contact'), contact_path %></li>

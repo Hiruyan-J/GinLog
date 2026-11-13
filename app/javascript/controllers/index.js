@@ -34,6 +34,9 @@ application.register("likes-modal", LikesModalController)
 import ProductNameAutocompleteController from "./product_name_autocomplete_controller"
 application.register("product-name-autocomplete", ProductNameAutocompleteController)
 
+import PwaInstallController from "./pwa_install_controller"
+application.register("pwa-install", PwaInstallController)
+
 import RatingController from "./rating_controller"
 application.register("rating", RatingController)
 

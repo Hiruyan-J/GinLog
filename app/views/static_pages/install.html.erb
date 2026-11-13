@@ -1,0 +1,37 @@
+<% content_for :title, t('.title') %>
+<%= page_heading %>
+
+<div class="flex flex-col gap-4 py-2 mx-auto w-full md:w-10/12">
+  <p><%= t('.lead') %></p>
+
+  <%# 端末ごとの手順 %>
+  <div class="flex flex-col gap-2">
+    <% { android: "android", iphone: "phone_iphone", pc: "computer" }.each do |device, icon| %>
+      <details class="collapse collapse-arrow bg-base-200" name="install_steps">
+        <summary class="collapse-title">
+          <h2 class="flex gap-1 items-center font-bold">
+            <span class="material-symbols-rounded ms-size-20 text-primary"><%= icon %></span>
+            <%= t(".#{device}.heading") %>
+          </h2>
+        </summary>
+
+        <div class="collapse-content">
+          <%# 手順がどのブラウザ向けか（例: Chrome の場合） %>
+          <p class="text-sm font-bold"><%= t(".#{device}.browser") %></p>
+          <ol class="mt-1 ml-6 space-y-1 text-sm list-decimal">
+            <% t(".#{device}.steps").each do |step| %>
+              <li><%= step %></li>
+            <% end %>
+          </ol>
+          <%# 補足がある端末だけ表示する（ない端末は nil になる） %>
+          <% note = t(".#{device}.note", default: nil) %>
+          <% if note %>
+            <p class="mt-2 text-xs text-base-content/70"><%= note %></p>
+          <% end %>
+        </div>
+      </details>
+    <% end %>
+  </div>
+
+  <p class="text-sm text-base-content/70"><%= t('.already_installed') %></p>
+</div>

@@ -1,6 +1,6 @@
 xml.instruct!
 xml.urlset(xmlns: "http://www.sitemaps.org/schemas/sitemap/0.9") do
-  [ root_url, timeline_url, sakes_url, contact_url, privacy_url, terms_url ].each do |page_url|
+  [ root_url, timeline_url, sakes_url, contact_url, privacy_url, terms_url, install_url ].each do |page_url|
     xml.url do
       xml.loc page_url
     end

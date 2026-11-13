@@ -12,8 +12,8 @@ RSpec.describe "ヘッダーのメニュー", type: :request do
   context "ログインしていないとき" do
     before { get timeline_path }
 
-    it "ホーム・日本酒検索・マイログ・好み分析へのリンクがある" do
-      expect(menu_paths).to include(root_path, sakes_path, sake_logs_path, preference_analysis_path)
+    it "ホーム・日本酒検索・マイログ・好み分析・インストール手順へのリンクがある" do
+      expect(menu_paths).to include(root_path, sakes_path, sake_logs_path, preference_analysis_path, install_path)
     end
 
     it "ログインと新規登録へのリンクがあり、マイアカウントへのリンクはない" do
@@ -28,8 +28,8 @@ RSpec.describe "ヘッダーのメニュー", type: :request do
       get timeline_path
     end
 
-    it "ホーム・日本酒検索・マイログ・好み分析へのリンクがある" do
-      expect(menu_paths).to include(root_path, sakes_path, sake_logs_path, preference_analysis_path)
+    it "ホーム・日本酒検索・マイログ・好み分析・インストール手順へのリンクがある" do
+      expect(menu_paths).to include(root_path, sakes_path, sake_logs_path, preference_analysis_path, install_path)
     end
 
     it "マイアカウントへのリンクがあり、ログインと新規登録へのリンクはない" do
