@@ -44,6 +44,25 @@ RSpec.describe "静的ページ", type: :request do
     end
   end
 
+  describe "GET /install" do
+    it "未ログインでも 200 が返る" do
+      get install_path
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "Android・iPhone・パソコンの手順の見出しが表示される" do
+      get install_path
+
+      headings = html.css("main details h2").map { |heading| heading.text.squish }
+      expect(headings).to include(
+        a_string_including(I18n.t("static_pages.install.android.heading")),
+        a_string_including(I18n.t("static_pages.install.iphone.heading")),
+        a_string_including(I18n.t("static_pages.install.pc.heading"))
+      )
+    end
+  end
+
   describe "ヘッダーのメニュー" do
     it "未ログインでも、お問い合わせへのリンクが表示される" do
       get root_path

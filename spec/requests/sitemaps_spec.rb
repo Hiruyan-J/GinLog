@@ -20,7 +20,7 @@ RSpec.describe "サイトマップ", type: :request do
     it "公開ページの URL が載っている" do
       get "/sitemap.xml"
 
-      expect(sitemap_urls).to include(root_url, timeline_url, sakes_url, contact_url, privacy_url, terms_url)
+      expect(sitemap_urls).to include(root_url, timeline_url, sakes_url, contact_url, privacy_url, terms_url, install_url)
     end
 
     it "日本酒詳細と記録詳細の URL が載っている" do
