@@ -24,7 +24,10 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-VJVYRQKGYH');
+      // アプリとして開いているか（standalone / browser）を、ページビューと一緒に送る
+      gtag('config', 'G-VJVYRQKGYH', {
+        display_mode: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true ? 'standalone' : 'browser'
+      });
     </script>
   </head>
 

@@ -12,6 +12,8 @@ window.addEventListener("beforeinstallprompt", (event) => {
 // インストールが終わったら、使い終わったイベントを捨てる
 window.addEventListener("appinstalled", () => {
   deferredInstallPrompt = null
+  // インストールされたことを GA4 に送る（gtag が使えないときは送らない）
+  if (typeof window.gtag === "function") window.gtag("event", "pwa_install")
 })
 
 // Connects to data-controller="pwa-install"
