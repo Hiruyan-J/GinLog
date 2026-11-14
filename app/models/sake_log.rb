@@ -42,6 +42,7 @@ class SakeLog < ApplicationRecord
   belongs_to :sake
   has_many :likes, dependent: :destroy
   has_many :comments, dependent: :destroy
+  has_one :taste_profile, dependent: :destroy
 
   has_one_attached :front_label_image
   has_one_attached :back_label_image
