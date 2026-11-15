@@ -1,20 +1,23 @@
 <% content_for :title,  t('.sign_up') %>
 <%= page_heading %>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "flex flex-col gap-4 items-center py-2" }) do |f| %>
+<%= form_for(resource,
+      as: resource_name,
+      url: registration_path(resource_name),
+      html: { class: "flex flex-col gap-4 py-2 mx-auto w-full md:w-8/12" }) do |f| %>
   <%= render "devise/shared/error_messages", resource: resource %>
 
-  <div class="w-full md:w-8/12 field">
+  <div class="field">
     <%= f.label :name %><br />
     <%= f.text_field :name, autofocus: true, autocomplete: "name", maxlength: User::NAME_MAX_LENGTH, class: "w-full input input-primary" %>
   </div>
 
-  <div class="w-full md:w-8/12 field">
+  <div class="field">
     <%= f.label :email %><br />
     <%= f.email_field :email, autocomplete: "email", class: "w-full input input-primary" %>
   </div>
 
-  <div class="w-full md:w-8/12 field">
+  <div class="field">
     <%= f.label :password %>
     <% if @minimum_password_length %>
     <em><%= t('devise.shared.minimum_password_length', count: @minimum_password_length) %></em>
@@ -22,13 +25,13 @@
     <%= f.password_field :password, autocomplete: "new-password", class: "w-full input input-primary" %>
   </div>
 
-  <div class="w-full md:w-8/12 field">
+  <div class="field">
     <%= f.label :password_confirmation %><br />
     <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full input input-primary" %>
   </div>
 
   <%# 利用規約・プライバシーポリシーへの同意（入力が消えないよう、別タブで開く） %>
-  <p class="w-full text-sm md:w-8/12">
+  <p class="text-sm">
     <%= t('.agreement_html',
           terms: link_to(t('header.terms'), terms_path, target: "_blank", rel: "noopener", class: "link link-info"),
           privacy: link_to(t('header.privacy'), privacy_path, target: "_blank", rel: "noopener", class: "link link-info")) %>

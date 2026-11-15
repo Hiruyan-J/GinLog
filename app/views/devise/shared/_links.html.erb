@@ -1,4 +1,4 @@
-<section class="flex flex-col gap-2 items-center py-2">
+<section class="flex flex-col gap-2 items-center py-2 mx-auto w-full md:w-8/12">
   <%- if controller_name != 'sessions' %>
     <%= link_to t(".sign_in"), new_session_path(resource_name), class: "link link-info" %>
   <% end %>
@@ -21,7 +21,7 @@
 
   <%# Google ログイン（ログイン画面と新規登録画面だけに出す） %>
   <%- if devise_mapping.omniauthable? && controller_name.in?(%w[sessions registrations]) %>
-    <div class="self-center w-full md:w-8/12 divider"><%= t('.or') %></div>
+    <div class="w-full divider"><%= t('.or') %></div>
     <%= button_to omniauth_authorize_path(resource_name, :google_oauth2),
           data: { turbo: false },
           class: "bg-white btn border-[#747775] text-[#1f1f1f]" do %>

@@ -1,15 +1,15 @@
 <% content_for :title, t('.title') %>
 <%= page_heading %>
 
-<div class="flex flex-col gap-6 items-center py-2">
+<div class="flex flex-col gap-6 py-2 mx-auto w-full md:w-8/12">
   <%# ユーザー名 %>
-  <section class="w-full md:w-8/12">
+  <section>
     <h2 class="font-bold"><%= User.human_attribute_name(:name) %></h2>
     <p class="pl-4 break-all"><%= @user.name %></p>
   </section>
 
   <%# メールアドレス（本人専用画面のため表示してよい） %>
-  <section class="w-full md:w-8/12">
+  <section>
     <h2 class="font-bold"><%= User.human_attribute_name(:email) %></h2>
     <p class="pl-4 break-all"><%= @user.email %></p>
   </section>
