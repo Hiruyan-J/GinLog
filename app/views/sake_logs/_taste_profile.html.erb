@@ -1,0 +1,64 @@
+<%# locals: taste_profile（TasteProfile。1項目以上記録済みのもの） %>
+<div class="mt-3 card bg-base-200">
+  <div class="gap-3 p-4 card-body">
+    <h4 class="pb-1 text-sm border-b card-title border-primary">味わい</h4>
+
+    <dl class="flex flex-col gap-5">
+      <%# 甘味・旨味・酸味・熟成度・余韻 %>
+      <% TasteProfile::INTENSITY_SCALES.each do |attribute, (low_label, high_label)| %>
+        <% value = taste_profile.public_send(attribute) %>
+
+        <% if value.nil? %>
+          <div class="flex justify-between text-sm text-neutral-400">
+            <dt><%= TasteProfile.human_attribute_name(attribute) %></dt>
+            <dd>記録なし</dd>
+          </div>
+        <% else %>
+          <div>
+            <dt class="flex justify-between text-sm">
+              <span><%= TasteProfile.human_attribute_name(attribute) %></span>
+              <span class="text-neutral-500"><%= value %></span>
+            </dt>
+            <dd class="pl-4 mt-1">
+              <progress class="w-full progress progress-primary"
+                        value="<%= value %>" max="<%= TasteProfile::INTENSITY_MAX %>"></progress>
+              <div class="flex justify-between text-xs text-neutral-500">
+                <span><%= low_label %></span>
+                <span><%= high_label %></span>
+              </div>
+            </dd>
+          </div>
+        <% end %>
+      <% end %>
+
+      <%# 炭酸感 %>
+      <% carbonation = taste_profile.carbonation %>
+      <% if carbonation.nil? %>
+        <div class="flex justify-between text-sm text-neutral-400">
+          <dt><%= TasteProfile.human_attribute_name(:carbonation) %></dt>
+          <dd>記録なし</dd>
+        </div>
+      <% else %>
+        <div>
+          <dt class="flex justify-between text-sm">
+            <span><%= TasteProfile.human_attribute_name(:carbonation) %></span>
+            <span class="text-neutral-500"><%= TasteProfile::CARBONATION_LABELS[carbonation] %></span>
+          </dt>
+          <dd class="pl-4 mt-1">
+            <div class="w-full join">
+              <% TasteProfile::CARBONATION_LABELS.each do |key, label| %>
+                <span class="flex-1 font-normal pointer-events-none join-item btn btn-xs <%= "btn-primary" if key == carbonation %>">
+                  <%= label %>
+                </span>
+              <% end %>
+            </div>
+            <div class="flex justify-between text-xs text-neutral-500">
+              <span>弱い</span>
+              <span>強い</span>
+            </div>
+          </dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+</div>
