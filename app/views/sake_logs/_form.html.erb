@@ -196,51 +196,30 @@
     <%# 香りの濃淡 %>
     <div class="w-full md:w-8/12">
       <%= f.label :aroma_strength, class: "font-semibold whitespace-nowrap required" %>
-      <div class="w-full">
-        <div class="px-5">
-          <%= f.range_field :aroma_strength,
-              min: SakeLog::AROMA_STRENGTH_MIN, max: SakeLog::AROMA_STRENGTH_MAX,
-              step: 0.1, class: "w-full range range-primary" %>
-        </div>
-        <div class="flex justify-between mt-2 text-xs px-7.5">
-          <span>|</span>
-          <span>|</span>
-          <span>|</span>
-        </div>
-        <div class="flex justify-between px-2.5 mt-2 text-xs">
-          <span>穏やか</span>
-          <span>中間</span>
-          <span>華やか</span>
-        </div>
-      </div>
+      <%= render "sake_logs/range_slider",
+            f: f, attribute: :aroma_strength,
+            min: SakeLog::AROMA_STRENGTH_MIN, max: SakeLog::AROMA_STRENGTH_MAX,
+            low_label: "穏やか", high_label: "華やか" %>
     </div>
 
     <%# 味の濃淡 %>
     <div class="w-full md:w-8/12">
       <%= f.label :taste_strength, class: "font-semibold whitespace-nowrap required" %>
-      <div class="w-full">
-        <div class="px-5">
-          <%= f.range_field :taste_strength,
-              min: SakeLog::TASTE_STRENGTH_MIN, max: SakeLog::TASTE_STRENGTH_MAX,
-              step: 0.1, class: "w-full range range-primary" %>
-        </div>
-        <div class="flex justify-between mt-2 text-xs px-7.5">
-          <span>|</span>
-          <span>|</span>
-          <span>|</span>
-        </div>
-        <div class="flex justify-between px-2.5 mt-2 text-xs">
-          <span>スッキリ</span>
-          <span>中間</span>
-          <span>濃い</span>
-        </div>
-      </div>
+      <%= render "sake_logs/range_slider",
+            f: f, attribute: :taste_strength,
+            min: SakeLog::TASTE_STRENGTH_MIN, max: SakeLog::TASTE_STRENGTH_MAX,
+            low_label: "スッキリ", high_label: "濃い" %>
     </div>
 
     <%# 感想 %>
     <div class="flex flex-col w-full md:w-8/12">
       <%= f.label :review, class: "font-semibold" %>
       <%= f.text_area :review, maxlength: SakeLog::REVIEW_MAX_LENGTH, class: "w-full textarea textarea-primary" %>
+    </div>
+
+    <%# 味・香りの詳細記録（任意。最初は閉じた状態） %>
+    <div class="w-full md:w-8/12">
+      <%= render "sake_logs/detail_fields", f: f, sake_log_form: sake_log_form %>
     </div>
 
     <div class="flex gap-2 justify-center">

@@ -1,0 +1,27 @@
+<%# locals: f（フォームビルダー）, attribute（例: :sweetness_intensity）, low_label, high_label（両端の表示） %>
+<div data-controller="clearable-field"
+     data-clearable-field-blank-class="opacity-40 grayscale">
+  <div class="flex justify-between items-center">
+    <%= f.label attribute, class: "font-semibold" %>
+    <button type="button" class="btn btn-outline btn-xs btn-primary"
+            data-action="clearable-field#clear">クリア</button>
+  </div>
+
+  <%# 実際に送信される値（空文字 = 記録なし） %>
+  <%= f.hidden_field attribute, id: nil, data: { clearable_field_target: "value" } %>
+
+  <div data-clearable-field-target="display">
+    <%# name: nil … スライダーは常に値を送ってしまうため送信しない %>
+    <%# click … 灰色のときにつまみの位置そのままをタップしても記録ありにする %>
+    <%= render "sake_logs/range_slider",
+          f: f, attribute: attribute,
+          min: TasteProfile::INTENSITY_MIN, max: TasteProfile::INTENSITY_MAX,
+          low_label: low_label, high_label: high_label,
+          range_options: {
+            name: nil,
+            value: f.object.public_send(attribute) || TasteProfile::INTENSITY_DEFAULT,
+            data: { clearable_field_target: "input",
+                    action: "input->clearable-field#record click->clearable-field#record" }
+          } %>
+  </div>
+</div>

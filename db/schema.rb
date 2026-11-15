@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_07_085228) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_13_141653) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -128,6 +128,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_085228) do
     t.index ["brand_id"], name: "index_sakes_on_brand_id"
   end
 
+  create_table "taste_profiles", force: :cascade do |t|
+    t.bigint "sake_log_id", null: false
+    t.float "sweetness_intensity", comment: "甘味の強弱(0〜10)。NULL = 記録なし"
+    t.float "umami_intensity", comment: "旨味の強弱(0〜10)。NULL = 記録なし"
+    t.float "acidity_intensity", comment: "酸味の強弱(0〜10)。NULL = 記録なし"
+    t.float "maturity_intensity", comment: "熟成度の強弱(0〜10)。NULL = 記録なし"
+    t.float "finish_intensity", comment: "余韻の長さ(0〜10)。NULL = 記録なし"
+    t.integer "carbonation", comment: "炭酸感 0:無し 1:ガス感 2:微発泡 3:発泡。NULL = 記録なし"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sake_log_id"], name: "index_taste_profiles_on_sake_log_id", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -162,4 +175,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_085228) do
   add_foreign_key "sake_logs", "sakes"
   add_foreign_key "sake_logs", "users"
   add_foreign_key "sakes", "brands"
+  add_foreign_key "taste_profiles", "sake_logs"
 end

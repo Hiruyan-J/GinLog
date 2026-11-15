@@ -19,7 +19,7 @@ class SakeLogsController < ApplicationController
   end
 
   def show
-    @sake_log = SakeLog.includes(:user, sake: { brand: { brewery: :area } })
+    @sake_log = SakeLog.includes(:user, :taste_profile, sake: { brand: { brewery: :area } })
                         .with_attached_images
                         .find(params[:id])
     # どの画面から来たか（"timeline" / "mylog" / "sake"）。無い場合は nil 。
@@ -124,7 +124,10 @@ class SakeLogsController < ApplicationController
       :manual_brand_name, :manual_brewery_name, :brewery_id, :area_id,
       :front_label_image, :back_label_image, :sub_image1, :sub_image2,
       :remove_front_label_image, :remove_back_label_image,
-      :remove_sub_image1, :remove_sub_image2
+      :remove_sub_image1, :remove_sub_image2,
+      # 味わいの詳細（空文字 = 記録なし）
+      :sweetness_intensity, :umami_intensity, :acidity_intensity,
+      :maturity_intensity, :finish_intensity, :carbonation
     )
   end
 end

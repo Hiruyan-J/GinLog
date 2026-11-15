@@ -1,5 +1,26 @@
 require 'rails_helper'
 
+# == Schema Information
+#
+# Table name: comments
+#
+#  id          :bigint           not null, primary key
+#  body        :text             not null
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#  sake_log_id :bigint           not null
+#  user_id     :bigint           not null
+#
+# Indexes
+#
+#  index_comments_on_sake_log_id  (sake_log_id)
+#  index_comments_on_user_id      (user_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (sake_log_id => sake_logs.id)
+#  fk_rails_...  (user_id => users.id)
+#
 RSpec.describe Comment, type: :model do
   describe "バリデーション" do
     subject { build(:comment) }
