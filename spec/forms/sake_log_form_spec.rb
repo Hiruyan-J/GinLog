@@ -477,4 +477,109 @@ RSpec.describe SakeLogForm, type: :model do
       end
     end
   end
+
+  # ------------------------------------------------------------------
+  # 味わいの詳細
+  #   フォームからは「空文字 = 記録なし」で届くため、テストも文字列で渡す
+  # ------------------------------------------------------------------
+  describe "味わいの詳細" do
+    # 6項目すべて空文字（記録なし）のパラメータに、指定した項目だけ値を入れる
+    def taste_params(overrides = {})
+      TasteProfile::RECORD_ATTRIBUTES.index_with { "" }.merge(overrides)
+    end
+
+    describe "バリデーション" do
+      it "強弱が範囲外なら無効" do
+        form = build_form(taste_params(sweetness_intensity: "10.1"))
+
+        expect(form).to be_invalid
+        expect(form.errors[:sweetness_intensity]).to be_present
+      end
+
+      it "炭酸感に想定外の値が来たら無効" do
+        form = build_form(taste_params(carbonation: "unknown"))
+
+        expect(form).to be_invalid
+        expect(form.errors[:carbonation]).to be_present
+      end
+    end
+
+    describe "新規作成" do
+      it "何も記録しなければ TasteProfile を作らない" do
+        form = build_form(taste_params)
+
+        expect { form.save }.to change(SakeLog, :count).by(1)
+          .and change(TasteProfile, :count).by(0)
+      end
+
+      it "記録した項目は値、空文字の項目は nil（記録なし）で保存される" do
+        form = build_form(taste_params(sweetness_intensity: "7.5"))
+
+        expect(form.save).to be true
+        taste_profile = form.sake_log.taste_profile
+        expect(taste_profile.sweetness_intensity).to eq 7.5
+        expect(taste_profile.umami_intensity).to be_nil
+        expect(taste_profile.carbonation).to be_nil
+      end
+
+      it "強弱の 0 は記録なしと区別して 0 で保存される" do
+        form = build_form(taste_params(acidity_intensity: "0"))
+
+        expect(form.save).to be true
+        expect(form.sake_log.taste_profile.acidity_intensity).to eq 0.0
+      end
+
+      it "炭酸感「無し」は記録なしと区別して保存される" do
+        form = build_form(taste_params(carbonation: "still"))
+
+        expect(form.save).to be true
+        expect(form.sake_log.taste_profile.carbonation).to eq "still"
+      end
+
+      it "範囲外の値があれば SakeLog も作成されない" do
+        form = build_form(taste_params(finish_intensity: "-0.1"))
+
+        expect { form.save }.to change(SakeLog, :count).by(0)
+          .and change(TasteProfile, :count).by(0)
+      end
+    end
+
+    describe "編集" do
+      let(:sake_log) { create(:sake_log, user: user) }
+
+      it "保存済みの値がフォームの初期値になる" do
+        create(:taste_profile, :blank, sake_log: sake_log, umami_intensity: 3.0, carbonation: :gassy)
+        form = SakeLogForm.new(user: user, sake_log: sake_log)
+
+        expect(form.umami_intensity).to eq 3.0
+        expect(form.carbonation).to eq "gassy"
+        expect(form.sweetness_intensity).to be_nil
+        expect(form.taste_profile_recorded?).to be true
+      end
+
+      it "未記録の記録を編集するときは taste_profile_recorded? が false" do
+        form = SakeLogForm.new(user: user, sake_log: sake_log)
+
+        expect(form.taste_profile_recorded?).to be false
+      end
+
+      it "クリアして更新すると nil（記録なし）に戻る" do
+        create(:taste_profile, sake_log: sake_log)
+        form = SakeLogForm.new(taste_params(umami_intensity: "4.0"), user: user, sake_log: sake_log)
+
+        expect(form.save).to be true
+        taste_profile = sake_log.reload.taste_profile
+        expect(taste_profile.umami_intensity).to eq 4.0
+        expect(taste_profile.sweetness_intensity).to be_nil
+        expect(taste_profile.carbonation).to be_nil
+      end
+
+      it "未記録の記録に、あとから味わいの詳細を追加できる" do
+        form = SakeLogForm.new(taste_params(carbonation: "sparkling"), user: user, sake_log: sake_log)
+
+        expect { form.save }.to change(TasteProfile, :count).by(1)
+        expect(sake_log.reload.taste_profile.carbonation).to eq "sparkling"
+      end
+    end
+  end
 end

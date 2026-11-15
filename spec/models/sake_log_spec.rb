@@ -65,6 +65,7 @@ RSpec.describe SakeLog, type: :model do
     it { is_expected.to belong_to(:user) }
     it { is_expected.to belong_to(:sake) }
     it { is_expected.to have_many(:likes).dependent(:destroy) }
+    it { is_expected.to have_one(:taste_profile).dependent(:destroy) }
   end
 
   describe "reviewの正規化" do
