@@ -1,30 +1,33 @@
 <% content_for :title, t('.title') %>
 <%= page_heading %>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "flex flex-col gap-4 items-center py-2" }) do |f| %>
+<%= form_for(resource,
+      as: resource_name,
+      url: registration_path(resource_name),
+      html: { method: :put, class: "flex flex-col gap-4 py-2 mx-auto w-full md:w-8/12" }) do |f| %>
   <%= render "devise/shared/error_messages", resource: resource %>
 
-  <div class="w-full md:w-8/12 field">
+  <div class="field">
     <%= f.label :name %><br />
     <%= f.text_field :name, autofocus: true, autocomplete: "name", maxlength: User::NAME_MAX_LENGTH, class: "w-full input input-primary" %>
   </div>
 
-  <div class="w-full md:w-8/12 field">
+  <div class="field">
     <%= f.label :email %><br />
     <%= f.email_field :email, autocomplete: "email", disabled: resource.google_account?, class: "w-full input input-primary" %>
   </div>
 
   <%# メールアドレスを変更したあと、新しいアドレスの確認が済むまで表示される %>
   <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <div class="w-full md:w-8/12 alert alert-info">
+    <div class="alert alert-info">
       <%= t('.currently_waiting_confirmation_for_email', email: resource.unconfirmed_email) %>
     </div>
   <% end %>
 
   <% if resource.google_account? %>
-    <p class="w-full text-sm md:w-8/12"><%= t('.google_account_notice') %></p>
+    <p class="text-sm"><%= t('.google_account_notice') %></p>
   <% else %>
-    <div class="w-full md:w-8/12 field">
+    <div class="field">
       <%= f.label :password %>
       <em class="text-sm"><%= t('.leave_blank_if_you_don_t_want_to_change_it') %></em>
       <% if @minimum_password_length %>
@@ -33,12 +36,12 @@
       <%= f.password_field :password, autocomplete: "new-password", class: "w-full input input-primary" %>
     </div>
 
-    <div class="w-full md:w-8/12 field">
+    <div class="field">
       <%= f.label :password_confirmation %><br />
       <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full input input-primary" %>
     </div>
 
-    <div class="w-full md:w-8/12 field">
+    <div class="field">
       <%= f.label :current_password %>
       <em class="text-sm"><%= t('.we_need_your_current_password_to_confirm_your_changes') %></em><br />
       <%= f.password_field :current_password, autocomplete: "current-password", class: "w-full input input-primary" %>
@@ -55,10 +58,13 @@
 </div>
 
 <%# 退会 %>
-<section class="flex flex-col gap-3 items-center py-6 mt-6 border-t border-base-300">
-  <p class="w-full text-sm md:w-8/12"><%= t('.unhappy') %></p>
-  <%= button_to t('.cancel_my_account'), registration_path(resource_name),
-        method: :delete,
-        data: { turbo_confirm: t('.are_you_sure') },
-        class: "btn btn-outline btn-error" %>
+<section class="py-6 mt-6 border-t border-base-300">
+  <div class="flex flex-col gap-3 mx-auto w-full md:w-8/12">
+    <p class="text-sm"><%= t('.unhappy') %></p>
+    <%= button_to t('.cancel_my_account'), registration_path(resource_name),
+          method: :delete,
+          data: { turbo_confirm: t('.are_you_sure') },
+          form_class: "self-center",
+          class: "btn btn-outline btn-error" %>
+  </div>
 </section>

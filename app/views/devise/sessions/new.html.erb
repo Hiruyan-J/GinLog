@@ -1,19 +1,22 @@
 <% content_for :title,  t('.sign_in') %>
 <%= page_heading %>
 
-<%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "flex flex-col gap-4 items-center py-2" }) do |f| %>
-  <div class="w-full md:w-8/12 field">
+<%= form_for(resource,
+      as: resource_name,
+      url: session_path(resource_name),
+      html: { class: "flex flex-col gap-4 py-2 mx-auto w-full md:w-8/12" }) do |f| %>
+  <div class="field">
     <%= f.label :email %><br />
     <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "w-full input input-primary" %>
   </div>
 
-  <div class="w-full md:w-8/12 field">
+  <div class="field">
     <%= f.label :password %><br />
     <%= f.password_field :password, autocomplete: "current-password", class: "w-full input input-primary" %>
   </div>
 
   <% if devise_mapping.rememberable? %>
-    <div class="w-full md:w-8/12 field">
+    <div class="field">
       <%= f.check_box :remember_me, class: "checkbox checkbox-primary" %>
       <%= f.label :remember_me %>
     </div>
