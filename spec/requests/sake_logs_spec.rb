@@ -132,6 +132,92 @@ RSpec.describe "SakeLogs", type: :request do
     end
   end
 
+  # 必須項目は送信前にブラウザで止める（エラーで写真が消えるのを防ぐ）
+  describe "必須項目の required" do
+    # required を付ける入力欄の CSS セレクタ
+    let(:required_selectors) do
+      [
+        "input[name='sake_log[manual_brand_name]']",
+        "input[name='sake_log[manual_brewery_name]']",
+        "select[name='sake_log[area_id]']",
+        "input[name='sake_log[product_name]']",
+        "input[type=radio][name='sake_log[rating]']"
+      ]
+    end
+
+    # すべての必須項目に required が付いているか確認する
+    # @return [void]
+    def expect_required_fields
+      html = Nokogiri::HTML(response.body)
+      required_selectors.each do |selector|
+        fields = html.css(selector)
+        expect(fields).to be_present, "#{selector} が見つからない"
+        expect(fields).to all(satisfy { |field| field.key?("required") })
+      end
+    end
+
+    it "新規作成画面の必須項目に required が付いている" do
+      get new_sake_log_path
+
+      expect_required_fields
+    end
+
+    it "編集画面の必須項目に required が付いている" do
+      sake_log = create(:sake_log, user: user)
+
+      get edit_sake_log_path(sake_log)
+
+      expect_required_fields
+    end
+
+    # 香りの濃淡・味の濃淡は、触るまで「未入力」として扱う
+    context "香りの濃淡・味の濃淡" do
+      let(:strength_attributes) { %i[aroma_strength taste_strength] }
+
+      it "新規作成画面では、スライダーは送信されず、送信用の hidden field は空（未入力）になる" do
+        get new_sake_log_path
+
+        html = Nokogiri::HTML(response.body)
+        strength_attributes.each do |attribute|
+          expect(html.at_css("input[type=range]#sake_log_#{attribute}")["name"]).to be_nil
+          expect(html.at_css("input[type=hidden][name='sake_log[#{attribute}]']")["value"]).to be_blank
+        end
+      end
+
+      it "必須として扱われ、クリアボタンは出ない" do
+        get new_sake_log_path
+
+        html = Nokogiri::HTML(response.body)
+        strength_attributes.each do |attribute|
+          field = html.at_css("input[type=range]#sake_log_#{attribute}")
+                      .ancestors("[data-controller='clearable-field']").first
+          expect(field["data-clearable-field-required-value"]).to eq "true"
+          expect(field.at_css("button[data-action='clearable-field#clear']")).to be_nil
+        end
+      end
+
+      it "編集画面では、記録済みの値が hidden field に入る" do
+        sake_log = create(:sake_log, user: user, aroma_strength: 7.5, taste_strength: 2.0)
+
+        get edit_sake_log_path(sake_log)
+
+        html = Nokogiri::HTML(response.body)
+        expect(html.at_css("input[type=hidden][name='sake_log[aroma_strength]']")["value"]).to eq "7.5"
+        expect(html.at_css("input[type=hidden][name='sake_log[taste_strength]']")["value"]).to eq "2.0"
+      end
+
+      it "未入力（空文字）のまま送信されたら、登録されずにエラーになる" do
+        brand = create(:brand)
+        params = { product_name: "純米吟醸", brand_id: brand.id, rating: 3, aroma_strength: "", taste_strength: "" }
+
+        expect {
+          post sake_logs_path, params: { sake_log: params }
+        }.not_to change(SakeLog, :count)
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+  end
+
   describe "DELETE /sake_logs/:id" do
     context "一覧画面（タイムライン・マイログ）からの削除のとき" do
       it "Turbo Stream でそのカードだけ削除する" do
