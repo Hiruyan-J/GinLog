@@ -1,0 +1,52 @@
+<%# locals: f（フォームビルダー）, sake_log_form %>
+<%# tag.details の open: は false なら属性ごと出力されない %>
+<%= tag.details class: "w-full border collapse collapse-arrow border-base-300",
+      open: sake_log_form.taste_profile_recorded? do %>
+  <summary class="font-semibold collapse-title">
+    味・香りの詳細記録<span class="ml-1 text-xs font-normal text-base-content/50">（任意）</span>
+  </summary>
+
+  <div class="flex flex-col gap-6 collapse-content">
+    <h3 class="font-semibold border-b border-primary">味わい</h3>
+
+    <%# 甘味・旨味・酸味・熟成度・余韻 %>
+    <% TasteProfile::INTENSITY_SCALES.each do |attribute, (low_label, high_label)| %>
+      <%= render "sake_logs/intensity_field",
+            f: f, attribute: attribute, low_label: low_label, high_label: high_label %>
+    <% end %>
+
+    <%# 炭酸感（1つだけ選ぶ。全部未選択 = 記録なし） %>
+    <div data-controller="clearable-field"
+         data-clearable-field-blank-class="opacity-40 grayscale">
+      <div class="flex justify-between items-center">
+        <span class="font-semibold"><%= SakeLogForm.human_attribute_name(:carbonation) %></span>
+        <button type="button" class="btn btn-outline btn-xs btn-primary"
+                data-action="clearable-field#clear">クリア</button>
+      </div>
+
+      <%# 実際に送信される値（空文字 = 記録なし） %>
+      <%= f.hidden_field :carbonation, id: nil, data: { clearable_field_target: "value" } %>
+
+      <div class="mt-2" data-clearable-field-target="display">
+        <%# join … ボタン同士をくっつけて1本の帯にする（daisyUI） %>
+        <div class="w-full join">
+          <% TasteProfile::CARBONATION_LABELS.each do |key, label| %>
+            <%# has-checked: … 中のラジオが選ばれていたら緑に塗る %>
+            <label class="flex-1 font-normal join-item btn btn-sm has-checked:bg-primary has-checked:text-primary-content">
+              <%# name はラジオ同士を1グループにするためのダミー（送信するのは上の hidden field） %>
+              <%# ラジオ自体は隠し、label をボタンとして押させる %>
+              <%= radio_button_tag "carbonation_choice", key, sake_log_form.carbonation == key,
+                    class: "hidden",
+                    data: { clearable_field_target: "input", action: "change->clearable-field#record" } %>
+              <%= label %>
+            </label>
+          <% end %>
+        </div>
+        <div class="flex justify-between px-1 mt-1 text-xs">
+          <span>弱い</span>
+          <span>強い</span>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

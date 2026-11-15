@@ -1,0 +1,20 @@
+<%# スライダー本体と目盛り・両端/中間の表示（味・香りの濃淡、味わいの詳細で共通） %>
+<%# locals: f, attribute, min, max, low_label, high_label, range_options（range_field への追加オプション。省略可） %>
+<% range_options = local_assigns.fetch(:range_options, {}) %>
+<div class="w-full">
+  <div class="px-5">
+    <%= f.range_field attribute, min: min, max: max, step: 0.1,
+          class: "w-full range range-primary", **range_options %>
+  </div>
+  <div class="flex justify-between mt-2 text-xs px-7.5">
+    <span>|</span>
+    <span>|</span>
+    <span>|</span>
+  </div>
+  <%# 中央は「中間」の文字幅だけ使い、残りを両端で分け合う（スマホ幅で長い表示が折り返さないように） %>
+  <div class="grid gap-x-2 px-2.5 mt-2 text-xs grid-cols-[1fr_auto_1fr]">
+    <span><%= low_label %></span>
+    <span class="text-center">中間</span>
+    <span class="text-right"><%= high_label %></span>
+  </div>
+</div>
