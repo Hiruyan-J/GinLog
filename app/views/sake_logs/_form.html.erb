@@ -5,12 +5,11 @@
 <%= form_with model: sake_log_form,
       url: sake_log_form.persisted? ? sake_log_path(sake_log_form.sake_log) : sake_logs_path,
       html: { multipart: true } do |f| %>
-  <%= render 'shared/error_messages', object: f.object %>
-
-  <section class="flex flex-col gap-6 items-center px-2">
+  <section class="flex flex-col gap-6 px-2 mx-auto w-full md:w-8/12">
+    <%= render 'shared/error_messages', object: f.object %>
 
     <%# 写真（すべて任意） %>
-    <div class="flex flex-col w-full md:w-8/12">
+    <div class="flex flex-col">
       <div class="flex gap-2 items-baseline">
         <span class="font-semibold whitespace-nowrap">写真</span>
       </div>
@@ -31,7 +30,7 @@
     <% end %>
 
     <%# 銘柄(オートコンプリート) %>
-    <div class="flex flex-col w-full md:w-8/12"
+    <div class="flex flex-col"
          data-controller="brand-autocomplete"
          data-brand-autocomplete-search-url-value="<%= search_api_brands_path %>"
          data-brand-autocomplete-initial-brand-id-value="<%= sake_log_form.brand_id %>"
@@ -66,7 +65,7 @@
 
     <%# 蔵元(オートコンプリート) %>
     <%# 銘柄選択時は readonly で自動表示、銘柄手入力モード時は検索/手入力可能になる %>
-    <div class="flex flex-col w-full md:w-8/12"
+    <div class="flex flex-col"
          data-controller="brewery-autocomplete"
          data-brewery-autocomplete-search-url-value="<%= search_api_breweries_path %>"
          data-brewery-autocomplete-initial-brand-id-value="<%= sake_log_form.brand_id %>"
@@ -102,7 +101,7 @@
 
     <%# 都道府県 %>
     <%# 通常モードは input(readonly) に都道府県名表示、蔵元手入力時は select に切替 %>
-    <div class="flex flex-col w-full md:w-8/12"
+    <div class="flex flex-col"
          data-controller="area-display"
          data-area-display-initial-brand-id-value="<%= sake_log_form.brand_id %>"
          data-area-display-initial-brewery-id-value="<%= sake_log_form.brewery_id %>"
@@ -129,7 +128,7 @@
     </div>
 
     <%# 商品名(オートコンプリート) %>
-    <div class="flex flex-col w-full md:w-8/12"
+    <div class="flex flex-col"
          data-controller="product-name-autocomplete"
          data-product-name-autocomplete-search-url-value="<%= search_api_sakes_path %>"
          data-product-name-autocomplete-brand-id-value="<%= sake_log_form.brand_id %>"
@@ -164,7 +163,7 @@
     </div>
 
     <%# 好み度 %>
-    <div class="w-full md:w-8/12">
+    <div>
       <%= f.label :rating, class: "font-semibold whitespace-nowrap required" %>
       <div class="flex justify-between items-center w-full">
         <%# 画面左 好み度入力 %>
@@ -194,7 +193,7 @@
     </div>
 
     <%# 香りの濃淡 %>
-    <div class="w-full md:w-8/12">
+    <div>
       <%= f.label :aroma_strength, class: "font-semibold whitespace-nowrap required" %>
       <%= render "sake_logs/range_slider",
             f: f, attribute: :aroma_strength,
@@ -203,7 +202,7 @@
     </div>
 
     <%# 味の濃淡 %>
-    <div class="w-full md:w-8/12">
+    <div>
       <%= f.label :taste_strength, class: "font-semibold whitespace-nowrap required" %>
       <%= render "sake_logs/range_slider",
             f: f, attribute: :taste_strength,
@@ -212,15 +211,13 @@
     </div>
 
     <%# 感想 %>
-    <div class="flex flex-col w-full md:w-8/12">
+    <div class="flex flex-col">
       <%= f.label :review, class: "font-semibold" %>
       <%= f.text_area :review, maxlength: SakeLog::REVIEW_MAX_LENGTH, class: "w-full textarea textarea-primary" %>
     </div>
 
     <%# 味・香りの詳細記録（任意。最初は閉じた状態） %>
-    <div class="w-full md:w-8/12">
-      <%= render "sake_logs/detail_fields", f: f, sake_log_form: sake_log_form %>
-    </div>
+    <%= render "sake_logs/detail_fields", f: f, sake_log_form: sake_log_form %>
 
     <div class="flex gap-2 justify-center">
       <%= link_to "一覧に戻る", sake_logs_path, class: "btn btn-outline btn-primary md:btn-wide" %>
@@ -228,7 +225,7 @@
     </div>
 
     <%# さけのわデータ帰属表示 %>
-    <p class="text-xs text-base-content/50">
+    <p class="text-xs text-center text-base-content/50">
       <%= t('sake_logs.sakenowa_attribution_html',
             link: link_to("さけのわデータ", "https://sakenowa.com",
                   target: "_blank", rel: "noopener noreferrer", class: "link")) %>
