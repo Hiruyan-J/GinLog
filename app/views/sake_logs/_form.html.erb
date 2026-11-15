@@ -168,13 +168,13 @@
       <div class="flex justify-between items-center w-full">
         <%# 画面左 好み度入力 %>
         <div class="flex gap-2 items-center rating rating-xl"
-              data-controller="rating">
+             data-controller="rating">
           <%# 好み度0 %>
           <%= f.radio_button :rating, SakeLog::RATING_MIN, class: "rating-hidden",
               id: "rating-0", aria: { label: "clear" },
-               data: { action: "change->rating#select" } %>
+              data: { action: "change->rating#select" } %>
 
-          <%# 好み度1〜5　%>
+          <%# 好み度1〜5 %>
           <% rating_range = (SakeLog::RATING_MIN + 1)..SakeLog::RATING_MAX %>
           <%# 初期表示の星色をrating値に応じて切り替え(nil→灰色、値あり→黄色) %>
           <% star_color = sake_log_form.rating.nil? ? "bg-stone-400" : "bg-yellow-300" %>
@@ -186,7 +186,7 @@
         </div>
 
         <%# 画面右 クリアボタン %>
-        <label for="rating-0" class= "cursor-pointer">
+        <label for="rating-0" class="cursor-pointer">
           <span class="btn btn-outline btn-xs btn-primary">好み度 0</span>
         </label>
       </div>
