@@ -87,6 +87,18 @@ RSpec.describe "SakeLogs", type: :request do
 
       expect(detail_section["open"]).to be_nil
     end
+
+    # スライダーに name が付くと、触っていない項目まで表示用の初期値（5.0）で保存されてしまうため
+    it "味わいのスライダーは送信されず、送信用の hidden field は空（記録なし）になる" do
+      get new_sake_log_path
+
+      html = Nokogiri::HTML(response.body)
+      TasteProfile::INTENSITY_SCALES.each_key do |attribute|
+        expect(html.at_css("input[type=range]#sake_log_#{attribute}")["name"]).to be_nil
+        expect(html.at_css("input[type=hidden][name='sake_log[#{attribute}]']")["value"]).to be_blank
+      end
+      expect(html.at_css("input[type=hidden][name='sake_log[carbonation]']")["value"]).to be_blank
+    end
   end
 
   # 作成・更新で味わいの詳細が保存される
