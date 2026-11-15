@@ -5,6 +5,7 @@ ja:
       sake_log: 日本酒記録
       sake: 日本酒
       comment: コメント
+      taste_profile: 味わいの詳細
     attributes:
       sake_log:
         rating: 好み度
@@ -20,3 +21,10 @@ ja:
         product_name: 商品名
       comment:
         body: コメント
+      taste_profile:
+        sweetness_intensity: 甘味
+        umami_intensity: 旨味
+        acidity_intensity: 酸味
+        maturity_intensity: 熟成度
+        finish_intensity: 余韻
+        carbonation: 炭酸感

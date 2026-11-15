@@ -21,4 +21,9 @@ ja:
         back_label_image: 裏ラベル
         sub_image1: その他1
         sub_image2: その他2
-
+        sweetness_intensity: 甘味
+        umami_intensity: 旨味
+        acidity_intensity: 酸味
+        maturity_intensity: 熟成度
+        finish_intensity: 余韻
+        carbonation: 炭酸感

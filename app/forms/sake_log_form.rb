@@ -27,6 +27,13 @@ class SakeLogForm
   attribute :manual_brewery_name, :string
   attribute :brewery_id, :integer           # オートコンプリートで選択した蔵元ID
   attribute :area_id, :integer              # 都道府県ID (蔵元手入力時)
+  # 味わいの詳細（任意。nil = 記録なし）
+  attribute :sweetness_intensity, :float
+  attribute :umami_intensity, :float
+  attribute :acidity_intensity, :float
+  attribute :maturity_intensity, :float
+  attribute :finish_intensity, :float
+  attribute :carbonation, :string           # enum のキー（"still" など）
 
   # 関連オブジェクト (ゲッターのみ)
   attr_reader :sake_log, :user
@@ -57,6 +64,13 @@ class SakeLogForm
                       numericality: { only_integer: true, greater_than: 0, allow_nil: true },
                       if: :manual_brewery_mode?
   validates :manual_brewery_name, presence: true, length: { maximum: Brewery::NAME_MAX_LENGTH }, if: :manual_brewery_mode?
+  # 味わいの詳細（記録なし = nil は許可）
+  TasteProfile::INTENSITY_SCALES.each_key do |attribute|
+    validates attribute, numericality: { greater_than_or_equal_to: TasteProfile::INTENSITY_MIN,
+                                         less_than_or_equal_to: TasteProfile::INTENSITY_MAX },
+                         allow_nil: true
+  end
+  validates :carbonation, inclusion: { in: TasteProfile.carbonations.keys }, allow_blank: true
 
   # コンストラクタ
   # @param attributes [Hash] フォームの属性
@@ -76,7 +90,8 @@ class SakeLogForm
           product_name: @sake_log.sake.product_name,
           brand_id: @sake_log.sake.brand_id,
           sake_id: @sake_log.sake.id
-        }.merge(attributes)
+        }.merge(saved_taste_profile_attributes)
+         .merge(attributes)
       end
       super(attributes)
   end
@@ -117,6 +132,9 @@ class SakeLogForm
         @sake_log.sake = sake
         @sake_log.save!
       end
+
+      # 味わいの詳細を保存（SakeLog の保存後でないと sake_log_id が決まらない）
+      save_taste_profile!
 
       saved = true
     rescue ActiveRecord::RecordInvalid => e
@@ -232,7 +250,40 @@ class SakeLogForm
     Area.order(:id).pluck(:name, :id)
   end
 
+  # 味わいの詳細が1項目でも記録されているか（詳細セクションを開いて表示するかの判定に使う）
+  # @return [Boolean] 記録された項目があれば true
+  def taste_profile_recorded?
+    TasteProfile.new(taste_profile_attributes).recorded?
+  end
+
   private
+
+  # 味わいの詳細を保存する
+  # 何も記録されておらず、保存済みの行も無いときは行を作らない
+  # （保存済みの行がある場合は、全項目クリアでも NULL で上書きして残す）
+  # @return [void]
+  def save_taste_profile!
+    taste_profile = @sake_log.taste_profile
+    return if taste_profile.nil? && !taste_profile_recorded?
+
+    taste_profile ||= @sake_log.build_taste_profile
+    taste_profile.update!(taste_profile_attributes)
+  end
+
+  # TasteProfile へ渡す属性をまとめる
+  # @return [Hash{Symbol => Float, String, nil}] 例: { sweetness_intensity: 7.5, ..., carbonation: "still" }
+  def taste_profile_attributes
+    TasteProfile::RECORD_ATTRIBUTES.index_with { |attribute| public_send(attribute) }
+  end
+
+  # 編集時、保存済みの味わいの詳細をフォームの初期値にする
+  # @return [Hash{Symbol => Float, String, nil}] 未記録（行が無い）なら空のハッシュ
+  def saved_taste_profile_attributes
+    taste_profile = @sake_log.taste_profile
+    return {} if taste_profile.nil?
+
+    TasteProfile::RECORD_ATTRIBUTES.index_with { |attribute| taste_profile.public_send(attribute) }
+  end
 
   # 銘柄手入力モード時に Brand(と必要なら Brewery)を作成し、brand_id をセットする
   # @return [void]
@@ -316,7 +367,7 @@ class SakeLogForm
   end
 
   # モデルのバリデーションエラーをFormObjectに転記する
-  # @param record [ActiveRecord::Base] エラーが発生したレコード（Sake/SakeLog/Brand/Brewery）
+  # @param record [ActiveRecord::Base] エラーが発生したレコード（Sake/SakeLog/Brand/Brewery/TasteProfile）
   # @return [void]
   def copy_errors_from_record(record)
     record.errors.each do |error|
@@ -326,7 +377,7 @@ class SakeLogForm
         if error.attribute == :product_name
           self.errors.add(error.attribute, error.message)
         end
-      when SakeLog
+      when SakeLog, TasteProfile
         self.errors.add(error.attribute, error.message)
       when Brand
         if error.attribute == :name
