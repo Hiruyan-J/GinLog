@@ -12,7 +12,9 @@
     <%# 甘味・旨味・酸味・熟成度・余韻 %>
     <% TasteProfile::INTENSITY_SCALES.each do |attribute, (low_label, high_label)| %>
       <%= render "sake_logs/intensity_field",
-            f: f, attribute: attribute, low_label: low_label, high_label: high_label %>
+            f: f, attribute: attribute, low_label: low_label, high_label: high_label,
+            min: TasteProfile::INTENSITY_MIN, max: TasteProfile::INTENSITY_MAX,
+            default_value: TasteProfile::INTENSITY_DEFAULT %>
     <% end %>
 
     <%# 炭酸感（1つだけ選ぶ。全部未選択 = 記録なし） %>
