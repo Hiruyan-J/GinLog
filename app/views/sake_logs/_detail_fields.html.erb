@@ -1,7 +1,7 @@
-<%# locals: f（フォームビルダー）, sake_log_form %>
+<%# locals: f（フォームビルダー。f.object が SakeLogForm） %>
 <%# tag.details の open: は false なら属性ごと出力されない %>
 <%= tag.details class: "w-full border collapse collapse-arrow border-base-300",
-      open: sake_log_form.taste_profile_recorded? do %>
+      open: f.object.taste_profile_recorded? do %>
   <summary class="font-semibold collapse-title">
     味・香りの詳細記録<span class="ml-1 text-xs font-normal text-base-content/50">（任意）</span>
   </summary>
@@ -35,7 +35,7 @@
             <label class="flex-1 font-normal join-item btn btn-sm has-checked:bg-primary has-checked:text-primary-content">
               <%# name はラジオ同士を1グループにするためのダミー（送信するのは上の hidden field） %>
               <%# ラジオ自体は隠し、label をボタンとして押させる %>
-              <%= radio_button_tag "carbonation_choice", key, sake_log_form.carbonation == key,
+              <%= radio_button_tag "carbonation_choice", key, f.object.carbonation == key,
                     class: "hidden",
                     data: { clearable_field_target: "input", action: "change->clearable-field#record" } %>
               <%= label %>

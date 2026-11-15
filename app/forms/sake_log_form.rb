@@ -77,23 +77,23 @@ class SakeLogForm
   # @param user [User] ログイン中のユーザー
   # @param sake_log [SakeLog, nil] 編集時の既存SakeLog（新規作成時はnil）
   def initialize(attributes = {}, user:, sake_log: nil)
-      @user = user
-      @sake_log = sake_log
+    @user = user
+    @sake_log = sake_log
 
-      if @sake_log
-        # 編集時: 既存データから属性をセット
-        attributes = {
-          rating: @sake_log.rating,
-          aroma_strength: @sake_log.aroma_strength,
-          taste_strength: @sake_log.taste_strength,
-          review: @sake_log.review,
-          product_name: @sake_log.sake.product_name,
-          brand_id: @sake_log.sake.brand_id,
-          sake_id: @sake_log.sake.id
-        }.merge(saved_taste_profile_attributes)
-         .merge(attributes)
-      end
-      super(attributes)
+    if @sake_log
+      # 編集時: 既存データから属性をセット
+      attributes = {
+        rating: @sake_log.rating,
+        aroma_strength: @sake_log.aroma_strength,
+        taste_strength: @sake_log.taste_strength,
+        review: @sake_log.review,
+        product_name: @sake_log.sake.product_name,
+        brand_id: @sake_log.sake.brand_id,
+        sake_id: @sake_log.sake.id
+      }.merge(saved_taste_profile_attributes)
+       .merge(attributes)
+    end
+    super(attributes)
   end
 
   # 保存処理
