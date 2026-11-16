@@ -95,6 +95,16 @@
       </section>
     <% end %>
 
+    <%# Xでシェアボタン(自分の記録のみ) %>
+    <% if current_user&.own?(@sake_log) %>
+      <div class="flex justify-center mt-6">
+        <%= render "shared/x_share_button",
+              text: sake_log_share_text(@sake_log, owned: true),
+              url: sake_log_url(@sake_log),
+              hashtags: share_hashtags(@sake_log.sake) %>
+      </div>
+    <% end %>
+
     <%# いいね・コメント・シェア %>
     <footer class="flex justify-around items-center pt-3 mt-6 border-t border-base-300">
       <%# いいね %>

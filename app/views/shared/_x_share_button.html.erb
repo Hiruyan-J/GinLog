@@ -1,0 +1,8 @@
+<%# locals: (text:, url:, hashtags: ShareHelper::SHARE_HASHTAGS) -%>
+<%= link_to x_share_url(text: text, url: url, hashtags: hashtags),
+      data: { x_share_button: true },
+      target: "_blank", rel: "noopener noreferrer",
+      class: "text-white bg-black border-black btn hover:bg-neutral-800" do %>
+  <%= render "shared/x_logo", css_class: "w-5 h-5" %>
+  Xでシェア
+<% end %>
