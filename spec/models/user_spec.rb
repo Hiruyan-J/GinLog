@@ -34,6 +34,7 @@ RSpec.describe User, type: :model do
     it { is_expected.to be_valid }
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_length_of(:name).is_at_most(User::NAME_MAX_LENGTH) }
+    it { is_expected.to validate_length_of(:email).is_at_most(User::EMAIL_MAX_LENGTH) }
   end
 
   describe "アソシエーション" do
