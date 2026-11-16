@@ -126,18 +126,18 @@
         </div>
       <% else %>
         <div class="mt-3 text-center">
-          <%= link_to "ログインしてコメントする", new_user_session_path, class: "btn btn-outline btn-primary btn-sm" %>
+          <%= link_to "ログインしてコメントする", new_user_session_path, class: "btn btn-primary btn-sm" %>
         </div>
       <% end %>
     </section>
 
     <%# 戻るリンク %>
     <% back_label, back_path = sake_log_back_link(origin: @origin, owned: current_user&.own?(@sake_log), sake_id: @sake_log.sake_id) %>
-    <section class="flex flex-wrap gap-2 justify-center mt-6">
-      <%= link_to back_label, back_path, class: "btn btn-outline btn-primary" %>
+    <section class="flex gap-2 justify-center mt-6">
+      <%= link_to back_label, back_path, class: "shrink btn btn-outline btn-primary btn-wide" %>
       <%# 戻り先がタイムラインでないときだけ、タイムラインへの導線を出す %>
       <% if back_path != timeline_path %>
-        <%= link_to "タイムラインで見る", timeline_path, class: "btn btn-primary" %>
+        <%= link_to "タイムラインへ", timeline_path, class: "shrink btn btn-primary btn-wide" %>
       <% end %>
     </section>
   </article>

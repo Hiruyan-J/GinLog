@@ -25,7 +25,8 @@
     <div class="w-full divider"><%= t('.or') %></div>
     <%= button_to omniauth_authorize_path(resource_name, :google_oauth2),
           data: { turbo: false },
-          class: "bg-white btn border-[#747775] text-[#1f1f1f]" do %>
+          form_class: "flex justify-center w-full",
+          class: "bg-white btn btn-wide border-[#747775] text-[#1f1f1f]" do %>
       <%= image_tag "google_g_logo.svg", alt: "", class: "size-5" %>
       <%= t('.sign_in_with_provider', provider: "Google") %>
     <% end %>
