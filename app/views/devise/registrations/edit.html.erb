@@ -9,12 +9,20 @@
 
   <div class="field">
     <%= f.label :name %><br />
-    <%= f.text_field :name, autofocus: true, autocomplete: "name", maxlength: User::NAME_MAX_LENGTH, class: "w-full input input-primary" %>
+    <%= f.text_field :name,
+          autofocus: true,
+          autocomplete: "name",
+          maxlength: User::NAME_MAX_LENGTH,
+          class: "w-full input input-primary" %>
   </div>
 
   <div class="field">
     <%= f.label :email %><br />
-    <%= f.email_field :email, autocomplete: "email", disabled: resource.google_account?, class: "w-full input input-primary" %>
+    <%= f.email_field :email,
+          autocomplete: "email",
+          maxlength: User::EMAIL_MAX_LENGTH,
+          disabled: resource.google_account?,
+          class: "w-full input input-primary" %>
   </div>
 
   <%# メールアドレスを変更したあと、新しいアドレスの確認が済むまで表示される %>
@@ -33,18 +41,29 @@
       <% if @minimum_password_length %>
         <em class="text-sm"><%= t('devise.shared.minimum_password_length', count: @minimum_password_length) %></em>
       <% end %><br />
-      <%= f.password_field :password, autocomplete: "new-password", class: "w-full input input-primary" %>
+      <%= f.password_field :password,
+            autocomplete: "new-password",
+            minlength: User.password_length.min,
+            maxlength: User.password_length.max,
+            class: "w-full input input-primary" %>
     </div>
 
     <div class="field">
       <%= f.label :password_confirmation %><br />
-      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full input input-primary" %>
+      <%= f.password_field :password_confirmation,
+            autocomplete: "new-password",
+            minlength: User.password_length.min,
+            maxlength: User.password_length.max,
+            class: "w-full input input-primary" %>
     </div>
 
     <div class="field">
       <%= f.label :current_password %>
       <em class="text-sm"><%= t('.we_need_your_current_password_to_confirm_your_changes') %></em><br />
-      <%= f.password_field :current_password, autocomplete: "current-password", class: "w-full input input-primary" %>
+      <%= f.password_field :current_password,
+            autocomplete: "current-password",
+            maxlength: User.password_length.max,
+            class: "w-full input input-primary" %>
     </div>
   <% end %>
 

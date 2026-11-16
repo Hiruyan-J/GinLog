@@ -27,6 +27,7 @@
 #
 class User < ApplicationRecord
   NAME_MAX_LENGTH = 20
+  EMAIL_MAX_LENGTH = 255
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -35,6 +36,8 @@ class User < ApplicationRecord
          :omniauthable, omniauth_providers: %i[google_oauth2]
 
   validates :name, presence: true, length: { maximum: NAME_MAX_LENGTH }
+  # Devise の validatable は email の文字数をチェックしないため、上限をここで設定する
+  validates :email, length: { maximum: EMAIL_MAX_LENGTH }
   has_many :sake_logs, dependent: :destroy
   has_many :label_extraction_logs, dependent: :destroy
   has_many :likes, dependent: :destroy

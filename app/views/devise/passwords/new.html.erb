@@ -9,7 +9,11 @@
 
   <div class="field">
     <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "w-full input input-primary" %>
+    <%= f.email_field :email,
+          autofocus: true,
+          autocomplete: "email",
+          maxlength: User::EMAIL_MAX_LENGTH,
+          class: "w-full input input-primary" %>
   </div>
 
   <div class="flex justify-center actions">

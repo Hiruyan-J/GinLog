@@ -9,12 +9,19 @@
 
   <div class="field">
     <%= f.label :name %><br />
-    <%= f.text_field :name, autofocus: true, autocomplete: "name", maxlength: User::NAME_MAX_LENGTH, class: "w-full input input-primary" %>
+    <%= f.text_field :name,
+          autofocus: true,
+          autocomplete: "name",
+          maxlength: User::NAME_MAX_LENGTH,
+          class: "w-full input input-primary" %>
   </div>
 
   <div class="field">
     <%= f.label :email %><br />
-    <%= f.email_field :email, autocomplete: "email", class: "w-full input input-primary" %>
+    <%= f.email_field :email,
+          autocomplete: "email",
+          maxlength: User::EMAIL_MAX_LENGTH,
+          class: "w-full input input-primary" %>
   </div>
 
   <div class="field">
@@ -22,12 +29,20 @@
     <% if @minimum_password_length %>
     <em><%= t('devise.shared.minimum_password_length', count: @minimum_password_length) %></em>
     <% end %><br />
-    <%= f.password_field :password, autocomplete: "new-password", class: "w-full input input-primary" %>
+    <%= f.password_field :password,
+          autocomplete: "new-password",
+          minlength: User.password_length.min,
+          maxlength: User.password_length.max,
+          class: "w-full input input-primary" %>
   </div>
 
   <div class="field">
     <%= f.label :password_confirmation %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full input input-primary" %>
+    <%= f.password_field :password_confirmation,
+          autocomplete: "new-password",
+          minlength: User.password_length.min,
+          maxlength: User.password_length.max,
+          class: "w-full input input-primary" %>
   </div>
 
   <%# 利用規約・プライバシーポリシーへの同意（入力が消えないよう、別タブで開く） %>
