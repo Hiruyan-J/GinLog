@@ -1,6 +1,6 @@
-<%# スライダー本体と目盛り・両端/中間の表示（味・香りの濃淡、味わいの詳細で共通） %>
-<%# locals: f, attribute, min, max, low_label, high_label, range_options（range_field への追加オプション。省略可） %>
-<% range_options = local_assigns.fetch(:range_options, {}) %>
+<%# locals: (f:, attribute:, min:, max:, low_label:, high_label:, range_options: {}) -%>
+<%# スライダー本体と目盛り・両端/中間の表示（味・香りの濃淡、味わいの詳細で共通）
+    range_options … range_field への追加オプション %>
 <div class="w-full">
   <div class="px-5">
     <%= f.range_field attribute, min: min, max: max, step: 0.1,

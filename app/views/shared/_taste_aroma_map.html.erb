@@ -1,3 +1,4 @@
+<%# locals: (taste:, aroma:, variant:, size: :sm, labels: :always) -%>
 <%# 味 × 香りの4象限マップ
   locals:
     taste:   味の濃淡の値（SakeLog#taste_strength / Sake#average_taste_strength）
@@ -10,9 +11,9 @@
 
 <% active_quadrant = taste_aroma_quadrant(taste, aroma) %>
 
-<%# 外枠サイズ（size 省略時は :sm）・軸ラベルの表示クラス（labels 省略時は :always） %>
-<% size_class = quadrant_map_size_class(local_assigns.fetch(:size, :sm)) %>
-<% label_class = quadrant_label_class(local_assigns.fetch(:labels, :always)) %>
+<%# 外枠サイズ・軸ラベルの表示クラス %>
+<% size_class = quadrant_map_size_class(size) %>
+<% label_class = quadrant_label_class(labels) %>
 
 <div class="<%= size_class %> grid grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr_auto] items-center justify-items-center gap-1 text-[10px] leading-none text-neutral-500">
   <%# 上の軸ラベル %>
