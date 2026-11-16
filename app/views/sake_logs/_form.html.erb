@@ -49,6 +49,7 @@
             class: "w-full input input-primary",
             value: sake_log_form.brand_display_name,
             placeholder: "銘柄名を入力してください",
+            maxlength: Brand::NAME_MAX_LENGTH,
             autocomplete: "off",
             required: true,
             data: {
@@ -86,6 +87,7 @@
             class: "w-full input input-primary",
             value: sake_log_form.brewery_display_name,
             placeholder: "蔵元名を入力してください",
+            maxlength: Brewery::NAME_MAX_LENGTH,
             autocomplete: "off",
             required: true, # 銘柄を候補から選んだときは disabled になり、チェックされない
             data: {
@@ -150,6 +152,7 @@
       <%# 商品名入力欄(オートコンプリート + フリー入力兼用) %>
       <%= f.text_field :product_name, class: "w-full input input-primary",
             placeholder: "商品名を入力してください",
+            maxlength: Sake::PRODUCT_NAME_MAX_LENGTH,
             autocomplete: "off",
             required: true, # 銘柄が決まるまでは disabled なので、チェックされない
             disabled: !sake_log_form.brand_committed?,

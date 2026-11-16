@@ -22,7 +22,7 @@
 class Brand < ApplicationRecord
   include Normalizable
 
-  NAME_MAX_LENGTH = 255
+  NAME_MAX_LENGTH = 100
 
   normalizes_text :name
 

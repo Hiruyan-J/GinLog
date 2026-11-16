@@ -218,6 +218,25 @@ RSpec.describe "SakeLogs", type: :request do
     end
   end
 
+  # 文字数の上限を超えて入力できないようにする
+  describe "入力欄の maxlength" do
+    it "銘柄名・蔵元名・商品名・感想に、モデルと同じ上限の maxlength が付いている" do
+      max_lengths = {
+        "input[name='sake_log[manual_brand_name]']" => Brand::NAME_MAX_LENGTH,
+        "input[name='sake_log[manual_brewery_name]']" => Brewery::NAME_MAX_LENGTH,
+        "input[name='sake_log[product_name]']" => Sake::PRODUCT_NAME_MAX_LENGTH,
+        "textarea[name='sake_log[review]']" => SakeLog::REVIEW_MAX_LENGTH
+      }
+
+      get new_sake_log_path
+
+      html = Nokogiri::HTML(response.body)
+      max_lengths.each do |selector, max_length|
+        expect(html.at_css(selector)["maxlength"]).to eq(max_length.to_s), "#{selector} の maxlength が違う"
+      end
+    end
+  end
+
   describe "DELETE /sake_logs/:id" do
     context "一覧画面（タイムライン・マイログ）からの削除のとき" do
       it "Turbo Stream でそのカードだけ削除する" do
