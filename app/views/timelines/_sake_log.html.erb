@@ -1,5 +1,5 @@
-<%# 描画元の画面（省略時はタイムライン）。記録詳細の「戻る」と削除時の応答の出し分けに使用 %>
-<% origin = local_assigns.fetch(:origin, "timeline") %>
+<%# locals: (sake_log:, origin: "timeline") -%>
+<%# origin … 描画元の画面（省略時はタイムライン）。記録詳細の「戻る」と削除時の応答の出し分けに使用 %>
 
 <article id="<%= dom_id sake_log %>" class="relative py-3">
   <%= link_to "", sake_log_path(sake_log, from: origin),
