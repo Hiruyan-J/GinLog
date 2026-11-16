@@ -18,7 +18,7 @@
       <div class="flex gap-2 items-baseline">
         <%# 銘柄名は縮ませず、長すぎるときだけ幅の 2/3 で「…」にする。残りの幅に商品名を入れる %>
         <h2 class="text-lg font-bold max-w-2/3 truncate shrink-0"><%= brand_link sake_log.sake.brand %></h2>
-        <p class="text-sm truncate"><%= product_name_link sake_log.sake %></p>
+        <p class="text-sm truncate"><%= product_name_link sake_log.sake, truncate: true %></p>
       </div>
 
       <%# 2段目: 左に文字情報、右に4象限マップ %>
