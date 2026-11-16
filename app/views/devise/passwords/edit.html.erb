@@ -13,12 +13,21 @@
     <% if @minimum_password_length %>
       <em><%= t('devise.shared.minimum_password_length', count: @minimum_password_length) %></em>
     <% end %><br />
-    <%= f.password_field :password, autofocus: true, autocomplete: "new-password", class: "w-full input input-primary" %>
+    <%= f.password_field :password,
+          autofocus: true,
+          autocomplete: "new-password",
+          minlength: User.password_length.min,
+          maxlength: User.password_length.max,
+          class: "w-full input input-primary" %>
   </div>
 
   <div class="field">
     <%= f.label :password_confirmation, t('.confirm_new_password') %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full input input-primary" %>
+    <%= f.password_field :password_confirmation,
+          autocomplete: "new-password",
+          minlength: User.password_length.min,
+          maxlength: User.password_length.max,
+          class: "w-full input input-primary" %>
   </div>
 
   <div class="flex justify-center pt-2 actions">
