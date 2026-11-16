@@ -6,6 +6,8 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["value", "input", "display"]
   static classes = ["blank"]
+  static values = { required: Boolean }
+  static REQUIRED_MESSAGE = "スライダーを動かすか、タップして選んでください"
 
   connect() {
     this.updateAppearance()
@@ -26,11 +28,20 @@ export default class extends Controller {
     this.updateAppearance()
   }
 
-  // 記録なしなら灰色にする
+  // 記録なしなら灰色、記録ありなら元の色に戻す（必須の欄はエラーの付け外しも行う）
   updateAppearance() {
     const isBlank = this.valueTarget.value === ""
     this.blankClasses.forEach((className) => {
       this.displayTarget.classList.toggle(className, isBlank)
     })
+    this.updateValidity(isBlank)
+  }
+
+  // 必須の欄が未入力ならエラーを付けて送信を止め、入力済みならエラーを外す
+  updateValidity(isBlank) {
+    if (!this.requiredValue) return
+
+    const message = isBlank ? this.constructor.REQUIRED_MESSAGE : ""
+    this.inputTargets.forEach((input) => input.setCustomValidity(message))
   }
 }
