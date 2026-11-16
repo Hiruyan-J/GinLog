@@ -52,7 +52,7 @@
   <section class="mt-1">
     <div class="flex flex-wrap gap-x-2 items-baseline">
       <h2 class="text-xl font-bold"><%= brand_link sake_log.sake.brand %></h2>
-      <p class="text-sm"><%= product_name_link sake_log.sake %></p>
+      <p class="text-sm truncate"><%= product_name_link sake_log.sake, truncate: true %></p>
     </div>
     <p class="text-xs text-neutral-500"><%= brewery_and_area_links sake_log.sake.brand.brewery %></p>
   </section>
