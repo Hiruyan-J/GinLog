@@ -24,7 +24,7 @@
 class Sake < ApplicationRecord
   include Normalizable
 
-  PRODUCT_NAME_MAX_LENGTH = 255
+  PRODUCT_NAME_MAX_LENGTH = 100
   # フリーワード検索で使う単語数の上限（超えた分は無視する）
   KEYWORD_MAX_WORDS = 5
 
