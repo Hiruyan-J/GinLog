@@ -44,6 +44,14 @@
       <p class="my-6 text-sm text-center text-neutral-500">集計中です。しばらくしてから開き直してください。</p>
     <% end %>
 
+    <%# Xでシェアボタン %>
+    <div class="flex justify-center mt-6">
+      <%= render "shared/x_share_button",
+            text: sake_share_text(@sake),
+            url: sake_url(@sake),
+            hashtags: share_hashtags(@sake) %>
+    </div>
+
     <%# ---------- みんなの記録（無限スクロール） ---------- %>
     <section class="mt-6">
       <h2 class="pb-1 text-sm font-semibold border-b border-base-300 text-neutral-500">みんなの記録</h2>

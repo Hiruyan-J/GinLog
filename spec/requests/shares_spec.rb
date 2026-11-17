@@ -24,6 +24,12 @@ RSpec.describe "シェア", type: :request do
     end
   end
 
+  # 単体の「Xでシェア」ボタンのクエリを { text: ..., url: ... } で返す（ボタンがなければ nil）
+  def x_share_button_query
+    link = html.at_css("[data-x-share-button]")
+    link && Rack::Utils.parse_query(URI.parse(link["href"]).query).symbolize_keys
+  end
+
   # <meta property="og:xxx" content="..."> の content を返す
   def meta_content(property)
     html.at_css("meta[property='#{property}'], meta[name='#{property}']")&.[]("content")
@@ -115,6 +121,27 @@ RSpec.describe "シェア", type: :request do
       expect(x_share_queries.first[:text]).to include "ぎんたろうさんの日本酒の記録"
     end
 
+    it "投稿主が見ると、単体の「Xでシェア」ボタンが出る" do
+      sign_in owner
+      get sake_log_path(sake_log)
+
+      expect(x_share_button_query[:url]).to eq sake_log_url(sake_log)
+      expect(x_share_button_query[:text]).to include "飲みました"
+    end
+
+    it "投稿主以外が見ると、単体の「Xでシェア」ボタンは出ない" do
+      sign_in create(:user)
+      get sake_log_path(sake_log)
+
+      expect(x_share_button_query).to be_nil
+    end
+
+    it "未ログインだと、単体の「Xでシェア」ボタンは出ない" do
+      get sake_log_path(sake_log)
+
+      expect(x_share_button_query).to be_nil
+    end
+
     it "OGP に記録ごとのタイトルと画像が出力される" do
       get sake_log_path(sake_log)
 
@@ -138,6 +165,13 @@ RSpec.describe "シェア", type: :request do
       expect(share_buttons.first[:text]).to include "みんなの記録"
       expect(x_share_queries.first[:url]).to eq sake_url(sake)
       expect(x_share_queries.first[:text]).to include "みんなの記録"
+    end
+
+    it "未ログインでも、単体の「Xでシェア」ボタンが出る" do
+      get sake_path(sake)
+
+      expect(x_share_button_query[:url]).to eq sake_url(sake)
+      expect(x_share_button_query[:text]).to include "みんなの記録"
     end
 
     it "og:image は静的OGP画像、説明文は日本酒ごとの内容になる" do
