@@ -218,7 +218,7 @@ RSpec.describe "いいね", type: :request do
     end
   end
 
-  describe "日本酒詳細のみんなの記録" do
+  describe "日本酒詳細の記録一覧" do
     let(:path) { sake_path(sake) }
 
     it_behaves_like "付け外しできるいいねボタン"

@@ -284,7 +284,7 @@ RSpec.describe "コメント", type: :request do
     it_behaves_like "コメント欄へ移動するコメントアイコン", "timeline"
   end
 
-  describe "日本酒詳細のみんなの記録" do
+  describe "日本酒詳細の記録一覧" do
     let(:path) { sake_path(sake) }
 
     it_behaves_like "コメント欄へ移動するコメントアイコン", "sake"
