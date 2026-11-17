@@ -21,7 +21,7 @@
     <%# ---------- 右: 4象限マップ ＋ 好み度の平均 ---------- %>
     <div class="flex flex-col gap-1 items-center shrink-0">
       <% if sake.aggregated? %>
-        <%# 味 × 香りの4象限マップ（みんなの記録の平均値） %>
+        <%# 味 × 香りの4象限マップ（記録の平均値） %>
         <%= render "shared/taste_aroma_map", taste: sake.average_taste_strength, aroma: sake.average_aroma_strength, variant: :quadrant, size: :sm, labels: :responsive %>
 
         <%# 好み度の平均（0.5 刻み） %>

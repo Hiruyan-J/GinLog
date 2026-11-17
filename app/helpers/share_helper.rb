@@ -49,7 +49,7 @@ module ShareHelper
   # @param sake [Sake] シェアする日本酒
   # @return [String] 投稿文
   def sake_share_text(sake)
-    "#{sake.brand.name} #{sake.product_name} のみんなの記録"
+    "#{sake.brand.name} #{sake.product_name} の評価と記録"
   end
 
   private

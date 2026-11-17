@@ -34,7 +34,7 @@ class SakesController < ApplicationController
 
   def show
     @sake = Sake.includes(brand: { brewery: :area }).find(params[:id])
-    # みんなの記録は 1ページ 10件（config/initializers/kaminari_config.rb の default_per_page）で、
+    # 「この日本酒の記録」は 1ページ 10件（config/initializers/kaminari_config.rb の default_per_page）で、
     # 2ページ目以降は末尾の Turbo Frame から読み込まれる（無限スクロール）
     @sake_logs = @sake.sake_logs
                       .includes(:likes, :comments, :user, sake: { brand: { brewery: :area } })

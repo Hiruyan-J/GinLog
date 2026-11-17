@@ -162,23 +162,23 @@ RSpec.describe "シェア", type: :request do
 
       # 見出しのシェアボタンが最初に来る
       expect(share_buttons.first[:url]).to eq sake_url(sake)
-      expect(share_buttons.first[:text]).to include "みんなの記録"
+      expect(share_buttons.first[:text]).to include "の評価と記録"
       expect(x_share_queries.first[:url]).to eq sake_url(sake)
-      expect(x_share_queries.first[:text]).to include "みんなの記録"
+      expect(x_share_queries.first[:text]).to include "の評価と記録"
     end
 
     it "未ログインでも、単体の「Xでシェア」ボタンが出る" do
       get sake_path(sake)
 
       expect(x_share_button_query[:url]).to eq sake_url(sake)
-      expect(x_share_button_query[:text]).to include "みんなの記録"
+      expect(x_share_button_query[:text]).to include "の評価と記録"
     end
 
     it "og:image は静的OGP画像、説明文は日本酒ごとの内容になる" do
       get sake_path(sake)
 
       expect(meta_content("og:image")).to include "ginlog_ogp"
-      expect(meta_content("og:description")).to include("而今", "純米吟醸")
+      expect(meta_content("og:description")).to include("而今", "純米吟醸", "評価の傾向")
     end
   end
 end
