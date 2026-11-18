@@ -1,0 +1,17 @@
+<%# locals: () -%>
+<section class="py-9 px-4" data-controller="pwa-install">
+  <div class="flex flex-col gap-4 mx-auto max-w-2xl">
+    <div class="flex gap-4 items-center">
+      <%= inline_svg_tag "top/install.svg", class: "w-24 h-auto shrink-0" %>
+      <div class="flex flex-col gap-2">
+        <h2 class="text-xl font-black leading-normal"><%= t('.title_html') %></h2>
+        <p class="text-sm leading-relaxed text-base-content/80"><%= t('.body') %></p>
+      </div>
+    </div>
+    <%= link_to install_path, class: "self-center w-full max-w-sm btn btn-outline btn-primary bg-base-100",
+        data: { action: "pwa-install#install" } do %>
+      <span class="material-symbols-rounded ms-size-20">download</span>
+      <%= t('.button') %>
+    <% end %>
+  </div>
+</section>

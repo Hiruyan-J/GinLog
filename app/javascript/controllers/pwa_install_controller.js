@@ -19,7 +19,7 @@ window.addEventListener("appinstalled", () => {
 // Connects to data-controller="pwa-install"
 export default class extends Controller {
   connect() {
-    // アプリとして開いているときは、メニュー項目（this.element は li）を隠す
+    // アプリとして開いているときは、data-controller を付けた要素を隠す
     if (this.isStandalone()) this.element.hidden = true
   }
 

@@ -33,10 +33,19 @@
 
   <body class="flex flex-col min-h-screen">
     <%= render "shared/header" %>
-    <main class="flex-1 px-4 pt-4 pb-14 mx-auto w-full max-w-2xl md:pb-20">
-      <%= render 'shared/flash_message' %>
-      <%= yield %>
-    </main>
+    <% if content_for?(:full_width) %>
+      <main class="flex-1 pb-14 md:pb-20">
+        <div class="mx-auto w-full max-w-2xl">
+          <%= render 'shared/flash_message' %>
+        </div>
+        <%= yield %>
+      </main>
+    <% else %>
+      <main class="flex-1 px-4 pt-4 pb-14 mx-auto w-full max-w-2xl md:pb-20">
+        <%= render 'shared/flash_message' %>
+        <%= yield %>
+      </main>
+    <% end %>
     <%= render "shared/footer" %>
     <%= render "likes/modal" %>
   </body>

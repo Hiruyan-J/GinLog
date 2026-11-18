@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 156" fill="none">
+  <text x="16" y="28" font-size="12" font-weight="700" fill="#374151" font-family="sans-serif">好み度</text>
+  <g transform="translate(64 14)" fill="#fbbf24"><path d="M8 0l2.4 5.1 5.6.7-4.1 3.8 1.1 5.6-5-2.8-5 2.8 1.1-5.6L0 5.8l5.6-.7z"/></g>
+  <g transform="translate(86 14)" fill="#fbbf24"><path d="M8 0l2.4 5.1 5.6.7-4.1 3.8 1.1 5.6-5-2.8-5 2.8 1.1-5.6L0 5.8l5.6-.7z"/></g>
+  <g transform="translate(108 14)" fill="#fbbf24"><path d="M8 0l2.4 5.1 5.6.7-4.1 3.8 1.1 5.6-5-2.8-5 2.8 1.1-5.6L0 5.8l5.6-.7z"/></g>
+  <g transform="translate(130 14)" fill="#fbbf24"><path d="M8 0l2.4 5.1 5.6.7-4.1 3.8 1.1 5.6-5-2.8-5 2.8 1.1-5.6L0 5.8l5.6-.7z"/></g>
+  <g transform="translate(152 14)" fill="#e5e7eb"><path d="M8 0l2.4 5.1 5.6.7-4.1 3.8 1.1 5.6-5-2.8-5 2.8 1.1-5.6L0 5.8l5.6-.7z"/></g>
+  <text x="180" y="27" font-size="11" fill="#4b5563" font-family="sans-serif">★5段階</text>
+  <text x="16" y="56" font-size="12" font-weight="700" fill="#374151" font-family="sans-serif">味</text>
+  <rect x="16" y="66" width="268" height="6" rx="3" fill="#d1fae5"/>
+  <circle cx="96" cy="69" r="8" fill="#10b981" stroke="#ffffff" stroke-width="3"/>
+  <text x="16" y="90" font-size="11" fill="#4b5563" font-family="sans-serif">スッキリ</text>
+  <text x="284" y="90" text-anchor="end" font-size="11" fill="#4b5563" font-family="sans-serif">濃い</text>
+  <text x="16" y="114" font-size="12" font-weight="700" fill="#374151" font-family="sans-serif">香り</text>
+  <rect x="16" y="124" width="268" height="6" rx="3" fill="#d1fae5"/>
+  <circle cx="204" cy="127" r="8" fill="#10b981" stroke="#ffffff" stroke-width="3"/>
+  <text x="16" y="148" font-size="11" fill="#4b5563" font-family="sans-serif">穏やか</text>
+  <text x="284" y="148" text-anchor="end" font-size="11" fill="#4b5563" font-family="sans-serif">華やか</text>
+</svg>

@@ -1,0 +1,31 @@
+<%# locals: () -%>
+<section class="py-10 px-4">
+  <div class="flex flex-col gap-2 mx-auto max-w-2xl">
+    <%= render "static_pages/top/section_heading", title: t('.title') %>
+
+    <%# STEP 1（撮る）・STEP 2（AIが読み取る） %>
+    <% %i[photo ai].each.with_index(1) do |key, number| %>
+      <div class="flex gap-4 items-center p-4 rounded-2xl border-2 border-emerald-100">
+        <%= inline_svg_tag "top/step_#{key}.svg", class: "w-16 h-16 shrink-0" %>
+        <div class="flex flex-col gap-0.5">
+          <span class="text-xs font-black text-emerald-700"><%= t('.step', number: number) %></span>
+          <h3 class="text-lg font-black"><%= t(".#{key}.heading") %></h3>
+          <p class="text-sm leading-relaxed text-base-content/70"><%= t(".#{key}.body") %></p>
+        </div>
+      </div>
+      <span class="self-center material-symbols-rounded text-primary">keyboard_arrow_down</span>
+    <% end %>
+
+    <%# STEP 3（好み度・味・香りを選ぶ）。ここが一番伝えたいところなので、枠の色を濃くする %>
+    <div class="flex flex-col gap-3 p-4 bg-green-50 rounded-2xl border-2 border-primary">
+      <div class="flex flex-col gap-0.5">
+        <span class="text-xs font-black text-emerald-700"><%= t('.step', number: 3) %></span>
+        <h3 class="text-lg font-black"><%= t('.rating.heading') %></h3>
+      </div>
+      <%= inline_svg_tag "top/step_rating.svg", class: "w-full h-auto rounded-xl bg-base-100" %>
+      <p class="text-sm leading-relaxed text-base-content/70"><%= t('.rating.body') %></p>
+    </div>
+
+    <p class="mt-2 text-sm leading-relaxed text-center"><%= t('.my_log_note_html') %></p>
+  </div>
+</section>

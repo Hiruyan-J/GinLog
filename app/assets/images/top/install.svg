@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 140" fill="none">
+  <rect x="8" y="4" width="80" height="132" rx="14" fill="#f0fdf4" stroke="#047857" stroke-width="2.5"/>
+  <rect x="38" y="10" width="20" height="4" rx="2" fill="#a7f3d0"/>
+  <rect x="18" y="24" width="16" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="40" y="24" width="16" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="62" y="24" width="16" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="18" y="48" width="16" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="40" y="48" width="16" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="62" y="48" width="16" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="34" y="76" width="28" height="28" rx="8" fill="#047857"/>
+  <path d="M45 81h6v6c0 2 5 3 5 7v5a1.5 1.5 0 0 1-1.5 1.5h-13a1.5 1.5 0 0 1-1.5-1.5v-5c0-4 5-5 5-7z" fill="#ffffff"/>
+  <text x="48" y="116" text-anchor="middle" font-size="9" font-weight="700" fill="#047857" font-family="sans-serif">吟ログ</text>
+  <circle cx="62" cy="76" r="8" fill="#fbbf24" stroke="#ffffff" stroke-width="2"/>
+  <path d="M62 72v8M58 76h8" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+</svg>
