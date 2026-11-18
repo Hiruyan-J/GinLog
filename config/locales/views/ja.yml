@@ -33,6 +33,7 @@ ja:
     data_menu_title: データについて
     sakenowa_attribution: さけのわデータを利用しています
     about_menu_title: 吟ログについて
+    about: 吟ログとは
     contact: お問い合わせ
     terms: 利用規約
     privacy: プライバシーポリシー
@@ -46,6 +47,66 @@ ja:
     show:
       title: マイアカウント
   static_pages:
+    top:
+      title: ラベルを撮るだけの日本酒メモアプリ
+      hero:
+        badge: 初心者にもやさしい日本酒メモアプリ
+        catchphrase_html: ラベルを撮るだけ。<br>飲んだ日本酒を、<br>もう忘れない。
+        lead_html: 吟ログは、ラベル写真から銘柄や蔵元を<br>AIが読み取って記録できる日本酒メモアプリ。<br>あなたの好みの傾向も見えてきます。
+        sign_up: 無料ではじめる
+        try_without_sign_up: 登録せずに見てみる
+        google_note: Googleアカウントでもかんたんに登録できます
+        login_note: アカウントをお持ちの方は
+        login: ログイン
+        new_sake_log: 日本酒を記録する
+        timeline: タイムラインへ
+      problems:
+        title: こんなこと、ありませんか？
+        forget_html: <b>飲み会の後半</b>、何を飲んだか<br>覚えていない…
+        memory_html: 「前に飲んだ気がする…」<br>でも、<b>味が思い出せない</b>
+        choose_html: 種類が多すぎて、<br><b>どれを選べばいいか</b>分からない
+        solution: 吟ログなら、まとめて解決！
+      features:
+        title: 吟ログでできること
+        record:
+          heading: ラベルを撮って、かんたん記録
+          body_html: 表・裏ラベルの写真をAIが読み取り、銘柄や蔵元を自動で入力。あとは<b>好み度・味・香り</b>を選ぶだけなので、飲みながらでもサクッと記録できます。
+        search:
+          heading: 気分に合わせてお酒を探す
+          body_html: 「今日は香りが華やかで、スッキリしたお酒がいいな」——そんな気分のときは、<b>フレーバーマトリックス</b>のエリアを選ぶだけ。銘柄・蔵元・都道府県などのキーワードでも探せて、日本酒ごとにみんなの評価や感想も見られます。
+        analysis:
+          heading: あなたの好みがわかる
+          body_html: 記録がたまると、好きな<b>フレーバー</b>や<b>産地（都道府県）</b>の傾向が一目でわかります。分析結果から、好みに合いそうなお酒もすぐ探せます。
+      steps:
+        title: 使い方はかんたん3ステップ
+        step: "STEP %{number}"
+        photo:
+          heading: ラベルを撮る
+          body: 表ラベル・裏ラベルを撮影してアップロード
+        ai:
+          heading: AIが読み取って自動入力
+          body: 銘柄・蔵元・都道府県・商品名を入力欄に書き込んでくれます
+        rating:
+          heading: 好み度・味・香りを選ぶだけ！
+          body: 好み度は★をタップ、味と香りはスライダーで直感的に。
+        my_log_note_html: 記録は「<b>マイログ</b>」にたまっていき、<br>あとからいつでも振り返れます。
+      timeline:
+        title: みんなの記録をのぞいてみる
+        lead_html: 登録しなくても、タイムラインで<br>みんなが飲んだ日本酒を見られます。
+        button: タイムラインを見る
+      install:
+        title_html: ホーム画面に置いて、<br>アプリのように使えます
+        body: アプリストアからのダウンロードは不要。アイコンをタップするだけで、すぐ記録できます。
+        button: アプリとしてインストール
+      cta:
+        title: さっそく記録をはじめよう
+        lead_html: 今日飲んだ一杯を、<br>あなただけの日本酒ノートに。
+        sign_up: 無料で新規登録
+        login_note: アカウントをお持ちの方は
+        login: ログイン
+        new_sake_log: 日本酒を記録する
+        search_lead: まずは、どんな日本酒があるか見てみる
+        search: 日本酒を探す
     contact:
       title: お問い合わせ
       lead: ご不明点やご要望がございましたら、下記フォームよりお気軽にお問い合わせください。

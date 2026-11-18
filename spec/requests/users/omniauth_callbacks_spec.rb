@@ -46,6 +46,7 @@ RSpec.describe "Google ログイン", type: :request do
 
     it "ユーザー名を変更できる旨の案内が表示される" do
       login_with_google
+      follow_redirect! # / へ移動する（ログイン済みなので、さらに /timeline へリダイレクトされる）
       follow_redirect!
 
       expect(response.body).to include "マイアカウントから変更できます"
@@ -65,6 +66,7 @@ RSpec.describe "Google ログイン", type: :request do
 
     it "ユーザー名の案内は表示されない" do
       login_with_google
+      follow_redirect! # / へ移動する（ログイン済みなので、さらに /timeline へリダイレクトされる）
       follow_redirect!
 
       expect(response.body).not_to include "マイアカウントから変更できます"

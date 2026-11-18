@@ -1,0 +1,12 @@
+<%# locals: () -%>
+<section class="py-10 px-4 bg-emerald-50">
+  <div class="flex flex-col gap-4 items-center mx-auto max-w-2xl">
+    <%= render "static_pages/top/section_heading", title: t('.title') %>
+    <p class="text-sm leading-relaxed text-center"><%= t('.lead_html') %></p>
+    <%= inline_svg_tag "top/timeline_card.svg", class: "w-full max-w-sm h-auto" %>
+    <%= link_to timeline_path, class: "w-full max-w-sm btn btn-outline btn-primary bg-base-100" do %>
+      <%= t('.button') %>
+      <span class="material-symbols-rounded ms-size-20">chevron_right</span>
+    <% end %>
+  </div>
+</section>

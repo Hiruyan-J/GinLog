@@ -46,6 +46,7 @@ Rails.application.routes.draw do
   get "timeline", to: "timelines#index", as: :timeline
   get "mypage", to: "users#show", as: :mypage
   get "preference_analysis", to: "preference_analyses#show", as: :preference_analysis
+  get "about", to: "static_pages#about", as: :about
   get "contact", to: "static_pages#contact", as: :contact
   get "privacy", to: "static_pages#privacy", as: :privacy
   get "terms", to: "static_pages#terms", as: :terms
@@ -53,7 +54,7 @@ Rails.application.routes.draw do
   get "sitemap", to: "sitemaps#show", defaults: { format: :xml } # GET /sitemap.xml
 
   # Defines the root path route ("/")
-  root "timelines#index"
+  root "static_pages#top"
 
   # 開発環境で送信メールを確認する画面（/letter_opener）
   mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?

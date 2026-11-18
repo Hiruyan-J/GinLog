@@ -1,0 +1,20 @@
+<%# locals: () -%>
+<section class="py-10 px-4 bg-emerald-50">
+  <div class="flex flex-col gap-5 mx-auto max-w-2xl">
+    <%= render "static_pages/top/section_heading", title: t('.title') %>
+
+    <%# with_index(1) で、番号を 1 から数える（01・02・03 の表示に使用） %>
+    <% %i[record search analysis].each.with_index(1) do |key, number| %>
+      <article class="flex flex-col gap-3 p-5 rounded-2xl shadow-sm bg-base-100">
+        <div class="flex gap-3 items-center">
+          <span class="py-0.5 px-2 text-sm font-black text-white bg-emerald-700 rounded-lg"><%= format("%02d", number) %></span>
+          <h3 class="text-lg font-black"><%= t(".#{key}.heading") %></h3>
+        </div>
+        <div class="flex justify-center p-3 bg-green-50 rounded-xl">
+          <%= inline_svg_tag "top/feature_#{key}.svg", class: "w-full max-w-xs h-auto" %>
+        </div>
+        <p class="text-sm leading-loose text-base-content/80"><%= t(".#{key}.body_html") %></p>
+      </article>
+    <% end %>
+  </div>
+</section>

@@ -1,0 +1,27 @@
+<%# locals: () -%>
+<section class="py-8 px-4 bg-emerald-50">
+  <div class="flex flex-col gap-4 items-center mx-auto max-w-2xl text-center">
+    <%= inline_svg_tag "top/hero.svg", class: "w-full max-w-xs h-auto" %>
+    <p class="py-1 px-3 text-xs font-bold text-emerald-700 rounded-full bg-base-100"><%= t('.badge') %></p>
+    <h1 class="text-3xl font-black leading-snug text-emerald-900"><%= t('.catchphrase_html') %></h1>
+    <p class="leading-loose text-base-content/80"><%= t('.lead_html') %></p>
+
+    <div class="flex flex-col gap-3 mt-1 w-full max-w-sm">
+      <% if user_signed_in? %>
+        <%= link_to t('.new_sake_log'), new_sake_log_path, class: "btn btn-primary btn-lg" %>
+        <%= link_to t('.timeline'), timeline_path, class: "btn btn-outline btn-primary bg-base-100" %>
+      <% else %>
+        <%= link_to t('.sign_up'), new_user_registration_path, class: "btn btn-primary btn-lg" %>
+        <%= link_to t('.try_without_sign_up'), timeline_path, class: "btn btn-outline btn-primary bg-base-100" %>
+      <% end %>
+    </div>
+
+    <% unless user_signed_in? %>
+      <p class="text-xs leading-relaxed text-base-content/70">
+        <%= t('.google_note') %><br>
+        <%= t('.login_note') %>
+        <%= link_to t('.login'), new_user_session_path, class: "font-bold link link-primary" %>
+      </p>
+    <% end %>
+  </div>
+</section>

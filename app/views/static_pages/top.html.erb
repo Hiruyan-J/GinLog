@@ -1,0 +1,17 @@
+<% content_for :title, t('.title') %>
+<%# /about も中身は同じなので、検索エンジンには / を正式な URL として伝える %>
+<% set_meta_tags canonical: root_url %>
+<% content_for :full_width, "true" %>
+
+<% content_for :head do %>
+  <%# text= で必要な文字だけを指定し、フォントファイルの容量を抑える %>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Syuku&text=<%= ERB::Util.url_encode('大吟醸') %>&display=swap">
+<% end %>
+
+<%= render "static_pages/top/hero" %>
+<%= render "static_pages/top/problems" %>
+<%= render "static_pages/top/features" %>
+<%= render "static_pages/top/steps" %>
+<%= render "static_pages/top/timeline" %>
+<%= render "static_pages/top/install" %>
+<%= render "static_pages/top/cta" %>

@@ -5,6 +5,60 @@ RSpec.describe "静的ページ", type: :request do
     Nokogiri::HTML(response.body)
   end
 
+  describe "GET /（root）" do
+    it "未ログインなら TOPページが表示される" do
+      get root_path
+
+      expect(response).to have_http_status(:ok)
+      expect(html.at_css("main h1").text).to include("ラベルを撮るだけ。")
+    end
+
+    it "ログイン済みならタイムラインへリダイレクトされる" do
+      sign_in create(:user)
+      get root_path
+
+      expect(response).to redirect_to(timeline_path)
+    end
+  end
+
+  describe "GET /about" do
+    it "未ログインなら、新規登録とタイムライン（登録せずに見てみる）へのボタンが表示される" do
+      get about_path
+
+      expect(response).to have_http_status(:ok)
+      expect(html.at_css(%(main a[href="#{new_user_registration_path}"]))).to be_present
+      expect(html.at_css(%(main a[href="#{timeline_path}"]))).to be_present
+    end
+
+    it "ログイン中もリダイレクトされず、新規登録の代わりに記録するボタンが表示される" do
+      sign_in create(:user)
+      get about_path
+
+      expect(response).to have_http_status(:ok)
+      expect(html.at_css(%(main a[href="#{new_sake_log_path}"]))).to be_present
+      expect(html.at_css(%(main a[href="#{new_user_registration_path}"]))).to be_nil
+    end
+
+    it "アプリとしてインストールするボタンがあり、メニューと同じ仕組みで動く" do
+      get about_path
+
+      install_section = html.at_css('main section[data-controller="pwa-install"]')
+      expect(install_section.at_css(%(a[href="#{install_path}"]))[:"data-action"]).to eq "pwa-install#install"
+    end
+
+    it "canonical が /（root）になっている" do
+      get about_path
+
+      expect(html.at_css('link[rel="canonical"]')[:href]).to eq root_url
+    end
+
+    it "ページのタイトルにサービスの説明が入っている" do
+      get about_path
+
+      expect(html.at_css("title").text).to eq "吟ログ | #{I18n.t('static_pages.top.title')}"
+    end
+  end
+
   describe "GET /contact" do
     it "未ログインでも 200 が返る" do
       get contact_path
@@ -65,26 +119,26 @@ RSpec.describe "静的ページ", type: :request do
 
   describe "ヘッダーのメニュー" do
     it "未ログインでも、お問い合わせへのリンクが表示される" do
-      get root_path
+      get about_path
 
       expect(html.at_css(%(header a[href="#{contact_path}"]))).to be_present
     end
 
     it "ログイン中も、お問い合わせへのリンクが表示される" do
       sign_in create(:user)
-      get root_path
+      get about_path
 
       expect(html.at_css(%(header a[href="#{contact_path}"]))).to be_present
     end
 
     it "未ログインでも、プライバシーポリシーへのリンクが表示される" do
-      get root_path
+      get about_path
 
       expect(html.at_css(%(header a[href="#{privacy_path}"]))).to be_present
     end
 
     it "未ログインでも、利用規約へのリンクが表示される" do
-      get root_path
+      get about_path
 
       expect(html.at_css(%(header a[href="#{terms_path}"]))).to be_present
     end

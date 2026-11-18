@@ -1,0 +1,25 @@
+<%# locals: () -%>
+<section class="py-12 px-4 text-white bg-emerald-700">
+  <div class="flex flex-col gap-4 items-center mx-auto max-w-sm text-center">
+    <h2 class="text-2xl font-black"><%= t('.title') %></h2>
+    <p class="text-sm leading-relaxed"><%= t('.lead_html') %></p>
+
+    <% if user_signed_in? %>
+      <%= link_to t('.new_sake_log'), new_sake_log_path, class: "w-full text-emerald-700 border-none btn btn-lg bg-base-100" %>
+    <% else %>
+      <%= link_to t('.sign_up'), new_user_registration_path, class: "w-full text-emerald-700 border-none btn btn-lg bg-base-100" %>
+      <p class="text-sm">
+        <%= t('.login_note') %>
+        <%= link_to t('.login'), new_user_session_path, class: "font-bold underline" %>
+      </p>
+    <% end %>
+
+    <div class="my-2 w-full h-px bg-white/40"></div>
+
+    <p class="text-sm"><%= t('.search_lead') %></p>
+    <%= link_to sakes_path, class: "w-full text-white border-white hover:text-emerald-700 hover:bg-white btn btn-outline" do %>
+      <span class="material-symbols-rounded ms-size-20">search</span>
+      <%= t('.search') %>
+    <% end %>
+  </div>
+</section>

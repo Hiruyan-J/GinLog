@@ -34,7 +34,7 @@
         <li>
           <h2 class="menu-title"><%= t('header.main_menu_title') %></h2>
           <ul>
-            <li><%= link_to t('header.home'), root_path %></li>
+            <li><%= link_to t('header.home'), timeline_path %></li>
             <li><%= link_to t('header.sake_search'), sakes_path %></li>
             <li><%= link_to t('header.my_log'), sake_logs_path %></li>
             <li><%= link_to t('header.analyze_preferences'), preference_analysis_path %></li>
@@ -59,6 +59,7 @@
         <li class="mt-2">
           <h2 class="menu-title"><%= t('header.about_menu_title') %></h2>
           <ul>
+            <li><%= link_to t('header.about'), about_path %></li>
             <li data-controller="pwa-install">
               <%= link_to t('header.install_app'), install_path, data: { action: "pwa-install#install" } %>
             </li>

@@ -1,0 +1,18 @@
+<%# locals: () -%>
+<section class="py-10 px-4">
+  <div class="flex flex-col gap-4 mx-auto max-w-2xl">
+    <%= render "static_pages/top/section_heading", title: t('.title') %>
+
+    <% %i[forget memory choose].each do |key| %>
+      <div class="flex gap-4 items-center p-4 rounded-2xl bg-base-200">
+        <%= inline_svg_tag "top/problem_#{key}.svg", class: "w-15 h-15 shrink-0" %>
+        <p class="leading-relaxed"><%= t(".#{key}_html") %></p>
+      </div>
+    <% end %>
+
+    <div class="flex flex-col items-center mt-2">
+      <span class="material-symbols-rounded ms-size-32 text-primary">expand_more</span>
+      <p class="text-lg font-black text-emerald-700"><%= t('.solution') %></p>
+    </div>
+  </div>
+</section>
