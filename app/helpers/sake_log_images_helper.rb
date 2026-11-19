@@ -7,9 +7,9 @@
 module SakeLogImagesHelper
   # ラベル写真が無い記録で使う土台画像
   OGP_BASE_PUBLIC_ID = "ginlog_ogp_base".freeze
-  # OGP画像に重ねるファビコン
-  OGP_ICON_PUBLIC_ID = "ginlog_ogp_icon".freeze
-  OGP_ICON_SIZE = 56
+  # OGP画像の左上に重ねるロゴ（アイコンと「吟ログ」の文字が一体になった画像）
+  OGP_LOGO_PUBLIC_ID = "ginlog_ogp_logo".freeze
+  OGP_LOGO_HEIGHT = 64
   OGP_FONT_FAMILY = "Sawarabi Gothic".freeze
   # 静的OGP画像に合わせたクリーム色（写真の余白を埋める）
   OGP_BACKGROUND_COLOR = "#F7F3EA".freeze
@@ -92,9 +92,8 @@ module SakeLogImagesHelper
     [
       { width: 520, height: 630, crop: :pad, background: OGP_BACKGROUND_COLOR },
       { width: 1200, height: 630, crop: :pad, gravity: :east, background: OGP_BACKGROUND_COLOR },
-      { overlay: OGP_ICON_PUBLIC_ID, width: OGP_ICON_SIZE, height: OGP_ICON_SIZE, crop: :fit,
+      { overlay: OGP_LOGO_PUBLIC_ID, height: OGP_LOGO_HEIGHT, crop: :fit,
         gravity: :north_west, x: OGP_TEXT_X, y: 44 },
-      ogp_text_layer("吟ログ", size: 48, color: "#5B8C6F", x: OGP_TEXT_X + OGP_ICON_SIZE + 12, y: 48, bold: true),
       # 銘柄名は1行に収めるため8文字で切る（72px × 8文字 ≒ 580px）
       ogp_text_layer(sake_log.sake.brand.name.truncate(8, omission: "…"), size: 72, color: "#333333", y: 140, bold: true),
       # 商品名は折り返して2行までに収める（48px × 12文字 ≒ 580px で1行）
