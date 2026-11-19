@@ -22,7 +22,7 @@ module ApplicationHelper
       reverse: false,
       charset: "utf-8",
       separator: "|",   # Webサイト名とページタイトルを区切るために使用されるテキスト
-      description: "吟ログは、日本酒を簡単に記録できる日本酒メモアプリ。味や香りを簡単にメモし、好みの傾向を分析。初心者でも自分に合う日本酒を見つけられます。",
+      description: "吟ログは、ラベルを撮るだけでAIが銘柄や蔵元を読み取ってくれる日本酒メモアプリ。好み度・味・香りを選ぶだけでサクッと記録でき、好きなフレーバーや産地の傾向も分析。初心者でも自分に合う日本酒が見つかります。",
       keywords: "日本酒, 日本酒アプリ, 日本酒メモ, 酒蔵, 銘柄検索, テイスティング記録, ラベル認識, 吟ログ",   # キーワードを「,」区切りで設定する
       canonical: request.original_url,   # 優先するurlを指定する
       noindex: ! Rails.env.production?,
