@@ -106,4 +106,50 @@ RSpec.describe "Google ログイン", type: :request do
       expect(response.body).to include "ログインに失敗しました"
     end
   end
+
+  describe "ログインの記憶" do
+    before do
+      create(:user, :google, uid: "12345", email: "taro@example.com")
+      mock_google_auth(email: "taro@example.com", uid: "12345")
+    end
+
+    # セッション Cookie だけを消し、アプリを閉じて開き直した状態にする
+    def reopen_app
+      cookies.delete("_myapp_session")
+    end
+
+    it "アプリを開き直してもログインしたままになる" do
+      login_with_google
+      reopen_app
+
+      get mypage_path
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "使い続けていれば、ログインから 2 週間たってもログインしたままになる" do
+      login_with_google
+
+      # 10 日後に使うと、記憶の期限がそこから 2 週間に延びる
+      travel_to(10.days.from_now) do
+        reopen_app
+        get mypage_path
+      end
+
+      travel_to(20.days.from_now) do
+        reopen_app
+        get mypage_path
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    it "2 週間使わなければログアウトする" do
+      login_with_google
+
+      travel_to(15.days.from_now) do
+        reopen_app
+        get mypage_path
+        expect(response).to redirect_to new_user_session_path
+      end
+    end
+  end
 end

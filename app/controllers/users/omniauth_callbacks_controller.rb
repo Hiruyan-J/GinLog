@@ -12,6 +12,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       set_flash_message(:notice, :success, kind: "Google")
       # 初回だけ、Google の名前がそのまま入っていることを知らせる
       flash[:info] = t("devise.omniauth_callbacks.name_changeable") if @user.previously_new_record?
+      @user.remember_me = true # Google ログインの画面にはチェックボックスが無いため、常に記憶する
       sign_in_and_redirect @user, event: :authentication
     else
       redirect_to new_user_session_path, alert: t("devise.omniauth_callbacks.failure")
