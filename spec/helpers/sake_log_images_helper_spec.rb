@@ -46,6 +46,11 @@ RSpec.describe SakeLogImagesHelper, type: :helper do
         expect(url).to include "/#{SakeLogImagesHelper::OGP_BASE_PUBLIC_ID}.jpg"
       end
 
+      it "左上にロゴ画像を重ねる" do
+        url = helper.sake_log_ogp_image_url(sake_log)
+
+        expect(url).to include "l_#{SakeLogImagesHelper::OGP_LOGO_PUBLIC_ID}"
+      end
 
       it "銘柄名・商品名・蔵元名・都道府県・好み度（★）が文字として重なる" do
         url = helper.sake_log_ogp_image_url(sake_log)
