@@ -1,5 +1,5 @@
 # 今回使うDockerの参照元のイメージ
-FROM ruby:3.3.6
+FROM ruby:3.3.14-bookworm
 
 # 環境変数の設定（ロケールとタイムゾーン）
 ENV LANG C.UTF-8
