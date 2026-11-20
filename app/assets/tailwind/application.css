@@ -8,8 +8,9 @@
     Google Fonts 側の .material-symbols-rounded { font-size: 24px } が
     utilities レイヤーの .ms-size-* に常に勝ってしまい、アイコンサイズが 24px 固定になる。
     layer(base) を付けて base レイヤーへ入れることで、utilities の ms-size-* が上書きできる。 */
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block') layer(base);
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block') layer(base);
+/* 新しいアイコンを使うときは icon_names に名前を足す（アルファベット順・足し忘れると文字のまま表示される）。
+    URL を変えたら、レイアウトの preload も同じ URL にする。 */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&icon_names=add_a_photo,add_circle,android,chat_bubble,chevron_right,computer,content_copy,delete,download,edit_square,expand_more,favorite,home,keyboard_arrow_down,lists,login,more_horiz,no_photography,phone_iphone,search,share,star&display=block') layer(base);
 
 @import 'tailwindcss';
 
@@ -117,8 +118,7 @@
     ・FILL / GRAD … このフォント独自の軸なので大文字
     ・wght / opsz … 標準で登録された軸なので小文字 */
 @layer base {
-  .material-symbols-rounded,
-  .material-symbols-outlined {
+  .material-symbols-rounded {
     --ms-fill: 0;
     --ms-wght: 400;
     --ms-grad: 0;
