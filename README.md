@@ -156,7 +156,7 @@
 | カテゴリ       | 使用技術 |
 |----------------|----------|
 | フロントエンド | Tailwind CSS v4 / daisyUI v5 / Hotwire（Turbo・Stimulus）/ esbuild |
-| バックエンド   | Ruby 3.3.6 / Rails 8.1.3 |
+| バックエンド   | Ruby 3.3.14 / Rails 8.1.3 |
 | データベース   | PostgreSQL（Neon） |
 | 認証           | Devise |
 | メール送信     | Resend（Action Mailer から SMTP 経由で送信） |
