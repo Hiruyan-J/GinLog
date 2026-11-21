@@ -16,12 +16,17 @@
 
     <%# 吟醸香・原料香・熟成香（強弱スライダー → 区切り線 → 香りの種類タグ） %>
     <% AromaProfile::INTENSITY_ATTRIBUTES.each do |category, attribute| %>
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-3"
+           data-controller="clearable-tags"
+           data-clearable-tags-blank-class="opacity-40 grayscale"
+           data-clearable-tags-locked-class="btn-disabled"
+           data-action="input->clearable-tags#sync click->clearable-tags#sync">
         <%= render "sake_logs/intensity_field",
-              f: f, attribute: attribute, low_label: "弱い", high_label: "強い",
+              f: f, attribute: attribute, low_label: AromaProfile::NONE_LABEL, high_label: "強い",
               min: AromaProfile::INTENSITY_MIN, max: AromaProfile::INTENSITY_MAX,
               default_value: AromaProfile::INTENSITY_DEFAULT,
-              description: AromaProfile::DESCRIPTIONS[category] %>
+              description: AromaProfile::DESCRIPTIONS[category],
+              value_data: { clearable_tags_target: "intensity" } %>
         <%= render "sake_logs/aroma_tag_field",
               aroma_tags: f.object.aroma_tags_by_category.fetch(category, []),
               selected_ids: f.object.selected_aroma_tag_ids %>

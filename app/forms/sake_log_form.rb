@@ -81,6 +81,7 @@ class SakeLogForm
                          allow_nil: true
   end
   validate :aroma_tags_must_exist
+  validate :aroma_tags_must_be_empty_when_none
 
   # コンストラクタ
   # @param attributes [Hash] フォームの属性
@@ -333,6 +334,17 @@ class SakeLogForm
     return if AromaTag.where(id: ids).count == ids.size
 
     errors.add(:aroma_tag_ids, "に存在しない香りの種類が含まれています")
+  end
+
+  # 強弱が 0（無し）の香りに、その香りのタグが選ばれていないか
+  # （「無かった」のに種類がある矛盾した記録を作らない。集計はこの前提で、強弱 0 の記録をタグの分母から外す）
+  # @return [void]
+  def aroma_tags_must_be_empty_when_none
+    none_categories = AromaProfile::INTENSITY_ATTRIBUTES.select { |_category, attribute| public_send(attribute)&.zero? }.keys
+    return if none_categories.empty? || selected_aroma_tag_ids.empty?
+    return unless AromaTag.where(id: selected_aroma_tag_ids, category: none_categories).exists?
+
+    errors.add(:aroma_tag_ids, "は、強弱が「#{AromaProfile::NONE_LABEL}」の香りには選べません")
   end
 
   # 味わいの詳細を保存する

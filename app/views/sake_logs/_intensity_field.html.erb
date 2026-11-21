@@ -1,4 +1,4 @@
-<%# locals: (f:, attribute:, low_label:, high_label:, min:, max:, default_value:, required: false, note: nil, description: nil) -%>
+<%# locals: (f:, attribute:, low_label:, high_label:, min:, max:, default_value:, required: false, note: nil, description: nil, value_data: {}) -%>
 <%# スライダー 1 つ分の入力欄（未入力 = 灰色。送信するのは hidden field だけ）
     f             … フォームビルダー
     attribute     … 項目名（例: :aroma_strength, :sweetness_intensity）
@@ -7,7 +7,8 @@
     default_value … 未入力のときのつまみの位置
     required      … 必須か（true ならクリアボタンを出さず、未入力では送信できない）
     note          … 項目名の横に（）付きで出す補足（例: 香りの評価の基準）
-    description   … 項目名の下に出す説明（例: 吟醸香の説明） %>
+    description   … 項目名の下に出す説明（例: 吟醸香の説明）
+    value_data    … 送信用の hidden field に足す data 属性（例: { clearable_tags_target: "intensity" }） %>
 <div data-controller="clearable-field"
      data-clearable-field-blank-class="opacity-40 grayscale"
      data-clearable-field-required-value="<%= required %>">
@@ -33,7 +34,7 @@
   </div>
 
   <%# 実際に送信される値（空文字 = 記録なし） %>
-  <%= f.hidden_field attribute, id: nil, data: { clearable_field_target: "value" } %>
+  <%= f.hidden_field attribute, id: nil, data: { clearable_field_target: "value", **value_data } %>
 
   <div class="pl-4" data-clearable-field-target="display">
     <%# name: nil … スライダーは常に値を送ってしまうため送信しない %>

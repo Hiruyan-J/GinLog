@@ -25,6 +25,8 @@ class AromaProfile < ApplicationRecord
   INTENSITY_MAX = 10
   # 未記録のときのスライダーのつまみの位置（値としては保存しない）
   INTENSITY_DEFAULT = 5.0
+  # 強弱 0 の意味（スライダーの左端・記録詳細に表示する）。0 のときはタグを選べない
+  NONE_LABEL = "無し".freeze
   # 香りの区分（AromaTag の category）ごとの強弱の列
   INTENSITY_ATTRIBUTES = {
     "ginjo" => :ginjo_intensity,

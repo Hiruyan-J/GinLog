@@ -28,20 +28,22 @@
                   <progress class="w-full progress progress-primary"
                             value="<%= value %>" max="<%= AromaProfile::INTENSITY_MAX %>"></progress>
                   <div class="flex justify-between text-xs text-neutral-500">
-                    <span>弱い</span>
+                    <span><%= AromaProfile::NONE_LABEL %></span>
                     <span>強い</span>
                   </div>
                 </div>
               <% end %>
 
-              <% if aroma_tags.any? %>
-                <div class="flex flex-wrap gap-1.5">
-                  <% aroma_tags.each do |aroma_tag| %>
-                    <span class="badge badge-primary"><%= aroma_tag.name %></span>
-                  <% end %>
-                </div>
-              <% else %>
-                <p class="text-xs text-neutral-400">種類: 記録なし</p>
+              <% unless value&.zero? %>
+                <% if aroma_tags.any? %>
+                  <div class="flex flex-wrap gap-1.5">
+                    <% aroma_tags.each do |aroma_tag| %>
+                      <span class="badge badge-primary"><%= aroma_tag.name %></span>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <p class="text-xs text-neutral-400">種類: 記録なし</p>
+                <% end %>
               <% end %>
             </dd>
           </div>
