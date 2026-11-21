@@ -19,6 +19,9 @@ application.register("brewery-autocomplete", BreweryAutocompleteController)
 import ClearableFieldController from "./clearable_field_controller"
 application.register("clearable-field", ClearableFieldController)
 
+import ClearableTagsController from "./clearable_tags_controller"
+application.register("clearable-tags", ClearableTagsController)
+
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
 

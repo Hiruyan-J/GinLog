@@ -207,7 +207,8 @@
           f: f, attribute: :aroma_strength, required: true,
           min: SakeLog::AROMA_STRENGTH_MIN, max: SakeLog::AROMA_STRENGTH_MAX,
           default_value: SakeLog::AROMA_STRENGTH_DEFAULT,
-          low_label: "穏やか", high_label: "華やか" %>
+          low_label: "穏やか", high_label: "華やか",
+          note: AromaProfile::EVALUATION_NOTE %>
 
     <%# 味の濃淡 %>
     <%= render "sake_logs/intensity_field",
@@ -223,7 +224,7 @@
     </div>
 
     <%# 味・香りの詳細記録（任意。最初は閉じた状態） %>
-    <%= render "sake_logs/detail_fields", f: f %>
+    <%= render "sake_logs/taste_aroma_fields", f: f %>
 
     <div class="flex gap-2 justify-center">
       <%= link_to "一覧に戻る", sake_logs_path, class: "shrink btn btn-outline btn-primary btn-wide" %>
