@@ -1,0 +1,52 @@
+<%# locals: (aroma_profile:) -%>
+<%# aroma_profile … AromaProfile（味わいだけ記録した場合は、全項目 nil の未保存のもの） %>
+<div id="aroma_profile_detail" class="mt-3 card bg-base-200">
+  <div class="gap-3 p-4 card-body">
+    <h4 class="pb-1 text-sm border-b card-title border-primary">香り</h4>
+
+    <dl class="flex flex-col gap-5">
+      <%# 吟醸香・原料香・熟成香 %>
+      <% AromaProfile::INTENSITY_ATTRIBUTES.each do |category, attribute| %>
+        <% value = aroma_profile.public_send(attribute) %>
+        <% aroma_tags = aroma_profile.aroma_tags_for(category) %>
+        <% label = AromaProfile.human_attribute_name(attribute) %>
+
+        <% if value.nil? && aroma_tags.empty? %>
+          <div class="flex justify-between text-sm text-neutral-400">
+            <dt><%= label %></dt>
+            <dd>記録なし</dd>
+          </div>
+        <% else %>
+          <div>
+            <dt class="flex justify-between text-sm">
+              <span><%= label %></span>
+              <span class="text-neutral-500"><%= value || "強弱: 記録なし" %></span>
+            </dt>
+            <dd class="flex flex-col gap-2 pl-4 mt-1">
+              <% if value %>
+                <div>
+                  <progress class="w-full progress progress-primary"
+                            value="<%= value %>" max="<%= AromaProfile::INTENSITY_MAX %>"></progress>
+                  <div class="flex justify-between text-xs text-neutral-500">
+                    <span>弱い</span>
+                    <span>強い</span>
+                  </div>
+                </div>
+              <% end %>
+
+              <% if aroma_tags.any? %>
+                <div class="flex flex-wrap gap-1.5">
+                  <% aroma_tags.each do |aroma_tag| %>
+                    <span class="badge badge-primary"><%= aroma_tag.name %></span>
+                  <% end %>
+                </div>
+              <% else %>
+                <p class="text-xs text-neutral-400">種類: 記録なし</p>
+              <% end %>
+            </dd>
+          </div>
+        <% end %>
+      <% end %>
+    </dl>
+  </div>
+</div>

@@ -75,10 +75,11 @@
     </section>
 
     <%# 味・香りの詳細記録（1項目でも記録があるときだけ） %>
-    <% if @sake_log.taste_profile&.recorded? %>
+    <% if @sake_log.taste_aroma_recorded? %>
       <section class="mt-6">
         <h3 class="pl-2 font-bold border-l-4 border-primary">味・香りの詳細記録</h3>
-        <%= render "taste_profile", taste_profile: @sake_log.taste_profile %>
+        <%= render "aroma_profile", aroma_profile: @sake_log.aroma_profile || AromaProfile.new %>
+        <%= render "taste_profile", taste_profile: @sake_log.taste_profile || TasteProfile.new %>
       </section>
     <% end %>
 
