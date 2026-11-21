@@ -34,10 +34,14 @@ class SakeLogForm
   attribute :maturity_intensity, :float
   attribute :finish_intensity, :float
   attribute :carbonation, :string           # enum のキー（"still" など）
+  # 香りの詳細（任意。強弱は nil = 記録なし、タグは空 = 記録なし）
+  attribute :ginjo_intensity, :float
+  attribute :ingredient_intensity, :float
+  attribute :aged_aroma_intensity, :float
+  attribute :aroma_tag_ids, default: -> { [] } # 選んだ香りの種類タグの id の配列
 
   # 関連オブジェクト (ゲッターのみ)
   attr_reader :sake_log, :user
-
 
   # バリデーション
   # Sake attributesバリデーション
@@ -71,6 +75,12 @@ class SakeLogForm
                          allow_nil: true
   end
   validates :carbonation, inclusion: { in: TasteProfile.carbonations.keys }, allow_blank: true
+  AromaProfile::INTENSITY_ATTRIBUTES.each_value do |attribute|
+    validates attribute, numericality: { greater_than_or_equal_to: AromaProfile::INTENSITY_MIN,
+                                         less_than_or_equal_to: AromaProfile::INTENSITY_MAX },
+                         allow_nil: true
+  end
+  validate :aroma_tags_must_exist
 
   # コンストラクタ
   # @param attributes [Hash] フォームの属性
@@ -91,6 +101,7 @@ class SakeLogForm
         brand_id: @sake_log.sake.brand_id,
         sake_id: @sake_log.sake.id
       }.merge(saved_taste_profile_attributes)
+       .merge(saved_aroma_profile_attributes)
        .merge(attributes)
     end
     super(attributes)
@@ -135,6 +146,8 @@ class SakeLogForm
 
       # 味わいの詳細を保存（SakeLog の保存後でないと sake_log_id が決まらない）
       save_taste_profile!
+      # 香りの詳細を保存
+      save_aroma_profile!
 
       saved = true
     rescue ActiveRecord::RecordInvalid => e
@@ -256,7 +269,71 @@ class SakeLogForm
     TasteProfile.new(taste_profile_attributes).recorded?
   end
 
+  # 香りの詳細が1項目でも記録されているか（強弱の 0 も、タグ1つだけでも「記録あり」）
+  # @return [Boolean] 記録された項目があれば true
+  def aroma_profile_recorded?
+    AromaProfile::INTENSITY_ATTRIBUTES.each_value.any? { |attribute| !public_send(attribute).nil? } ||
+      selected_aroma_tag_ids.any?
+  end
+
+  # 味わい・香りのどちらかに記録があるか（詳細セクションを開いて表示するかの判定に使う）
+  # @return [Boolean] どちらかに記録があれば true
+  def taste_aroma_recorded?
+    taste_profile_recorded? || aroma_profile_recorded?
+  end
+
+  # 選んだ香りの種類タグの id（空文字を除き、整数にそろえる）
+  # @return [Array<Integer>] 例: [2, 4, 11]
+  def selected_aroma_tag_ids
+    Array(aroma_tag_ids).compact_blank.map(&:to_i).uniq
+  end
+
+  # 香りの種類タグを区分ごとにまとめる（フォームでタグのボタンを並べるのに使う）
+  # @return [Hash{String => Array<AromaTag>}] 例: { "ginjo" => [リンゴ・洋梨, ...], ... }
+  def aroma_tags_by_category
+    @aroma_tags_by_category ||= AromaTag.ordered.group_by(&:category)
+  end
+
   private
+
+  # 香りの詳細を保存する
+  # 何も記録されておらず、保存済みの行も無いときは行を作らない
+  # （保存済みの行がある場合は、全項目クリアでも NULL・タグなしで上書きして残す）
+  # @return [void]
+  def save_aroma_profile!
+    aroma_profile = @sake_log.aroma_profile
+    return if aroma_profile.nil? && !aroma_profile_recorded?
+
+    aroma_profile ||= @sake_log.build_aroma_profile
+    aroma_profile.update!(aroma_profile_attributes)
+  end
+
+  # AromaProfile へ渡す属性をまとめる
+  # @return [Hash{Symbol => Float, Array<Integer>, nil}] 例: { ginjo_intensity: 7.0, ..., aroma_tag_ids: [2, 4] }
+  def aroma_profile_attributes
+    AromaProfile::INTENSITY_ATTRIBUTES.values.index_with { |attribute| public_send(attribute) }
+                                             .merge(aroma_tag_ids: selected_aroma_tag_ids)
+  end
+
+  # 編集時、保存済みの香りの詳細をフォームの初期値にする
+  # @return [Hash{Symbol => Float, Array<Integer>, nil}] 未記録（行が無い）なら空のハッシュ
+  def saved_aroma_profile_attributes
+    aroma_profile = @sake_log.aroma_profile
+    return {} if aroma_profile.nil?
+
+    AromaProfile::INTENSITY_ATTRIBUTES.values.index_with { |attribute| aroma_profile.public_send(attribute) }
+                                             .merge(aroma_tag_ids: aroma_profile.aroma_tag_ids)
+  end
+
+  # 選んだタグがすべて存在するか（存在しない id を送られたとき、保存時の例外ではなく入力エラーにする）
+  # @return [void]
+  def aroma_tags_must_exist
+    ids = selected_aroma_tag_ids
+    return if ids.empty?
+    return if AromaTag.where(id: ids).count == ids.size
+
+    errors.add(:aroma_tag_ids, "に存在しない香りの種類が含まれています")
+  end
 
   # 味わいの詳細を保存する
   # 何も記録されておらず、保存済みの行も無いときは行を作らない
@@ -377,7 +454,7 @@ class SakeLogForm
         if error.attribute == :product_name
           self.errors.add(error.attribute, error.message)
         end
-      when SakeLog, TasteProfile
+      when SakeLog, TasteProfile, AromaProfile
         self.errors.add(error.attribute, error.message)
       when Brand
         if error.attribute == :name
