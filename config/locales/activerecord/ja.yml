@@ -6,6 +6,8 @@ ja:
       sake: 日本酒
       comment: コメント
       taste_profile: 味わいの詳細
+      aroma_profile: 香りの詳細
+      aroma_tag: 香りの種類
     attributes:
       sake_log:
         rating: 好み度
@@ -28,3 +30,11 @@ ja:
         maturity_intensity: 熟成度
         finish_intensity: 余韻
         carbonation: 炭酸感
+      aroma_profile:
+        ginjo_intensity: 吟醸香
+        ingredient_intensity: 原料香
+        aged_aroma_intensity: 熟成香
+      aroma_tag:
+        category: 香りの区分
+        name: 名前
+        position: 表示順

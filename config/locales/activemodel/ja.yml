@@ -27,3 +27,7 @@ ja:
         maturity_intensity: 熟成度
         finish_intensity: 余韻
         carbonation: 炭酸感
+        ginjo_intensity: 吟醸香
+        ingredient_intensity: 原料香
+        aged_aroma_intensity: 熟成香
+        aroma_tag_ids: 香りの種類

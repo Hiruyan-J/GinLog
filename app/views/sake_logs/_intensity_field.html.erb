@@ -1,16 +1,31 @@
-<%# locals: (f:, attribute:, low_label:, high_label:, min:, max:, default_value:, required: false) -%>
+<%# locals: (f:, attribute:, low_label:, high_label:, min:, max:, default_value:, required: false, note: nil, description: nil, value_data: {}) -%>
 <%# スライダー 1 つ分の入力欄（未入力 = 灰色。送信するのは hidden field だけ）
     f             … フォームビルダー
     attribute     … 項目名（例: :aroma_strength, :sweetness_intensity）
     low_label / high_label … 両端の表示
     min / max     … スライダーの範囲
     default_value … 未入力のときのつまみの位置
-    required      … 必須か（true ならクリアボタンを出さず、未入力では送信できない） %>
+    required      … 必須か（true ならクリアボタンを出さず、未入力では送信できない）
+    note          … 項目名の横に（）付きで出す補足（例: 香りの評価の基準）
+    description   … 項目名の下に出す説明（例: 吟醸香の説明）
+    value_data    … 送信用の hidden field に足す data 属性（例: { clearable_tags_target: "intensity" }） %>
 <div data-controller="clearable-field"
      data-clearable-field-blank-class="opacity-40 grayscale"
      data-clearable-field-required-value="<%= required %>">
-  <div class="flex justify-between items-center">
-    <%= f.label attribute, class: class_names("font-semibold", "whitespace-nowrap required": required) %>
+  <div class="flex gap-2 justify-between items-start">
+    <div>
+      <div class="flex flex-wrap gap-x-2 items-baseline">
+        <%= f.label attribute, class: class_names("font-semibold", "whitespace-nowrap required": required) %>
+        <%# 項目名の横に補足 %>
+        <% if note %>
+          <span class="text-xs text-base-content/50">（<%= note %>）</span>
+        <% end %>
+      </div>
+      <%# 項目名の下に説明 %>
+      <% if description %>
+        <p class="text-xs text-base-content/50"><%= description %></p>
+      <% end %>
+    </div>
     <% unless required %>
       <%# クリアボタン %>
       <button type="button" class="btn btn-outline btn-xs btn-primary"
@@ -19,9 +34,9 @@
   </div>
 
   <%# 実際に送信される値（空文字 = 記録なし） %>
-  <%= f.hidden_field attribute, id: nil, data: { clearable_field_target: "value" } %>
+  <%= f.hidden_field attribute, id: nil, data: { clearable_field_target: "value", **value_data } %>
 
-  <div data-clearable-field-target="display">
+  <div class="pl-4" data-clearable-field-target="display">
     <%# name: nil … スライダーは常に値を送ってしまうため送信しない %>
     <%# click … 灰色のときにつまみの位置そのままをタップしても記録ありにする %>
     <%= render "sake_logs/range_slider",

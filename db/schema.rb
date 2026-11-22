@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_13_141653) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_21_045502) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -48,6 +48,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_141653) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["sakenowa_id"], name: "index_areas_on_sakenowa_id", unique: true
+  end
+
+  create_table "aroma_profile_aroma_tags", force: :cascade do |t|
+    t.bigint "aroma_profile_id", null: false
+    t.bigint "aroma_tag_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["aroma_profile_id", "aroma_tag_id"], name: "idx_on_aroma_profile_id_aroma_tag_id_75194f4c18", unique: true
+    t.index ["aroma_tag_id"], name: "index_aroma_profile_aroma_tags_on_aroma_tag_id"
+  end
+
+  create_table "aroma_profiles", force: :cascade do |t|
+    t.bigint "sake_log_id", null: false
+    t.float "ginjo_intensity", comment: "吟醸香の強弱(0〜10)。NULL = 記録なし"
+    t.float "ingredient_intensity", comment: "原料香の強弱(0〜10)。NULL = 記録なし"
+    t.float "aged_aroma_intensity", comment: "熟成香の強弱(0〜10)。NULL = 記録なし"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sake_log_id"], name: "index_aroma_profiles_on_sake_log_id", unique: true
+  end
+
+  create_table "aroma_tags", force: :cascade do |t|
+    t.integer "category", null: false, comment: "香りの区分 0:吟醸香 1:原料香 2:熟成香"
+    t.string "name", null: false, comment: "タグ名（例: リンゴ・洋梨）"
+    t.integer "position", null: false, comment: "区分の中での表示順"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category", "name"], name: "index_aroma_tags_on_category_and_name", unique: true
+    t.unique_constraint ["category", "position"], deferrable: :deferred
   end
 
   create_table "brands", force: :cascade do |t|
@@ -164,6 +193,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_141653) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "aroma_profile_aroma_tags", "aroma_profiles"
+  add_foreign_key "aroma_profile_aroma_tags", "aroma_tags"
+  add_foreign_key "aroma_profiles", "sake_logs"
   add_foreign_key "brands", "breweries"
   add_foreign_key "breweries", "areas"
   add_foreign_key "breweries", "breweries", column: "merged_into_id"

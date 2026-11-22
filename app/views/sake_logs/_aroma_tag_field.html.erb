@@ -1,0 +1,30 @@
+<%# locals: (aroma_tags:, selected_ids:) -%>
+<%# aroma_tags   … この区分のタグ（表示順）
+    selected_ids … 選んだタグの id の配列 %>
+<div class="flex flex-col gap-3 pl-4">
+  <div class="border-t border-base-300"></div>
+
+  <div class="flex gap-2 items-start">
+    <div class="flex flex-wrap flex-1 gap-1.5" data-clearable-tags-target="display">
+      <% aroma_tags.each do |aroma_tag| %>
+        <%# has-checked: … 中のチェックボックスが選ばれていたら緑に塗る %>
+        <label class="font-normal rounded-full btn btn-sm has-checked:bg-primary has-checked:text-primary-content"
+               data-clearable-tags-target="tag">
+          <%# チェックボックス自体は隠し、label をボタンとして押させる %>
+          <%= check_box_tag "sake_log[aroma_tag_ids][]", aroma_tag.id, selected_ids.include?(aroma_tag.id),
+                id: "aroma_tag_#{aroma_tag.id}", class: "hidden",
+                data: { clearable_tags_target: "checkbox", action: "change->clearable-tags#updateAppearance" } %>
+          <%= aroma_tag.name %>
+        </label>
+      <% end %>
+    </div>
+
+    <button type="button" class="btn btn-outline btn-xs btn-primary"
+            data-action="clearable-tags#clear">クリア</button>
+  </div>
+
+  <%# 強弱が 0（無し）のときだけ出す案内文 %>
+  <p class="hidden text-xs text-base-content/50" data-clearable-tags-target="message">
+    香りが「<%= AromaProfile::NONE_LABEL %>」のため、種類は選べません
+  </p>
+</div>

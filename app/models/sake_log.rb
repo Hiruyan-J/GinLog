@@ -43,6 +43,7 @@ class SakeLog < ApplicationRecord
   has_many :likes, dependent: :destroy
   has_many :comments, dependent: :destroy
   has_one :taste_profile, dependent: :destroy
+  has_one :aroma_profile, dependent: :destroy
 
   has_one_attached :front_label_image
   has_one_attached :back_label_image
@@ -82,6 +83,12 @@ class SakeLog < ApplicationRecord
   # @return [Boolean] いいね済みなら true
   def liked_by?(user)
     likes.any? { |like| like.user_id == user.id }
+  end
+
+  # 味・香りの詳細が1項目でも記録されているか（記録詳細で詳細欄を出すかの判定に使う）
+  # @return [Boolean] 味わい・香りのどちらかに記録があれば true
+  def taste_aroma_recorded?
+    taste_profile&.recorded? || aroma_profile&.recorded? || false
   end
 
   private
