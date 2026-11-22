@@ -582,4 +582,126 @@ RSpec.describe SakeLogForm, type: :model do
       end
     end
   end
+
+  # ------------------------------------------------------------------
+  # 香りの詳細
+  #   強弱は空文字 = 記録なし、タグは id の文字列の配列（"" はタグを全部外したとき用）で届く
+  # ------------------------------------------------------------------
+  describe "香りの詳細" do
+    let(:ginjo_tag) { create(:aroma_tag, category: :ginjo) }
+    let(:aged_tag) { create(:aroma_tag, category: :aged) }
+
+    # 強弱3項目すべて空文字（記録なし）・タグなしのパラメータに、指定した項目だけ値を入れる
+    def aroma_params(overrides = {})
+      AromaProfile::INTENSITY_ATTRIBUTES.values.index_with { "" }
+                                        .merge(aroma_tag_ids: [ "" ])
+                                        .merge(overrides)
+    end
+
+    describe "バリデーション" do
+      it "強弱が範囲外なら無効" do
+        form = build_form(aroma_params(ginjo_intensity: "10.1"))
+
+        expect(form).to be_invalid
+        expect(form.errors[:ginjo_intensity]).to be_present
+      end
+
+      it "存在しないタグの id が来たら無効" do
+        form = build_form(aroma_params(aroma_tag_ids: [ "", "0" ]))
+
+        expect(form).to be_invalid
+        expect(form.errors[:aroma_tag_ids]).to be_present
+      end
+
+      # 強弱 0 =「無し」の香りにはタグを選べない
+      it "強弱が 0（無し）の香りに、その香りのタグを選ぶと無効" do
+        form = build_form(aroma_params(ginjo_intensity: "0", aroma_tag_ids: [ "", ginjo_tag.id.to_s ]))
+
+        expect(form).to be_invalid
+        expect(form.errors[:aroma_tag_ids]).to include("は、強弱が「無し」の香りには選べません")
+      end
+
+      it "強弱が 0（無し）でも、別の香りのタグなら選べる" do
+        form = build_form(aroma_params(ginjo_intensity: "0", aroma_tag_ids: [ "", aged_tag.id.to_s ]))
+
+        expect(form).to be_valid
+      end
+    end
+
+    describe "新規作成" do
+      it "何も記録しなければ AromaProfile を作らない" do
+        form = build_form(aroma_params)
+
+        expect { form.save }.to change(SakeLog, :count).by(1)
+          .and change(AromaProfile, :count).by(0)
+      end
+
+      it "記録した強弱は値、空文字の強弱は nil、選んだタグは区分をまたいで保存される" do
+        form = build_form(aroma_params(ginjo_intensity: "7.0", aroma_tag_ids: [ "", ginjo_tag.id.to_s, aged_tag.id.to_s ]))
+
+        expect(form.save).to be true
+        aroma_profile = form.sake_log.aroma_profile
+        expect(aroma_profile.ginjo_intensity).to eq 7.0
+        expect(aroma_profile.ingredient_intensity).to be_nil
+        expect(aroma_profile.aroma_tags).to contain_exactly(ginjo_tag, aged_tag)
+      end
+
+      it "強弱の 0 は記録なしと区別して 0 で保存される" do
+        form = build_form(aroma_params(aged_aroma_intensity: "0"))
+
+        expect(form.save).to be true
+        expect(form.sake_log.aroma_profile.aged_aroma_intensity).to eq 0.0
+      end
+
+      it "タグだけ選んだ場合も AromaProfile が作られる" do
+        form = build_form(aroma_params(aroma_tag_ids: [ "", ginjo_tag.id.to_s ]))
+
+        expect { form.save }.to change(AromaProfile, :count).by(1)
+        expect(form.sake_log.aroma_profile.aroma_tags).to eq [ ginjo_tag ]
+      end
+    end
+
+    describe "編集" do
+      let(:sake_log) { create(:sake_log, user: user) }
+
+      it "保存済みの値とタグがフォームの初期値になる" do
+        create(:aroma_profile, :blank, sake_log: sake_log, ingredient_intensity: 3.0, aroma_tags: [ aged_tag ])
+        form = SakeLogForm.new(user: user, sake_log: sake_log)
+
+        expect(form.ingredient_intensity).to eq 3.0
+        expect(form.ginjo_intensity).to be_nil
+        expect(form.selected_aroma_tag_ids).to eq [ aged_tag.id ]
+        expect(form.aroma_profile_recorded?).to be true
+      end
+
+      it "香りだけ記録した記録は taste_aroma_recorded? が true（詳細セクションを開く）" do
+        create(:aroma_profile, :blank, sake_log: sake_log, aroma_tags: [ ginjo_tag ])
+        form = SakeLogForm.new(user: user, sake_log: sake_log)
+
+        expect(form.taste_profile_recorded?).to be false
+        expect(form.taste_aroma_recorded?).to be true
+      end
+
+      it "クリアして更新すると、強弱は nil に戻り、タグは外れる" do
+        create(:aroma_profile, sake_log: sake_log, aroma_tags: [ ginjo_tag, aged_tag ])
+        form = SakeLogForm.new(aroma_params(ingredient_intensity: "4.0"), user: user, sake_log: sake_log)
+
+        expect(form.save).to be true
+        aroma_profile = sake_log.reload.aroma_profile
+        expect(aroma_profile.ingredient_intensity).to eq 4.0
+        expect(aroma_profile.ginjo_intensity).to be_nil
+        expect(aroma_profile.aroma_tags).to be_empty
+      end
+
+      it "香りの項目を送らない更新では、保存済みの香りの詳細はそのまま" do
+        create(:aroma_profile, sake_log: sake_log, aroma_tags: [ ginjo_tag ])
+        form = SakeLogForm.new({ rating: 5 }, user: user, sake_log: sake_log)
+
+        expect(form.save).to be true
+        aroma_profile = sake_log.reload.aroma_profile
+        expect(aroma_profile.ginjo_intensity).to eq 5.0
+        expect(aroma_profile.aroma_tags).to eq [ ginjo_tag ]
+      end
+    end
+  end
 end
